@@ -33,7 +33,7 @@ export default function Navbar() {
             />
           </Link>
           <div
-            className="hidden md:flex gap-2 relative ml-8"
+            className="hidden md:flex gap-2 relative ml-8 justify-center flex-1"
             style={{ minHeight: 44 }}
           >
             {navLinks.map((link) => (
