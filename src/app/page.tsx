@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useRef, useEffect } from "react";
 import { LuFolderOpen } from "react-icons/lu";
 import {
   FaGithub,
@@ -8,15 +10,48 @@ import {
   FaYoutube,
 } from "react-icons/fa6";
 
+import gsap from "gsap";
+import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
+
+// Register the plugin once
+gsap.registerPlugin(ScrambleTextPlugin);
+
 export default function Home() {
+  const nameRef = useRef(null);
+
+  useEffect(() => {
+    // Ensure the ref is connected to the DOM element before animating
+    if (nameRef.current) {
+      gsap.to(nameRef.current, {
+        scrambleText: {
+          text: "Aditya.",
+          chars: "abcdefghijklmnopqrstuvwxyz!@#$%^&*+",
+          speed: 0.25,
+          rightToLeft: true,
+          revealDelay: 0.9,
+        },
+        duration: 1,
+        ease: "power1.inOut",
+      });
+    } else {
+      console.error(
+        "nameRef.current is null - element not found for GSAP animation."
+      );
+    }
+  }, []);
+
   return (
     <main className="min-h-screen flex flex-col justify-center items-center bg-[var(--background)] text-[var(--foreground)] px-4">
       <div className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16">
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-2">
-          Hi, I&apos;m <span className="text-[var(--primary)]">Aditya.</span>
+          Hi, I&apos;m{" "}
+          {/* Initial text is "xditya.", will scramble to "Aditya." */}
+          <span ref={nameRef} className="text-[var(--primary)]">
+            xditya?
+          </span>
         </h1>
         <p className="text-base sm:text-lg text-gray-400 font-medium mb-5 font-sans">
-          Open-Source Developer &amp; Freelancer.
+          Open-Source Developer & Freelancer.
         </p>
         <a
           href="/projects"

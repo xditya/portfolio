@@ -233,6 +233,15 @@ const CustomCursor = () => {
     };
   }, [isMobile]);
 
+  // Conditionally apply a class to hide cursor on mobile
+  const cursorClass = `fixed w-4 h-4 bg-[var(--primary)] rounded-full pointer-events-none z-[9999] ${
+    isMobile ? "hidden" : ""
+  }`;
+
+  const trailClass = `fixed w-2 h-2 bg-[var(--primary)] rounded-full pointer-events-none z-[9998] ${
+    isMobile ? "hidden" : ""
+  }`;
+
   // Don't render cursor on mobile
   if (isMobile) return null;
 
@@ -244,17 +253,14 @@ const CustomCursor = () => {
           ref={(el) => {
             trailRefs.current[index] = el;
           }}
-          className="fixed w-2 h-2 bg-[var(--primary)] rounded-full pointer-events-none z-[9998]"
+          className={trailClass}
           style={{
             opacity: 1 - index * 0.25,
             transform: `scale(${1 - index * 0.15})`,
           }}
         />
       ))}
-      <div
-        ref={cursorRef}
-        className="fixed w-4 h-4 bg-[var(--primary)] rounded-full pointer-events-none z-[9999]"
-      />
+      <div ref={cursorRef} className={cursorClass} />
     </>
   );
 };
