@@ -2,77 +2,22 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [open, setOpen] = React.useState(false);
-  const [active, setActive] = React.useState<string>(
-    typeof window !== "undefined" ? window.location.hash || "#" : "#"
-  );
-  const [indicatorStyle, setIndicatorStyle] =
-    React.useState<React.CSSProperties>({});
-  const linkRefs = React.useRef<(HTMLAnchorElement | null)[]>([]);
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-
-  React.useEffect(() => {
-    const onHashChange = () => setActive(window.location.hash || "#");
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+  const active = usePathname() || "/";
 
   const navLinks = React.useMemo(
     () => [
-      { href: "#", label: "Home" },
-      { href: "#projects", label: "Projects" },
-      { href: "#about", label: "About" },
-      { href: "#contact", label: "Contact" },
+      { href: "/", label: "Home" },
+      { href: "/projects", label: "Projects" },
+      { href: "/about", label: "About" },
+      { href: "/contact", label: "Contact" },
     ],
     []
   );
-
-  React.useEffect(() => {
-    const idx = navLinks.findIndex(
-      (link) => active === link.href || (link.href === "#" && active === "#")
-    );
-    const linkEl = linkRefs.current[idx];
-    const containerEl = containerRef.current;
-    if (linkEl && containerEl) {
-      const linkRect = linkEl.getBoundingClientRect();
-      const containerRect = containerEl.getBoundingClientRect();
-      setIndicatorStyle({
-        left: linkRect.left - containerRect.left + containerEl.scrollLeft,
-        top: linkRect.top - containerRect.top + containerEl.scrollTop,
-        width: linkRect.width,
-        height: linkRect.height,
-      });
-    }
-  }, [active, navLinks, open]);
-
-  // Update on window resize
-  React.useEffect(() => {
-    const handleResize = () => {
-      setTimeout(() => {
-        const idx = navLinks.findIndex(
-          (link) =>
-            active === link.href || (link.href === "#" && active === "#")
-        );
-        const linkEl = linkRefs.current[idx];
-        const containerEl = containerRef.current;
-        if (linkEl && containerEl) {
-          const linkRect = linkEl.getBoundingClientRect();
-          const containerRect = containerEl.getBoundingClientRect();
-          setIndicatorStyle({
-            left: linkRect.left - containerRect.left + containerEl.scrollLeft,
-            top: linkRect.top - containerRect.top + containerEl.scrollTop,
-            width: linkRect.width,
-            height: linkRect.height,
-          });
-        }
-      }, 50);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [active, navLinks]);
 
   return (
     <nav className="w-full fixed top-0 left-0 z-50 bg-[var(--background)]">
@@ -86,52 +31,31 @@ export default function Navbar() {
               height={36}
               className="rounded"
             />
-            {/* <span className="hidden sm:block text-xl font-bold text-white">
-              Aditya S
-            </span> */}
           </Link>
           <div
             className="hidden md:flex gap-2 relative ml-8"
-            ref={containerRef}
             style={{ minHeight: 44 }}
           >
-            {/* Sliding indicator */}
-            <div
-              className="absolute bg-[var(--primary)] rounded-lg shadow-inner transition-all duration-300"
-              style={{
-                ...indicatorStyle,
-                zIndex: 0,
-                pointerEvents: "none",
-                transitionProperty:
-                  "left, top, width, height, background-color",
-              }}
-            />
-            {navLinks.map((link, i) => (
-              <a
+            {navLinks.map((link) => (
+              <Link
                 key={link.href}
                 href={link.href}
-                ref={(el) => {
-                  linkRefs.current[i] = el;
-                }}
                 className={`px-4 py-2 rounded-lg font-semibold text-base tracking-wide font-sans transition-colors duration-200 relative z-10
                   ${
-                    active === link.href ||
-                    (link.href === "#" && active === "#")
-                      ? "text-[var(--background)]"
+                    active === link.href
+                      ? "bg-[var(--primary)] text-[var(--background)] shadow-inner"
                       : "text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--background)]"
                   }
                 `}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
-        {/* Desktop: theme toggle at right end */}
         <div className="hidden md:flex">
           <ThemeToggle />
         </div>
-        {/* Mobile: theme toggle before hamburger */}
         <div className="flex md:hidden items-center gap-2 ml-2">
           <ThemeToggle />
           <button
@@ -157,14 +81,14 @@ export default function Navbar() {
         </div>
       </div>
       {open && (
-        <div className="md:hidden bg-[#181820] px-4 pb-4 flex flex-col gap-2 animate-fade-in-down">
+        <div className="md:hidden bg-[var(--background)] px-4 pb-4 flex flex-col gap-2">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className={`px-4 py-2 rounded-lg font-semibold text-base tracking-wide font-sans transition-colors duration-200 relative z-10
                 ${
-                  active === link.href || (link.href === "#" && active === "#")
+                  active === link.href
                     ? "bg-[var(--primary)] text-[var(--background)] shadow-inner"
                     : "text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--background)]"
                 }
@@ -172,7 +96,7 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
       )}
@@ -188,7 +112,7 @@ function ThemeToggle() {
     return "dark";
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (typeof window !== "undefined") {
       document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(theme);

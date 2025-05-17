@@ -19,7 +19,7 @@ export default function Home() {
           Open-Source Developer &amp; Freelancer.
         </p>
         <a
-          href="#"
+          href="/projects"
           className="flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--background)] font-semibold rounded-full px-8 py-2 text-lg shadow hover:bg-[var(--accent)] transition-colors mb-10"
         >
           <LuFolderOpen className="text-xl" /> View Projects
