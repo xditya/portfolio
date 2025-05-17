@@ -217,7 +217,7 @@ function ThemeToggle() {
             cx="12"
             cy="12"
             r={theme === "dark" ? 8 : 5}
-            fill={theme === "dark" ? "#e2f1f4" : "#5148b9"}
+            fill={theme === "dark" ? "var(--foreground)" : "var(--primary)"}
             className="transition-all duration-300"
           />
           {/* Sun rays */}
@@ -225,7 +225,7 @@ function ThemeToggle() {
             className={`transition-all duration-300 ${
               theme === "dark" ? "opacity-0 scale-75" : "opacity-100 scale-100"
             }`}
-            stroke="#5148b9"
+            stroke="var(--accent)"
             strokeWidth="2"
             strokeLinecap="round"
           >
@@ -244,7 +244,7 @@ function ThemeToggle() {
               cx="16"
               cy="10"
               r="5"
-              fill="#091718"
+              fill="var(--background)"
               className="transition-all duration-300"
             />
           )}
