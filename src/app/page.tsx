@@ -59,6 +59,13 @@ export default function Home() {
         >
           <LuFolderOpen className="text-xl" /> View Projects
         </a>
+        {/* <a
+          href="#"
+          className="flex items-center justify-center gap-2 bg-[var(--secondary)] text-[var(--background)] font-semibold rounded-full px-8 py-2 text-lg shadow hover:bg-[var(--accent)] transition-colors mb-10"
+        >
+          <LuFolderOpen className="text-xl" /> Download Resume
+        </a> */}
+
         <div className="flex gap-4 mt-2">
           <a
             href="https://github.com/xditya"

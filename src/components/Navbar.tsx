@@ -1,13 +1,15 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import gsap from "gsap";
 
 export default function Navbar() {
   const [open, setOpen] = React.useState(false);
   const active = usePathname() || "/";
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const navLinks = React.useMemo(
     () => [
@@ -18,6 +20,26 @@ export default function Navbar() {
     ],
     []
   );
+
+  useEffect(() => {
+    if (mobileMenuRef.current) {
+      if (open) {
+        gsap.to(mobileMenuRef.current, {
+          height: "100vh",
+          opacity: 1,
+          duration: 0.4,
+          ease: "power2.out",
+        });
+      } else {
+        gsap.to(mobileMenuRef.current, {
+          height: 0,
+          opacity: 0,
+          duration: 0.4,
+          ease: "power2.in",
+        });
+      }
+    }
+  }, [open]);
 
   return (
     <nav className="w-full fixed top-0 left-0 z-50 bg-[var(--background)]">
@@ -80,17 +102,21 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-      {open && (
-        <div className="md:hidden bg-[var(--background)] px-4 pb-4 flex flex-col gap-2">
+      <div
+        ref={mobileMenuRef}
+        className="md:hidden fixed inset-0 bg-[var(--background)] overflow-hidden flex flex-col items-center justify-center bg-opacity-95"
+        style={{ height: 0, opacity: 0, top: "64px" }}
+      >
+        <div className="flex flex-col gap-6 items-center">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`px-4 py-2 rounded-lg font-semibold text-base tracking-wide font-sans transition-colors duration-200 relative z-10
+              className={`text-3xl font-extrabold tracking-wide font-sans transition-colors duration-200
                 ${
                   active === link.href
-                    ? "bg-[var(--primary)] text-[var(--background)] shadow-inner"
-                    : "text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--background)]"
+                    ? "text-[var(--primary)] drop-shadow-md"
+                    : "text-[var(--foreground)] hover:text-[var(--accent)]"
                 }
               `}
               onClick={() => setOpen(false)}
@@ -99,7 +125,7 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
-      )}
+      </div>
     </nav>
   );
 }
@@ -128,7 +154,6 @@ function ThemeToggle() {
     >
       <span className="sr-only">Toggle theme</span>
       <span className="absolute inset-0 flex items-center justify-center">
-        {/* Animated sun/moon icon */}
         <svg
           className="transition-all duration-300"
           width="24"
@@ -144,7 +169,6 @@ function ThemeToggle() {
             fill={theme === "dark" ? "var(--foreground)" : "var(--primary)"}
             className="transition-all duration-300"
           />
-          {/* Sun rays */}
           <g
             className={`transition-all duration-300 ${
               theme === "dark" ? "opacity-0 scale-75" : "opacity-100 scale-100"
@@ -162,7 +186,6 @@ function ThemeToggle() {
             <line x1="4.93" y1="19.07" x2="6.34" y2="17.66" />
             <line x1="17.66" y1="6.34" x2="19.07" y2="4.93" />
           </g>
-          {/* Moon cutout */}
           {theme === "dark" && (
             <circle
               cx="16"
