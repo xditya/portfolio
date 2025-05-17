@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@studio-freight/lenis": "^1.0.42",
     "@vercel/speed-insights": "^1.2.0",
     "gsap": "^3.13.0",
+    "lenis": "^1.3.3",
     "next": "15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
