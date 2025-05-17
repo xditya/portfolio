@@ -31,9 +31,7 @@ export default function Navbar() {
 
   React.useEffect(() => {
     const idx = navLinks.findIndex(
-      (link) =>
-        (link.href === "#" && (active === "#" || active === "/")) ||
-        (active === link.href && link.href !== "#")
+      (link) => active === link.href || (link.href === "#" && active === "#")
     );
     const linkEl = linkRefs.current[idx];
     const containerEl = containerRef.current;
@@ -77,7 +75,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full fixed top-0 left-0 z-50 bg-[#181820]">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+      <div className="max-w-6xl flex items-center pl-4 pr-4 py-3">
         <Link href="/#" className="flex items-center gap-2">
           <Image
             src="/logo.png"
@@ -91,7 +89,7 @@ export default function Navbar() {
           </span> */}
         </Link>
         <div
-          className="hidden md:flex gap-2 relative"
+          className="hidden md:flex gap-2 relative ml-8"
           ref={containerRef}
           style={{ minHeight: 44 }}
         >
@@ -114,8 +112,7 @@ export default function Navbar() {
               }}
               className={`px-4 py-2 rounded-lg font-semibold text-base tracking-wide font-sans transition-colors duration-200 relative z-10
                 ${
-                  (link.href === "#" && (active === "#" || active === "/")) ||
-                  (active === link.href && link.href !== "#")
+                  active === link.href || (link.href === "#" && active === "#")
                     ? "text-white"
                     : "text-gray-300 hover:bg-[#23232e] hover:text-white"
                 }
@@ -126,7 +123,7 @@ export default function Navbar() {
           ))}
         </div>
         <button
-          className="md:hidden flex items-center text-white text-3xl focus:outline-none"
+          className="md:hidden ml-auto flex items-center text-white text-3xl focus:outline-none"
           onClick={() => setOpen(!open)}
           aria-label="Toggle navigation"
         >
@@ -154,8 +151,7 @@ export default function Navbar() {
               href={link.href}
               className={`px-4 py-2 rounded-lg font-semibold text-base tracking-wide font-sans transition-colors duration-200 relative z-10
                 ${
-                  (link.href === "#" && (active === "#" || active === "/")) ||
-                  (active === link.href && link.href !== "#")
+                  active === link.href || (link.href === "#" && active === "#")
                     ? "bg-[#23232e] text-white shadow-inner"
                     : "text-gray-300 hover:bg-[#23232e] hover:text-white"
                 }
