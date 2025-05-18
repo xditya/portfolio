@@ -8,6 +8,7 @@ const redirectLinks = {
   twitter: "https://twitter.com/its_xditya",
   linkedin: "https://www.linkedin.com/in/xditya",
   bots: "https://t.me/botzhub/76?embed=true&dark=1",
+  digitalOcean: "https://www.digitalocean.com/?refcode=7b7d6a915392",
 };
 
 const nextConfig = {

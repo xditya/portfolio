@@ -133,7 +133,7 @@ export default function ProjectsPage() {
         duration: 1.5,
         scrambleText: {
           text: "Projects",
-          chars: "#@$*&",
+          chars: "lowerCase",
           revealDelay: 0.5,
           speed: 0.75,
         },

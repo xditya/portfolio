@@ -50,9 +50,10 @@ export default function Navbar() {
             <Image
               src="/logo.png"
               alt="Logo"
-              width={36}
-              height={36}
+              width={32}
+              height={32}
               className="rounded"
+              style={{ width: "auto", height: "auto" }}
             />
           </Link>
           <div
@@ -79,7 +80,7 @@ export default function Navbar() {
         <div className="hidden md:flex">
           <ThemeToggle />
         </div>
-        <div className="flex md:hidden items-center gap-2 ml-2">
+        <div className="flex md:hidden items-center gap-2 ml-4">
           <ThemeToggle />
           <button
             className="md:hidden flex items-center text-[var(--foreground)] text-3xl focus:outline-none"

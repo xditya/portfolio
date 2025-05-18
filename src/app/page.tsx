@@ -25,7 +25,7 @@ export default function Home() {
       gsap.to(nameRef.current, {
         scrambleText: {
           text: "Aditya.",
-          chars: "abcdefghijklmnopqrstuvwxyz!@#$%^&*+",
+          chars: "abcdefghijklmnopqrstuvwxyz!%^&*+",
           speed: 0.25,
           rightToLeft: true,
           revealDelay: 0.9,

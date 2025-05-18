@@ -20,7 +20,7 @@ interface LinkItem {
 const links: LinkItem[] = [
   {
     name: "Website Status",
-    url: "https://xditya.me/status",
+    url: "/status",
     description: "Check the status of my websites",
   },
   {
@@ -29,9 +29,24 @@ const links: LinkItem[] = [
     description: "Shorten your links easily",
   },
   {
+    name: "PasteBin",
+    url: "https://paste.xditya.me",
+    description: "Paste your code snippets and share them",
+  },
+  {
+    name: "Collection of REST APIs",
+    url: "https://apis.xditya.me",
+    description: "A collection of REST APIs for various purposes",
+  },
+  {
     name: "My Bots",
     url: "/bots",
     description: "Check out my bots",
+  },
+  {
+    name: "Terms & Conditions",
+    url: "/terms",
+    description: "Read the terms and conditions (for freelance clients)",
   },
 ];
 
@@ -48,7 +63,7 @@ const LinksPage = () => {
         duration: 1.5,
         scrambleText: {
           text: "Links",
-          chars: "#@$*&",
+          chars: "lowerCase",
           revealDelay: 0.5,
           speed: 0.75,
         },
@@ -80,6 +95,10 @@ const LinksPage = () => {
     linkRefs.current[index] = el;
   };
 
+  const isExternalLink = (url: string) => {
+    return url.startsWith("http://") || url.startsWith("https://");
+  };
+
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
       <div className="max-w-2xl mx-auto relative">
@@ -108,8 +127,10 @@ const LinksPage = () => {
             >
               <Link
                 href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                {...(isExternalLink(link.url) && {
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                })}
                 className="block border border-[var(--foreground)] rounded-lg p-6 transition-all duration-300 hover:border-[var(--primary)] hover:bg-[var(--primary)]/5"
               >
                 <div className="flex items-center justify-between">
@@ -123,7 +144,9 @@ const LinksPage = () => {
                       </p>
                     )}
                   </div>
-                  <FiExternalLink className="w-6 h-6 text-[var(--primary)] group-hover:text-[var(--accent)] transition-colors duration-300" />
+                  {isExternalLink(link.url) && (
+                    <FiExternalLink className="w-6 h-6 text-[var(--primary)] group-hover:text-[var(--accent)] transition-colors duration-300" />
+                  )}
                 </div>
               </Link>
             </div>
