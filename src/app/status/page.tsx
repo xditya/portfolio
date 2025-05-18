@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { IoArrowBack } from "react-icons/io5";
+import { IoArrowBack, IoRefreshOutline } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
@@ -44,6 +44,7 @@ const getStatusText = (color: string) => {
 const StatusPage = () => {
   const router = useRouter();
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const loadingIconRef = useRef<HTMLDivElement>(null);
   const [statusData, setStatusData] = useState<StatusData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -83,6 +84,21 @@ const StatusPage = () => {
     fetchStatus();
   }, []);
 
+  useEffect(() => {
+    // Loading animation
+    if (loading && loadingIconRef.current) {
+      gsap.to(loadingIconRef.current, {
+        rotation: 360,
+        duration: 1,
+        repeat: -1,
+        ease: "linear",
+      });
+    } else if (!loading && loadingIconRef.current) {
+      gsap.killTweensOf(loadingIconRef.current);
+      gsap.set(loadingIconRef.current, { rotation: 0 });
+    }
+  }, [loading]);
+
   return (
     <>
       <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
@@ -104,7 +120,14 @@ const StatusPage = () => {
           </div>
 
           {loading ? (
-            <div className="text-center text-[var(--primary)]">Loading...</div>
+            <div className="text-center">
+              <div
+                ref={loadingIconRef}
+                className="text-[var(--primary)] text-5xl flex justify-center items-center"
+              >
+                <IoRefreshOutline />
+              </div>
+            </div>
           ) : (
             <div className="space-y-8">
               {statusData.map((service) => (
