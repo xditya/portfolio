@@ -5,6 +5,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
+import Footer from "@/components/Footer";
 
 // Register the plugin
 gsap.registerPlugin(ScrambleTextPlugin);
@@ -83,101 +84,104 @@ const StatusPage = () => {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
-      <div className="max-w-4xl mx-auto relative">
-        <div className="flex items-center mb-12">
-          <button
-            onClick={() => router.back()}
-            className="text-[var(--primary)] hover:text-[var(--secondary)] transition-colors duration-200 absolute left-0"
-            aria-label="Go back"
-          >
-            <IoArrowBack className="text-3xl" />
-          </button>
-          <h1
-            ref={titleRef}
-            className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center w-full"
-          >
-            Website Status
-          </h1>
-        </div>
+    <>
+      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
+        <div className="max-w-4xl mx-auto relative">
+          <div className="flex items-center mb-12">
+            <button
+              onClick={() => router.back()}
+              className="text-[var(--primary)] hover:text-[var(--secondary)] transition-colors duration-200 absolute left-0"
+              aria-label="Go back"
+            >
+              <IoArrowBack className="text-3xl" />
+            </button>
+            <h1
+              ref={titleRef}
+              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center w-full"
+            >
+              Website Status
+            </h1>
+          </div>
 
-        {loading ? (
-          <div className="text-center text-[var(--primary)]">Loading...</div>
-        ) : (
-          <div className="space-y-8">
-            {statusData.map((service) => (
-              <div
-                key={service.key}
-                className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold text-[var(--primary)]">
-                      {service.key.charAt(0).toUpperCase() +
-                        service.key.slice(1)}
-                    </h2>
-                    <a
-                      href={service.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--foreground)]/70 hover:text-[var(--primary)] transition-colors duration-200"
-                    >
-                      {service.url}
-                    </a>
-                  </div>
-                  {service.data && (
-                    <div className="text-right">
-                      <div
-                        className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                          getStatusColor(service.data[0]) === "success"
-                            ? "bg-green-500/20 text-green-500"
-                            : getStatusColor(service.data[0]) === "failure"
-                            ? "bg-red-500/20 text-red-500"
-                            : getStatusColor(service.data[0]) === "partial"
-                            ? "bg-yellow-500/20 text-yellow-500"
-                            : "bg-gray-500/20 text-gray-500"
-                        }`}
+          {loading ? (
+            <div className="text-center text-[var(--primary)]">Loading...</div>
+          ) : (
+            <div className="space-y-8">
+              {statusData.map((service) => (
+                <div
+                  key={service.key}
+                  className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="text-2xl font-bold text-[var(--primary)]">
+                        {service.key.charAt(0).toUpperCase() +
+                          service.key.slice(1)}
+                      </h2>
+                      <a
+                        href={service.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[var(--foreground)]/70 hover:text-[var(--primary)] transition-colors duration-200"
                       >
-                        {getStatusText(getStatusColor(service.data[0]))}
+                        {service.url}
+                      </a>
+                    </div>
+                    {service.data && (
+                      <div className="text-right">
+                        <div
+                          className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                            getStatusColor(service.data[0]) === "success"
+                              ? "bg-green-500/20 text-green-500"
+                              : getStatusColor(service.data[0]) === "failure"
+                              ? "bg-red-500/20 text-red-500"
+                              : getStatusColor(service.data[0]) === "partial"
+                              ? "bg-yellow-500/20 text-yellow-500"
+                              : "bg-gray-500/20 text-gray-500"
+                          }`}
+                        >
+                          {getStatusText(getStatusColor(service.data[0]))}
+                        </div>
+                        <div className="text-[var(--foreground)]/70 mt-1">
+                          Uptime: {service.data.upTime}
+                        </div>
                       </div>
-                      <div className="text-[var(--foreground)]/70 mt-1">
-                        Uptime: {service.data.upTime}
-                      </div>
+                    )}
+                  </div>
+
+                  {service.data && (
+                    <div className="grid grid-cols-30 gap-1 mt-4">
+                      {Array.from({ length: 30 }, (_, i) => {
+                        const status = service.data?.[i];
+                        const color = getStatusColor(status);
+                        return (
+                          <div
+                            key={i}
+                            className={`aspect-square rounded-sm ${
+                              color === "success"
+                                ? "bg-green-500"
+                                : color === "failure"
+                                ? "bg-red-500"
+                                : color === "partial"
+                                ? "bg-yellow-500"
+                                : "bg-gray-500"
+                            }`}
+                            title={`${new Date(
+                              Date.now() - i * 24 * 60 * 60 * 1000
+                            ).toLocaleDateString()}: ${getStatusText(color)}`}
+                          />
+                        );
+                      })}
                     </div>
                   )}
                 </div>
-
-                {service.data && (
-                  <div className="grid grid-cols-30 gap-1 mt-4">
-                    {Array.from({ length: 30 }, (_, i) => {
-                      const status = service.data?.[i];
-                      const color = getStatusColor(status);
-                      return (
-                        <div
-                          key={i}
-                          className={`aspect-square rounded-sm ${
-                            color === "success"
-                              ? "bg-green-500"
-                              : color === "failure"
-                              ? "bg-red-500"
-                              : color === "partial"
-                              ? "bg-yellow-500"
-                              : "bg-gray-500"
-                          }`}
-                          title={`${new Date(
-                            Date.now() - i * 24 * 60 * 60 * 1000
-                          ).toLocaleDateString()}: ${getStatusText(color)}`}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </main>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 };
 

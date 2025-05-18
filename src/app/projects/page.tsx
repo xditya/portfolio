@@ -9,6 +9,7 @@ import { FaGithub } from "react-icons/fa";
 import { FiExternalLink } from "react-icons/fi";
 import { IoArrowBack } from "react-icons/io5";
 import { useRouter } from "next/navigation";
+import Footer from "@/components/Footer";
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrambleTextPlugin, ScrollTrigger);
@@ -215,144 +216,147 @@ export default function ProjectsPage() {
   }, [dummyProjects.length]);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
-      <div className="max-w-6xl mx-auto relative">
-        <div className="flex items-center mb-12">
-          <button
-            onClick={() => router.back()}
-            className="text-[var(--primary)] hover:text-[var(--secondary)] transition-colors duration-200 absolute left-0"
-            aria-label="Go back"
-          >
-            <IoArrowBack className="text-3xl" />
-          </button>
-          <h1
-            ref={titleRef}
-            className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center w-full"
-          >
-            Projects
-          </h1>
-        </div>
-
-        {/* Scroll Indicator */}
-        {dummyProjects.length > 0 && (
-          <div
-            ref={scrollIndicatorRef}
-            className="fixed bottom-10 left-1/2 transform -translate-x-1/2 text-[var(--primary)] text-3xl opacity-100 transition-opacity duration-300"
-            style={{ zIndex: 9999 }}
-          >
-            <LuArrowDown />
-          </div>
-        )}
-
-        {/* Projects Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dummyProjects.map((project, index) => (
-            <div
-              key={index}
-              ref={(el) => setProjectRef(el, index)}
-              // Make the card a flex container in a column direction
-              className="flex flex-col rounded-lg overflow-hidden shadow-md text-[var(--foreground)] transition-shadow duration-300 ease-in-out transform scale-100 border border-[var(--foreground)]"
-              style={{ boxShadow: "0 4px 8px rgba(0,0,0,0.15)" }}
+    <>
+      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
+        <div className="max-w-6xl mx-auto relative">
+          <div className="flex items-center mb-12">
+            <button
+              onClick={() => router.back()}
+              className="text-[var(--primary)] hover:text-[var(--secondary)] transition-colors duration-200 absolute left-0"
+              aria-label="Go back"
             >
-              {/* Project Visual (Image or Fallback Pattern) */}
-              {/* This block will take its natural height */}
-              {project.imagePlaceholder ? (
-                <div
-                  className="w-full h-48 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url(${project.imagePlaceholder})`,
-                  }}
-                  aria-label={`Preview image for ${project.name}`}
-                  role="img"
-                >
-                  {/* Optional: Add an overlay div here */}
-                </div>
-              ) : (
-                // Fallback if no image - Pattern Background
-                <div
-                  className="w-full h-48 flex items-center justify-center text-center p-4 relative"
-                  style={{
-                    backgroundImage: `repeating-linear-gradient(
+              <IoArrowBack className="text-3xl" />
+            </button>
+            <h1
+              ref={titleRef}
+              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center w-full"
+            >
+              Projects
+            </h1>
+          </div>
+
+          {/* Scroll Indicator */}
+          {dummyProjects.length > 0 && (
+            <div
+              ref={scrollIndicatorRef}
+              className="fixed bottom-10 left-1/2 transform -translate-x-1/2 text-[var(--primary)] text-3xl opacity-100 transition-opacity duration-300"
+              style={{ zIndex: 9999 }}
+            >
+              <LuArrowDown />
+            </div>
+          )}
+
+          {/* Projects Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dummyProjects.map((project, index) => (
+              <div
+                key={index}
+                ref={(el) => setProjectRef(el, index)}
+                // Make the card a flex container in a column direction
+                className="flex flex-col rounded-lg overflow-hidden shadow-md text-[var(--foreground)] transition-shadow duration-300 ease-in-out transform scale-100 border border-[var(--foreground)]"
+                style={{ boxShadow: "0 4px 8px rgba(0,0,0,0.15)" }}
+              >
+                {/* Project Visual (Image or Fallback Pattern) */}
+                {/* This block will take its natural height */}
+                {project.imagePlaceholder ? (
+                  <div
+                    className="w-full h-48 bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${project.imagePlaceholder})`,
+                    }}
+                    aria-label={`Preview image for ${project.name}`}
+                    role="img"
+                  >
+                    {/* Optional: Add an overlay div here */}
+                  </div>
+                ) : (
+                  // Fallback if no image - Pattern Background
+                  <div
+                    className="w-full h-48 flex items-center justify-center text-center p-4 relative"
+                    style={{
+                      backgroundImage: `repeating-linear-gradient(
                       45deg,
                       rgba(var(--primary-rgb), 0.1),
                       rgba(var(--primary-rgb), 0.1) 10px,
                       transparent 10px,
                       transparent 20px
                     )`,
-                  }}
-                >
-                  <div className="absolute inset-0 bg-gray-600 opacity-70 z-10"></div>
-                  <span className="text-xl font-semibold text-[var(--primary)] z-20 relative">
-                    {project.name}
-                  </span>
-                </div>
-              )}
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gray-600 opacity-70 z-10"></div>
+                    <span className="text-xl font-semibold text-[var(--primary)] z-20 relative">
+                      {project.name}
+                    </span>
+                  </div>
+                )}
 
-              {/* Project Content */}
-              {/* This div will contain the text and links */}
-              <div className="p-6 flex flex-col justify-between flex-grow">
-                {" "}
-                {/* Added flex flex-col justify-between and flex-grow */}
-                <div>
+                {/* Project Content */}
+                {/* This div will contain the text and links */}
+                <div className="p-6 flex flex-col justify-between flex-grow">
                   {" "}
-                  {/* Wrapper for text content */}
-                  <h2 className="text-xl sm:text-2xl font-bold text-[var(--primary)] mb-2">
-                    {project.name}
-                  </h2>
-                  {project.tagline && (
-                    <p className="text-sm mb-3">{project.tagline}</p>
-                  )}
-                  <p className="text-sm text-[var(--foreground)] mb-4">
-                    {project.description}
-                  </p>
-                  {project.tags && project.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs font-semibold inline-block py-1 px-2 rounded-full bg-[var(--accent)] text-[var(--background)]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {/* Project Links - ADDED mt-auto for bottom alignment */}
-                {/* mt-auto pushes this div to the bottom of its flex-col parent (the .p-6 div) */}
-                <div className="flex gap-3 items-center mt-auto">
-                  {" "}
-                  {/* Left-aligned by default */}
-                  {project.githubUrl && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1 border border-[var(--primary)] rounded-md text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-colors duration-200 text-sm"
-                      aria-label={`GitHub repository for ${project.name}`}
-                    >
-                      <FaGithub className="text-base" />
-                      GitHub
-                    </a>
-                  )}
-                  {project.projectUrl && (
-                    <a
-                      href={project.projectUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1 border border-[var(--primary)] rounded-md text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-colors duration-200 text-sm"
-                      aria-label={`Live demo of ${project.name}`}
-                    >
-                      <FiExternalLink className="text-base" />
-                      Live Project
-                    </a>
-                  )}
+                  {/* Added flex flex-col justify-between and flex-grow */}
+                  <div>
+                    {" "}
+                    {/* Wrapper for text content */}
+                    <h2 className="text-xl sm:text-2xl font-bold text-[var(--primary)] mb-2">
+                      {project.name}
+                    </h2>
+                    {project.tagline && (
+                      <p className="text-sm mb-3">{project.tagline}</p>
+                    )}
+                    <p className="text-sm text-[var(--foreground)] mb-4">
+                      {project.description}
+                    </p>
+                    {project.tags && project.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {project.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs font-semibold inline-block py-1 px-2 rounded-full bg-[var(--accent)] text-[var(--background)]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {/* Project Links - ADDED mt-auto for bottom alignment */}
+                  {/* mt-auto pushes this div to the bottom of its flex-col parent (the .p-6 div) */}
+                  <div className="flex gap-3 items-center mt-auto">
+                    {" "}
+                    {/* Left-aligned by default */}
+                    {project.githubUrl && (
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-3 py-1 border border-[var(--primary)] rounded-md text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-colors duration-200 text-sm"
+                        aria-label={`GitHub repository for ${project.name}`}
+                      >
+                        <FaGithub className="text-base" />
+                        GitHub
+                      </a>
+                    )}
+                    {project.projectUrl && (
+                      <a
+                        href={project.projectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-3 py-1 border border-[var(--primary)] rounded-md text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-colors duration-200 text-sm"
+                        aria-label={`Live demo of ${project.name}`}
+                      >
+                        <FiExternalLink className="text-base" />
+                        Live Project
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }
