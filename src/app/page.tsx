@@ -17,37 +17,67 @@ import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 gsap.registerPlugin(ScrambleTextPlugin);
 
 export default function Home() {
+  // Ref for the "xditya" part
   const nameRef = useRef(null);
+  // Ref for the "?" part
+  const punctRef = useRef(null);
 
   useEffect(() => {
-    // Ensure the ref is connected to the DOM element before animating
-    if (nameRef.current) {
-      gsap.to(nameRef.current, {
+    const nameElement = nameRef.current;
+    const punctElement = punctRef.current;
+
+    // Ensure both refs are connected to DOM elements before animating
+    if (nameElement && punctElement) {
+      // Tween for the name part ("xditya" -> "Aditya")
+      const nameTween = gsap.to(nameElement, {
+        delay: 1, // Wait for 1 second before starting this animation
         scrambleText: {
-          text: "Aditya.",
-          chars: "abcdefghijklmnopqrstuvwxyz!%^&*+",
-          speed: 0.25,
-          rightToLeft: true,
-          revealDelay: 0.9,
+          text: "Aditya", // The final text for this span
+          chars: "abcdefghijklmnopqrstuvwxyz", // Characters to use for scrambling the name
+          speed: 0.3, // Speed of the name scramble/reveal (adjust as needed)
+          // Default reveal direction is left-to-right, which works well here
         },
-        duration: 1,
+        duration: 1, // Duration for the name part animation (adjust as needed)
         ease: "power1.inOut",
+        onComplete: () => {
+          // This function runs *after* the name tween finishes
+
+          // Tween for the punctuation part ("?" -> ".")
+          gsap.to(punctElement, {
+            scrambleText: {
+              text: ".", // The final text for this span
+              chars: "!@#$%", // Scramble with symbols before resolving to '.'
+              speed: 0.5, // Speed of the punctuation change (can be faster)
+            },
+            duration: 0.5, // Duration for the punctuation change (adjust as needed)
+            ease: "power1.inOut",
+          });
+        },
       });
+
+      // Optional: Clean up tweens on component unmount
+      return () => {
+        nameTween.kill();
+        // The second tween is tied to the first's onComplete,
+        // killing the first should prevent the second from starting if unmounted early.
+      };
     } else {
       console.error(
-        "nameRef.current is null - element not found for GSAP animation."
+        "Refs not connected - elements not found for GSAP animation."
       );
     }
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
     <main className="min-h-screen flex flex-col justify-center items-center bg-[var(--background)] text-[var(--foreground)] px-4">
       <div className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16">
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-2">
-          Hi, I&apos;m{" "}
-          {/* Initial text is "xditya.", will scramble to "Aditya." */}
-          <span ref={nameRef} className="text-[var(--primary)]">
-            xditya?
+          Hi, I&apos;m {/* Container span to keep styling */}
+          <span className="text-[var(--primary)]">
+            {/* Span for the name part - initially "xditya" */}
+            <span ref={nameRef}>xditya</span>
+            {/* Span for the punctuation part - initially "?" */}
+            <span ref={punctRef}>?</span>
           </span>
         </h1>
         <p className="text-base sm:text-lg text-gray-400 font-medium mb-5 font-sans">
