@@ -15,6 +15,7 @@ export default function Navbar() {
     () => [
       { href: "/", label: "Home" },
       { href: "/projects", label: "Projects" },
+      { href: "/links", label: "Links" },
       { href: "/about", label: "About" },
       { href: "/contact", label: "Contact" },
     ],
@@ -45,7 +46,7 @@ export default function Navbar() {
     <nav className="w-full fixed top-0 left-0 z-50 bg-[var(--background)]">
       <div className="w-full flex items-center pl-4 pr-4 py-3">
         <div className="flex items-center flex-1">
-          <Link href="/#" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <Image
               src="/logo.png"
               alt="Logo"
