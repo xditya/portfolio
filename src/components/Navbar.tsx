@@ -44,7 +44,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full fixed top-0 left-0 z-50 bg-[var(--background)]">
-      <div className="w-full flex items-center pl-4 pr-4 py-3">
+      <div className="w-full flex items-center pl-4 pr-4 py-4">
         <div className="flex items-center flex-1">
           <Link href="/" className="flex items-center gap-2">
             <Image
