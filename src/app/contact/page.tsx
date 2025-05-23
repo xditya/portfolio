@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import Footer from "@/components/Footer";
 import { IoArrowBack, IoCheckmarkCircle, IoCloseCircle } from "react-icons/io5";
+import { FaTwitter, FaInstagram, FaTelegram, FaLinkedin } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
@@ -20,6 +21,7 @@ export default function ContactPage() {
     email: "",
     phone: "",
     message: "",
+    socialHandle: "",
   });
   const [hcaptchaError, setHcaptchaError] = useState(false);
   const [status, setStatus] = useState<{
@@ -30,6 +32,7 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hcaptchaRef = useRef<HCaptcha>(null);
   const [showModal, setShowModal] = useState(false);
+  const [highlightedIcon, setHighlightedIcon] = useState<string | null>(null); // State for highlighted icon
 
   useEffect(() => {
     // Check if hCaptcha site key is configured
@@ -75,6 +78,73 @@ export default function ContactPage() {
     }
   }, []);
 
+  // Function to normalize URL input
+  const normalizeUrl = (url: string) => {
+    let normalized = url.toLowerCase();
+    // Remove http(s):// and www.
+    normalized = normalized.replace(/^(https?:\/\/)?(www\.)?/, "");
+    // Remove trailing slash
+    normalized = normalized.replace(/\/+$/, "");
+    return normalized;
+  };
+
+  // Function to check URL and set highlighted icon
+  const checkHighlight = (value: string) => {
+    const normalizedValue = normalizeUrl(value);
+
+    if (normalizedValue.startsWith("twitter.com/")) {
+      setHighlightedIcon("x");
+    } else if (normalizedValue.startsWith("instagram.com/")) {
+      setHighlightedIcon("instagram");
+    } else if (normalizedValue.startsWith("t.me/")) {
+      setHighlightedIcon("telegram");
+    } else if (normalizedValue.startsWith("linkedin.com/in/")) {
+      setHighlightedIcon("linkedin");
+    } else {
+      setHighlightedIcon(null);
+    }
+  };
+
+  const handleSocialIconClick = (
+    platform: "x" | "instagram" | "telegram" | "linkedin"
+  ) => {
+    let baseUrl = "";
+    switch (platform) {
+      case "x":
+        baseUrl = "twitter.com/";
+        break;
+      case "instagram":
+        baseUrl = "instagram.com/";
+        break;
+      case "telegram":
+        baseUrl = "t.me/";
+        break;
+      case "linkedin":
+        baseUrl = "linkedin.com/in/";
+        break;
+    }
+
+    // Prefill only if the current input is empty or doesn't start with a known base URL pattern
+    const isCurrentlyPrefilled = [
+      "twitter.com/",
+      "instagram.com/",
+      "t.me/",
+      "linkedin.com/in/",
+    ].some((prefix) => formData.socialHandle.startsWith(prefix));
+
+    if (!formData.socialHandle || isCurrentlyPrefilled) {
+      setFormData({ ...formData, socialHandle: baseUrl });
+    }
+    // Always highlight the clicked icon
+    setHighlightedIcon(platform);
+  };
+
+  const handleSocialInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData({ ...formData, socialHandle: value });
+    checkHighlight(value); // Check and highlight based on input value
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -115,7 +185,14 @@ export default function ContactPage() {
           type: "success",
           message: "Message sent successfully!",
         });
-        setFormData({ name: "", email: "", phone: "", message: "" });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          message: "",
+          socialHandle: "",
+        });
+        setHighlightedIcon(null);
         setShowModal(true);
       }
     } catch (error) {
@@ -233,6 +310,83 @@ export default function ContactPage() {
                     placeholder="+91 9876543221"
                   />
                 </div>
+              </div>
+
+              {/* Social Handle Section */}
+              <div className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300">
+                <label
+                  htmlFor="socialHandle"
+                  className="block text-xl font-semibold text-[var(--primary)] mb-2"
+                >
+                  Social Handle
+                </label>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="text"
+                    id="socialHandle"
+                    value={formData.socialHandle}
+                    onChange={handleSocialInputChange}
+                    className="flex-shrink-0 md:flex-grow rounded-lg border-[var(--foreground)]/20 bg-[var(--background)] text-[var(--foreground)] text-lg p-4 shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] transition-all duration-300"
+                    placeholder="Profile Link or Username"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleSocialIconClick("x")}
+                    aria-label="X (formerly Twitter)"
+                  >
+                    <FaTwitter
+                      className={`text-xl cursor-pointer transition-colors ${
+                        highlightedIcon === "x"
+                          ? "text-[var(--primary)]"
+                          : "text-[var(--foreground)]/50 hover:text-[var(--primary)]"
+                      }`}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSocialIconClick("instagram")}
+                    aria-label="Instagram"
+                  >
+                    <FaInstagram
+                      className={`text-xl cursor-pointer transition-colors ${
+                        highlightedIcon === "instagram"
+                          ? "text-[var(--primary)]"
+                          : "text-[var(--foreground)]/50 hover:text-[var(--primary)]"
+                      }`}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSocialIconClick("telegram")}
+                    aria-label="Telegram"
+                  >
+                    <FaTelegram
+                      className={`text-xl cursor-pointer transition-colors ${
+                        highlightedIcon === "telegram"
+                          ? "text-[var(--primary)]"
+                          : "text-[var(--foreground)]/50 hover:text-[var(--primary)]"
+                      }`}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSocialIconClick("linkedin")}
+                    aria-label="LinkedIn"
+                  >
+                    <FaLinkedin
+                      className={`text-xl cursor-pointer transition-colors ${
+                        highlightedIcon === "linkedin"
+                          ? "text-[var(--primary)]"
+                          : "text-[var(--foreground)]/50 hover:text-[var(--primary)]"
+                      }`}
+                    />
+                  </button>
+                </div>
+                {highlightedIcon && !formData.socialHandle.includes("/") && (
+                  <p className="mt-2 text-sm text-[var(--primary)]">
+                    Enter only your username after the prefilled link.
+                  </p>
+                )}
               </div>
 
               <div className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300">

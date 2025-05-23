@@ -8,6 +8,7 @@ const contactSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
   message: z.string().min(10, "Message must be at least 10 characters"),
+  socialHandle: z.string().optional(),
   hcaptchaToken: z.string().min(1, "Captcha token is required"),
 });
 
@@ -127,6 +128,7 @@ export async function POST(request: Request) {
 • Name: <code>${validatedData.name}</code>
 • Email: <code>${validatedData.email}</code>
 • Phone: <code>${validatedData.phone || "Not provided"}</code>
+• Social: <code>${validatedData.socialHandle || "Not provided"}</code>
 
 <b>📝 Message:</b>
 <code>${validatedData.message}</code>
