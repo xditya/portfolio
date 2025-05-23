@@ -269,6 +269,7 @@ export default function ContactPage() {
                   }
                   className="mt-1 block w-full rounded-lg border-[var(--foreground)]/20 bg-[var(--background)] text-[var(--foreground)] text-lg p-4 shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] transition-all duration-300"
                   required
+                  placeholder="John Doe"
                 />
               </div>
 
@@ -289,6 +290,7 @@ export default function ContactPage() {
                     }
                     className="mt-1 block w-full rounded-lg border-[var(--foreground)]/20 bg-[var(--background)] text-[var(--foreground)] text-lg p-4 shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] transition-all duration-300"
                     required
+                    placeholder="contact@xditya.me"
                   />
                 </div>
 
@@ -405,6 +407,7 @@ export default function ContactPage() {
                   rows={6}
                   className="mt-1 block w-full rounded-lg border-[var(--foreground)]/20 bg-[var(--background)] text-[var(--foreground)] text-lg p-4 shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] transition-all duration-300 resize-none"
                   required
+                  placeholder="Be witty, be charming, be you!"
                 />
               </div>
 
