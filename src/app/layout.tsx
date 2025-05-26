@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aditya S Portfolio",
+  title: "Aditya S",
   description: "Portfolio of Aditya S - Open-Source Developer & Freelancer",
 };
 

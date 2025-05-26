@@ -15,9 +15,19 @@ const Footer: React.FC = () => {
         <div className="text-center md:text-left">
           {" "}
           <p className="text-[var(--foreground)]">
-            &copy; {currentYear} Aditya S. All Rights Reserved.
+            &copy; {currentYear} Aditya S. All Rights Reserved.{" "}
           </p>
-          <p className="text-[var(--foreground-lighter)] mt-1">Built with ❤️</p>
+          <p className="text-[var(--foreground-lighter)] mt-1">
+            Built with ❤️ •{" "}
+            <a
+              href="https://i.xditya.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--foreground-lighter)] hover:text-[var(--accent)] transition-colors text-xs"
+            >
+              Legacy Site
+            </a>
+          </p>
         </div>
         <div className="flex items-center gap-4 text-[var(--foreground-lighter)]">
           <a
