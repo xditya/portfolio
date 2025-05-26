@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { IoHomeOutline } from "react-icons/io5";
-import FuzzyText from "@/components/FuzzyText";
 
 export default function NotFound() {
   const router = useRouter();
@@ -32,13 +31,7 @@ export default function NotFound() {
           ref={titleRef}
           className="text-6xl md:text-8xl font-bold mb-8 flex justify-center"
         >
-          <FuzzyText
-            baseIntensity={0.2}
-            hoverIntensity={0.5}
-            enableHover={true}
-          >
-            404
-          </FuzzyText>
+          404
         </h1>
         <p className="text-xl md:text-2xl mb-12 opacity-80">
           Oops! Looks like you&apos;ve ventured into the void!
