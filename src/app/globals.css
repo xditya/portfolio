@@ -31,16 +31,16 @@ body {
 }
 
 /* Hide default cursor */
-* {
+/* * {
   cursor: none !important;
-}
+} */
 
 /* Show default cursor for touch devices */
-@media (hover: none) and (pointer: coarse) {
+/* @media (hover: none) and (pointer: coarse) {
   * {
     cursor: auto !important;
   }
-}
+} */
 
 /* Hide default scrollbar */
 ::-webkit-scrollbar {

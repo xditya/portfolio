@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navbar";
-import CustomCursor from "@/components/CustomCursor";
+// import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -36,7 +36,7 @@ export default function RootLayout({
       >
         <SpeedInsights />
         <SmoothScroll />
-        <CustomCursor />
+        {/* <CustomCursor /> */}
         <Navbar />
         <div>{children}</div>
         <Analytics />
