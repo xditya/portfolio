@@ -194,7 +194,7 @@ export default function ProjectsPage() {
       gsap.to(titleRef.current, {
         duration: 1.5,
         scrambleText: {
-          text: "Selected Works",
+          text: "Projects",
           chars: "lowerCase",
           revealDelay: 0.5,
           speed: 0.75,
