@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { IoHomeOutline } from "react-icons/io5";
-import FuzzyText from "@/components/blocks/TextAnimations/FuzzyText/FuzzyText";
+import FuzzyText from "@/components/FuzzyText";
 
 export default function NotFound() {
   const router = useRouter();
