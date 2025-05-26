@@ -274,7 +274,7 @@ export default function ProjectsPage() {
               ref={titleRef}
               className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center w-full"
             >
-              Selected Works
+              Projects
             </h1>
           </div>
 
