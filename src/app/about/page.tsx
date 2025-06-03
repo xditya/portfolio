@@ -4,12 +4,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoArrowBack, IoDownload } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import Footer from "@/components/Footer";
 
-gsap.registerPlugin(ScrambleTextPlugin, ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 interface Experience {
   title: string;
@@ -75,19 +74,16 @@ export default function AboutPage() {
     const ctx = gsap.context(() => {
       // Title animation
       if (titleRef.current) {
-        gsap.set(titleRef.current, { visibility: "hidden" });
-        gsap.to(titleRef.current, {
-          duration: 1.5,
-          scrambleText: {
-            text: "About Me",
-            chars: "lowerCase",
-            revealDelay: 0.5,
-            speed: 0.75,
-          },
-          visibility: "visible",
-          ease: "power1.inOut",
-          delay: 0.5,
-        });
+        gsap.fromTo(
+          titleRef.current,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out",
+          }
+        );
       }
 
       // Content glow effect
@@ -97,7 +93,7 @@ export default function AboutPage() {
           opacity: 1,
           duration: 1.2,
           ease: "power2.inOut",
-          delay: 1,
+          delay: 0.3,
           onComplete: () => {
             // Start timeline animations after text is done
             if (timelineRef.current) {

@@ -4,11 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { IoArrowBack } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import Footer from "@/components/Footer";
-
-// Register the plugin
-gsap.registerPlugin(ScrambleTextPlugin);
 
 const TermsPage = () => {
   const router = useRouter();
@@ -18,19 +14,16 @@ const TermsPage = () => {
   useEffect(() => {
     // Title animation
     if (titleRef.current) {
-      gsap.set(titleRef.current, { visibility: "hidden" });
-      gsap.to(titleRef.current, {
-        duration: 1.5,
-        scrambleText: {
-          text: "Terms & Conditions",
-          chars: "lowerCase",
-          revealDelay: 0.5,
-          speed: 0.75,
-        },
-        visibility: "visible",
-        ease: "power1.inOut",
-        delay: 0.5,
-      });
+      gsap.fromTo(
+        titleRef.current,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        }
+      );
     }
 
     // Content fade in
@@ -42,7 +35,7 @@ const TermsPage = () => {
           opacity: 1,
           y: 0,
           duration: 0.8,
-          delay: 0.8,
+          delay: 0.3,
           ease: "power2.out",
         }
       );

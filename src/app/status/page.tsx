@@ -4,11 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoArrowBack, IoRefreshOutline } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import Footer from "@/components/Footer";
-
-// Register the plugin
-gsap.registerPlugin(ScrambleTextPlugin);
 
 interface StatusData {
   key: string;
@@ -51,19 +47,16 @@ const StatusPage = () => {
   useEffect(() => {
     // Title animation
     if (titleRef.current) {
-      gsap.set(titleRef.current, { visibility: "hidden" });
-      gsap.to(titleRef.current, {
-        duration: 1.5,
-        scrambleText: {
-          text: "Website Status",
-          chars: "lowerCase",
-          revealDelay: 0.5,
-          speed: 0.75,
-        },
-        visibility: "visible",
-        ease: "power1.inOut",
-        delay: 0.5,
-      });
+      gsap.fromTo(
+        titleRef.current,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        }
+      );
     }
 
     // Fetch status data

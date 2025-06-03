@@ -7,10 +7,6 @@ import { IoArrowBack, IoCheckmarkCircle, IoCloseCircle } from "react-icons/io5";
 import { FaTwitter, FaInstagram, FaTelegram, FaLinkedin } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
-
-// Register the plugin
-gsap.registerPlugin(ScrambleTextPlugin);
 
 export default function ContactPage() {
   const router = useRouter();
@@ -47,19 +43,16 @@ export default function ContactPage() {
 
     // Title animation
     if (titleRef.current) {
-      gsap.set(titleRef.current, { visibility: "hidden" });
-      gsap.to(titleRef.current, {
-        duration: 1.5,
-        scrambleText: {
-          text: "Contact Me",
-          chars: "lowerCase",
-          revealDelay: 0.5,
-          speed: 0.75,
-        },
-        visibility: "visible",
-        ease: "power1.inOut",
-        delay: 0.5,
-      });
+      gsap.fromTo(
+        titleRef.current,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        }
+      );
     }
 
     // Content fade in
@@ -71,7 +64,7 @@ export default function ContactPage() {
           opacity: 1,
           y: 0,
           duration: 0.8,
-          delay: 0.8,
+          delay: 0.3,
           ease: "power2.out",
         }
       );
