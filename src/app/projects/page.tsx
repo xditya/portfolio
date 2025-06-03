@@ -5,7 +5,6 @@ import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { FaGithub, FaPython, FaNodeJs } from "react-icons/fa";
 import {
   SiMongodb,
   SiRedis,
@@ -15,6 +14,12 @@ import {
   SiQt,
   SiFlask,
   SiNextdotjs,
+  SiKotlin,
+  SiJetpackcompose,
+  SiPython,
+  SiNodedotjs,
+  SiAndroid,
+  SiGithub,
 } from "react-icons/si";
 import { FiExternalLink } from "react-icons/fi";
 import { IoArrowBack } from "react-icons/io5";
@@ -32,7 +37,7 @@ interface TechStack {
 const techStacks: Record<string, TechStack> = {
   python: {
     name: "Python",
-    icon: <FaPython className="text-xl" />,
+    icon: <SiPython className="text-xl" />,
   },
   mongodb: {
     name: "MongoDB",
@@ -68,7 +73,19 @@ const techStacks: Record<string, TechStack> = {
   },
   javascript: {
     name: "JavaScript",
-    icon: <FaNodeJs className="text-xl" />,
+    icon: <SiNodedotjs className="text-xl" />,
+  },
+  kotlin: {
+    name: "Kotlin",
+    icon: <SiKotlin className="text-xl" />,
+  },
+  android: {
+    name: "Android",
+    icon: <SiAndroid className="text-xl" />,
+  },
+  jetpack_compose: {
+    name: "Jetpack Compose",
+    icon: <SiJetpackcompose className="text-xl" />,
   },
 };
 
@@ -142,7 +159,7 @@ export default function ProjectsPage() {
       imagePlaceholder: "/images/channelautopost.png",
     },
     {
-      name: "TelethonBot",
+      name: "Telethon Bot",
       tagline: "Telegram bot boilerplate.",
       description:
         "Telegram Bot/UserBot boilerplate built with the Telethon library.",
@@ -164,7 +181,7 @@ export default function ProjectsPage() {
       imagePlaceholder: "/images/tgdetails.png",
     },
     {
-      name: "WhatsAppUtilitiesBot",
+      name: "WhatsApp Utilities",
       tagline: "WhatsApp Bot.",
       description:
         "A WhatsApp Bot using whatsapp-web.js to convert images into stickers.",
@@ -174,6 +191,17 @@ export default function ProjectsPage() {
       year: 2024,
       imagePlaceholder: "/images/whatsapputilities.png",
     },
+    {
+      name: "Lyrics Searcher",
+      tagline: "Song lyrics searching app.",
+      description:
+        "Android application that allows users to search for lyrics based on song titles.",
+      githubUrl: "https://github.com/xditya/LyricsSearcher/",
+      projectUrl: "https://github.com/xditya/LyricsSearcher/releases/tag/v0.1",
+      techStack: ["kotlin", "jetpack_compose", "android"],
+      year: 2023,
+      imagePlaceholder: "",
+    },
   ].sort((a, b) => b.year - a.year);
 
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
@@ -181,7 +209,7 @@ export default function ProjectsPage() {
 
   const allTechStacks = Array.from(
     new Set(projectsList.flatMap((project) => project.techStack || []))
-  );
+  ).sort((a, b) => techStacks[a].name.localeCompare(techStacks[b].name));
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   const projectsContainerRef = useRef<HTMLDivElement>(null);
@@ -408,7 +436,7 @@ export default function ProjectsPage() {
                                 className="inline-flex items-center gap-2 px-5 py-2 border border-[var(--primary)] rounded-md text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-colors duration-200 text-lg font-medium"
                                 aria-label={`GitHub repository for ${project.name}`}
                               >
-                                <FaGithub className="text-xl" />
+                                <SiGithub className="text-xl" />
                                 GitHub
                               </a>
                             )}
