@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import {
@@ -27,7 +26,7 @@ import { useRouter } from "next/navigation";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 
-gsap.registerPlugin(ScrambleTextPlugin, ScrollTrigger, ScrollToPlugin);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 interface TechStack {
   name: string;
@@ -217,20 +216,16 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     if (titleRef.current) {
-      gsap.set(titleRef.current, { visibility: "hidden" });
-
-      gsap.to(titleRef.current, {
-        duration: 1.5,
-        scrambleText: {
-          text: "Projects",
-          chars: "lowerCase",
-          revealDelay: 0.5,
-          speed: 0.75,
-        },
-        visibility: "visible",
-        ease: "power1.inOut",
-        delay: 0.5,
-      });
+      gsap.fromTo(
+        titleRef.current,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        }
+      );
     }
 
     const container = projectsContainerRef.current;
