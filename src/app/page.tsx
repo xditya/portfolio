@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
-import { LuFolderOpen } from "react-icons/lu";
+import React, { useRef, useEffect, useState } from "react";
+import { LuFolderOpen, LuUser, LuMail } from "react-icons/lu";
 import {
   FaGithub,
   FaXTwitter,
@@ -21,13 +21,47 @@ export default function Home() {
   const nameRef = useRef(null);
   // Ref for the "?" part
   const punctRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const ctaRef = useRef(null);
+  const socialsRef = useRef(null);
+  
+  const [githubStats, setGithubStats] = useState({ stars: 0, repos: 0 });
 
   useEffect(() => {
+    // Fetch GitHub stats
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("https://api.github.com/users/xditya");
+        const data = await response.json();
+        setGithubStats({ stars: 1770, repos: data.public_repos || 0 });
+      } catch {
+        setGithubStats({ stars: 1770, repos: 200 });
+      }
+    };
+    fetchStats();
+
     const nameElement = nameRef.current;
     const punctElement = punctRef.current;
 
     // Ensure both refs are connected to DOM elements before animating
     if (nameElement && punctElement) {
+      // Fade in subtitle and CTA after a delay
+      gsap.fromTo(
+        subtitleRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.5, ease: "power2.out" }
+      );
+      gsap.fromTo(
+        ctaRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.7, ease: "power2.out" }
+      );
+      gsap.fromTo(
+        socialsRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.9, ease: "power2.out" }
+      );
+
       // Tween for the name part ("xditya" -> "Aditya")
       const nameTween = gsap.to(nameElement, {
         delay: 1, // Wait for 1 second before starting this animation
@@ -69,8 +103,11 @@ export default function Home() {
   }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center bg-[var(--background)] text-[var(--foreground)] px-4">
-      <div className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16">
+    <main className="min-h-screen flex flex-col justify-center items-center bg-[var(--background)] text-[var(--foreground)] px-4 relative overflow-hidden">
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[var(--primary)]/5 via-transparent to-transparent pointer-events-none" />
+      
+      <div className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16 relative z-10">
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-2">
           Hi, I&apos;m {/* Container span to keep styling */}
           <span className="text-[var(--primary)]">
@@ -80,28 +117,45 @@ export default function Home() {
             <span ref={punctRef}>?</span>
           </span>
         </h1>
-        <p className="text-base sm:text-lg text-gray-400 font-medium mb-5 font-sans">
-          Open-Source Developer & Freelancer.
+        
+        <p ref={subtitleRef} className="text-base sm:text-lg text-[var(--foreground)]/60 font-medium mb-2 font-sans opacity-0">
+          Full-stack dev. Open-source contributor. Bot builder.
         </p>
-        <a
-          href="/projects"
-          className="flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--background)] font-semibold rounded-full px-8 py-2 text-lg shadow hover:bg-[var(--accent)] transition-colors mb-10"
-        >
-          <LuFolderOpen className="text-xl" /> View Projects
-        </a>
-        {/* <a
-          href="#"
-          className="flex items-center justify-center gap-2 bg-[var(--secondary)] text-[var(--background)] font-semibold rounded-full px-8 py-2 text-lg shadow hover:bg-[var(--accent)] transition-colors mb-10"
-        >
-          <LuFolderOpen className="text-xl" /> Download Resume
-        </a> */}
+        
+        {/* Quick stats */}
+        <div className="flex items-center gap-6 text-sm text-[var(--foreground)]/40 mb-6">
+          <span>{githubStats.repos}+ repos</span>
+          <span className="w-1 h-1 rounded-full bg-[var(--foreground)]/20" />
+          <span>{githubStats.stars}+ stars</span>
+        </div>
 
-        <div className="flex gap-4 mt-2">
+        <div ref={ctaRef} className="flex flex-wrap justify-center gap-3 mb-10 opacity-0">
+          <a
+            href="/projects"
+            className="flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--background)] font-semibold rounded-full px-8 py-3 text-base shadow-lg shadow-[var(--primary)]/20 hover:shadow-[var(--primary)]/40 hover:scale-105 transition-all"
+          >
+            <LuFolderOpen className="text-lg" /> View Projects
+          </a>
+          <a
+            href="/about"
+            className="flex items-center justify-center gap-2 bg-[var(--foreground)]/5 text-[var(--foreground)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)]/10 hover:border-[var(--primary)]/30 hover:bg-[var(--foreground)]/10 transition-all"
+          >
+            <LuUser className="text-lg" /> About Me
+          </a>
+          <a
+            href="/contact"
+            className="flex items-center justify-center gap-2 bg-[var(--foreground)]/5 text-[var(--foreground)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)]/10 hover:border-[var(--primary)]/30 hover:bg-[var(--foreground)]/10 transition-all"
+          >
+            <LuMail className="text-lg" /> Contact
+          </a>
+        </div>
+
+        <div ref={socialsRef} className="flex gap-3 mt-2 opacity-0">
           <a
             href="https://github.com/xditya"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-[var(--secondary)] hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)] rounded-full p-3 transition-colors shadow text-2xl"
+            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
           >
             <FaGithub />
           </a>
@@ -109,7 +163,7 @@ export default function Home() {
             href="https://x.com/its_xditya"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-[var(--secondary)] hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)] rounded-full p-3 transition-colors shadow text-2xl"
+            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
           >
             <FaXTwitter />
           </a>
@@ -117,7 +171,7 @@ export default function Home() {
             href="https://linkedin.com/in/xditya"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-[var(--secondary)] hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)] rounded-full p-3 transition-colors shadow text-2xl"
+            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
           >
             <FaLinkedin />
           </a>
@@ -125,7 +179,7 @@ export default function Home() {
             href="https://t.me/xditya"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-[var(--secondary)] hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)] rounded-full p-3 transition-colors shadow text-2xl"
+            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
           >
             <FaTelegram />
           </a>
@@ -133,7 +187,7 @@ export default function Home() {
             href="https://youtube.com/@xditya"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-[var(--secondary)] hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)] rounded-full p-3 transition-colors shadow text-2xl"
+            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
           >
             <FaYoutube />
           </a>
