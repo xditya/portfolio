@@ -65,6 +65,14 @@ export default function AboutPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const [age, setAge] = useState<number | null>(null);
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
+
   const [stats, setStats] = useState({
     projects: 0,
     stars: 0,
@@ -211,17 +219,18 @@ export default function AboutPage() {
       <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
         <div className="max-w-5xl mx-auto relative">
           {/* Header Section */}
-          <div className="flex items-center mb-8 relative z-20">
+          <div className="mb-8">
             <button
-              onClick={() => router.back()}
-              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-lg hover:bg-[var(--primary)]/10"
+              onClick={handleBack}
+              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 p-2 rounded-lg hover:bg-[var(--primary)]/10 mb-4 flex items-center gap-2 relative z-20"
               aria-label="Go back"
             >
-              <IoArrowBack className="text-2xl" />
+              <IoArrowBack className="text-xl" />
+              <span className="text-sm font-medium">Back</span>
             </button>
             <h1
               ref={titleRef}
-              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center w-full"
+              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center"
             >
               About Me
             </h1>

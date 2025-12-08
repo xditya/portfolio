@@ -108,7 +108,6 @@ export default function ProjectsPage() {
       description:
         "A comprehensive mobile app to streamline and digitize campus services - digital wallet, print services, vehicle pass, ID cards, lab access, and smart vending.",
       githubUrl: "https://github.com/xditya/CampusServicesManagementSystem",
-      projectUrl: "https://csms.xditya.me",
       techStack: ["kotlin", "android", "mongodb"],
       year: 2024,
       imagePlaceholder: "",
@@ -382,6 +381,14 @@ export default function ProjectsPage() {
 
   const currentProject = projectsList[currentProjectIndex];
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
+
   // Group projects by year
   const projectsByYear = projectsList.reduce((acc, project) => {
     if (!acc[project.year]) {
@@ -396,17 +403,18 @@ export default function ProjectsPage() {
       <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
         <div className="max-w-6xl mx-auto relative">
           {/* Header Section */}
-          <div className="flex items-center mb-8 relative z-20">
+          <div className="mb-8">
             <button
-              onClick={() => router.back()}
-              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-lg hover:bg-[var(--primary)]/10"
+              onClick={handleBack}
+              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 p-2 rounded-lg hover:bg-[var(--primary)]/10 mb-4 flex items-center gap-2 relative z-20"
               aria-label="Go back"
             >
-              <IoArrowBack className="text-2xl" />
+              <IoArrowBack className="text-xl" />
+              <span className="text-sm font-medium">Back</span>
             </button>
             <h1
               ref={titleRef}
-              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center w-full"
+              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center"
             >
               Projects
             </h1>

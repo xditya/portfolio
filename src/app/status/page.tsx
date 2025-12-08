@@ -41,6 +41,14 @@ const StatusPage = () => {
   const router = useRouter();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const loadingIconRef = useRef<HTMLDivElement>(null);
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
   const [statusData, setStatusData] = useState<StatusData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -96,17 +104,18 @@ const StatusPage = () => {
     <>
       <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
         <div className="max-w-4xl mx-auto relative">
-          <div className="flex items-center mb-12">
+          <div className="mb-12">
             <button
-              onClick={() => router.back()}
-              className="text-[var(--primary)] hover:text-[var(--secondary)] transition-colors duration-200 absolute left-0"
+              onClick={handleBack}
+              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 p-2 rounded-lg hover:bg-[var(--primary)]/10 mb-4 flex items-center gap-2"
               aria-label="Go back"
             >
-              <IoArrowBack className="text-3xl" />
+              <IoArrowBack className="text-xl" />
+              <span className="text-sm font-medium">Back</span>
             </button>
             <h1
               ref={titleRef}
-              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center w-full"
+              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center"
             >
               Website Status
             </h1>
