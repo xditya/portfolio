@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { LuFolderOpen, LuUser, LuMail } from "react-icons/lu";
 import {
   FaGithub,
@@ -25,6 +25,60 @@ export default function Home() {
   const subtitleRef = useRef(null);
   const ctaRef = useRef(null);
   const socialsRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  
+  // Listen for mobile menu toggle
+  useEffect(() => {
+    const handleMenuToggle = (e: CustomEvent<{ open: boolean }>) => {
+      if (!contentRef.current || !ctaRef.current || !socialsRef.current) return;
+      
+      if (e.detail.open) {
+        // Menu opened - move content down below the navbar menu
+        gsap.to(contentRef.current, {
+          y: 200,
+          duration: 0.4,
+          ease: "power2.out",
+        });
+        gsap.to(ctaRef.current, {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.2,
+          ease: "power2.in",
+        });
+        // Move social icons up to stay visible on screen
+        gsap.to(socialsRef.current, {
+          y: -180,
+          duration: 0.4,
+          ease: "power2.out",
+        });
+      } else {
+        // Menu closed - restore content
+        gsap.to(contentRef.current, {
+          y: 0,
+          duration: 0.4,
+          ease: "power2.out",
+        });
+        gsap.to(ctaRef.current, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.3,
+          delay: 0.15,
+          ease: "power2.out",
+        });
+        // Restore social icons position
+        gsap.to(socialsRef.current, {
+          y: 0,
+          duration: 0.4,
+          ease: "power2.out",
+        });
+      }
+    };
+    
+    window.addEventListener("mobileMenuToggle", handleMenuToggle as EventListener);
+    return () => {
+      window.removeEventListener("mobileMenuToggle", handleMenuToggle as EventListener);
+    };
+  }, []);
   
   // const [githubStats, setGithubStats] = useState({ stars: 0, repos: 0 });
 
@@ -125,7 +179,7 @@ export default function Home() {
       {/* Subtle background gradient */}
       {/* <div className="absolute inset-0 bg-gradient-to-b from-[var(--primary)]/5 via-transparent to-transparent pointer-events-none" /> */}
       
-      <div className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16 relative z-10">
+      <div ref={contentRef} className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16 relative z-10">
         <h1 ref={headingRef} className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-2 translate-y-24">
           Hi, I&apos;m {/* Container span to keep styling */}
           <span className="text-[var(--primary)]">

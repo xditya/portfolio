@@ -1,15 +1,13 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import gsap from "gsap";
 
 export default function Navbar() {
   const [open, setOpen] = React.useState(false);
   const active = usePathname() || "/";
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const navLinks = React.useMemo(
     () => [
@@ -22,103 +20,107 @@ export default function Navbar() {
     []
   );
 
+  // Close menu on route change
   useEffect(() => {
-    if (mobileMenuRef.current) {
-      if (open) {
-        gsap.to(mobileMenuRef.current, {
-          height: "100vh",
-          opacity: 1,
-          duration: 0.4,
-          ease: "power2.out",
-        });
-      } else {
-        gsap.to(mobileMenuRef.current, {
-          height: 0,
-          opacity: 0,
-          duration: 0.4,
-          ease: "power2.in",
-        });
-      }
+    setOpen(false);
+  }, [active]);
+
+  // Prevent body scroll when menu is open & dispatch event for page animations
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
+    // Dispatch custom event for other components to react
+    window.dispatchEvent(new CustomEvent("mobileMenuToggle", { detail: { open } }));
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   return (
     <nav className="w-full fixed top-0 left-0 z-50 bg-[var(--background)]">
-      <div className="w-full flex items-center pl-4 pr-4 py-4">
-        <div className="flex items-center flex-1">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={32}
-              height={32}
-              className="rounded"
-              style={{ width: "auto", height: "auto" }}
-            />
-          </Link>
-          <div
-            className="hidden md:flex gap-2 relative ml-8 justify-center flex-1"
-            style={{ minHeight: 44 }}
-          >
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-4 py-2 rounded-lg font-semibold text-base tracking-wide font-sans transition-colors duration-200 relative z-10
-                  ${
-                    active === link.href
-                      ? "bg-[var(--primary)] text-[var(--background)] shadow-inner"
-                      : "text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--background)]"
-                  }
-                `}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-        <div className="hidden md:flex">
-          <ThemeToggle />
-        </div>
-        <div className="flex md:hidden items-center gap-4">
-          <ThemeToggle />
-          <button
-            className="md:hidden flex items-center text-[var(--foreground)] text-3xl focus:outline-none"
-            onClick={() => setOpen(!open)}
-            aria-label="Toggle navigation"
-          >
-            <svg
-              width="28"
-              height="28"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div
-        ref={mobileMenuRef}
-        className="md:hidden fixed inset-0 bg-[var(--background)] overflow-hidden flex flex-col items-center justify-center bg-opacity-95"
-        style={{ height: 0, opacity: 0, top: "64px" }}
-      >
-        <div className="flex flex-col gap-6 items-center">
+      <div className="w-full flex items-center justify-between px-4 py-4">
+        <Link href="/" className="flex items-center gap-2 z-50">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={32}
+            height={32}
+            className="rounded"
+            style={{ width: "auto", height: "auto" }}
+          />
+        </Link>
+        
+        {/* Desktop nav */}
+        <div
+          className="hidden md:flex gap-2 absolute left-1/2 -translate-x-1/2"
+          style={{ minHeight: 44 }}
+        >
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`text-3xl font-extrabold tracking-wide font-sans transition-colors duration-200
+              className={`px-4 py-2 rounded-lg font-semibold text-base tracking-wide font-sans transition-colors duration-200 relative z-10
                 ${
                   active === link.href
-                    ? "text-[var(--primary)] drop-shadow-md"
-                    : "text-[var(--foreground)] hover:text-[var(--accent)]"
+                    ? "bg-[var(--primary)] text-[var(--background)] shadow-inner"
+                    : "text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--background)]"
+                }
+              `}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="hidden md:flex">
+          <ThemeToggle />
+        </div>
+
+        {/* Mobile controls */}
+        <div className="flex md:hidden items-center gap-3 z-50">
+          <ThemeToggle />
+          <button
+            className="flex items-center justify-center w-10 h-10 text-[var(--foreground)] focus:outline-none"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle navigation"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {open ? (
+                <>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </>
+              ) : (
+                <>
+                  <line x1="4" y1="6" x2="20" y2="6" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <line x1="4" y1="18" x2="20" y2="18" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile menu - simple dropdown */}
+      <div
+        className={`md:hidden absolute left-0 right-0 bg-[var(--background)] border-b border-[var(--foreground)]/10 transition-all duration-200 overflow-hidden ${
+          open ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="flex flex-col py-2">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`px-6 py-3 text-base font-medium transition-colors duration-150
+                ${
+                  active === link.href
+                    ? "text-[var(--primary)] bg-[var(--primary)]/5"
+                    : "text-[var(--foreground)] hover:bg-[var(--foreground)]/5"
                 }
               `}
               onClick={() => setOpen(false)}
