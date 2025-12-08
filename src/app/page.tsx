@@ -21,57 +21,40 @@ export default function Home() {
   const nameRef = useRef(null);
   // Ref for the "?" part
   const punctRef = useRef(null);
+  const headingRef = useRef(null);
   const subtitleRef = useRef(null);
   const ctaRef = useRef(null);
   const socialsRef = useRef(null);
   
-  const [githubStats, setGithubStats] = useState({ stars: 0, repos: 0 });
+  // const [githubStats, setGithubStats] = useState({ stars: 0, repos: 0 });
 
   useEffect(() => {
     // Fetch GitHub stats
-    const fetchStats = async () => {
-      try {
-        const response = await fetch("https://api.github.com/users/xditya");
-        const data = await response.json();
-        setGithubStats({ stars: 1770, repos: data.public_repos || 0 });
-      } catch {
-        setGithubStats({ stars: 1770, repos: 200 });
-      }
-    };
-    fetchStats();
+    // const fetchStats = async () => {
+    //   try {
+    //     const response = await fetch("https://api.github.com/users/xditya");
+    //     const data = await response.json();
+    //     setGithubStats({ stars: 1770, repos: data.public_repos || 0 });
+    //   } catch {
+    //     setGithubStats({ stars: 1770, repos: 200 });
+    //   }
+    // };
+    // fetchStats();
 
     const nameElement = nameRef.current;
     const punctElement = punctRef.current;
 
     // Ensure both refs are connected to DOM elements before animating
     if (nameElement && punctElement) {
-      // Fade in subtitle and CTA after a delay
-      gsap.fromTo(
-        subtitleRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.5, ease: "power2.out" }
-      );
-      gsap.fromTo(
-        ctaRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.7, ease: "power2.out" }
-      );
-      gsap.fromTo(
-        socialsRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.9, ease: "power2.out" }
-      );
-
       // Tween for the name part ("xditya" -> "Aditya")
       const nameTween = gsap.to(nameElement, {
-        delay: 1, // Wait for 1 second before starting this animation
+        delay: 0.3, // Short delay before starting
         scrambleText: {
           text: "Aditya", // The final text for this span
           chars: "abcdefghijklmnopqrstuvwxyz", // Characters to use for scrambling the name
-          speed: 0.3, // Speed of the name scramble/reveal (adjust as needed)
-          // Default reveal direction is left-to-right, which works well here
+          speed: 0.4, // Speed of the name scramble/reveal
         },
-        duration: 1, // Duration for the name part animation (adjust as needed)
+        duration: 0.8, // Faster scramble duration
         ease: "power1.inOut",
         onComplete: () => {
           // This function runs *after* the name tween finishes
@@ -85,6 +68,41 @@ export default function Home() {
             },
             duration: 0.5, // Duration for the punctuation change (adjust as needed)
             ease: "power1.inOut",
+            onComplete: () => {
+              // Move heading up smoothly
+              gsap.to(headingRef.current, {
+                y: 0,
+                duration: 0.8,
+                ease: "power2.out",
+              });
+              
+              // After heading moves up, reveal subtitle and buttons in sequence
+              gsap.to(subtitleRef.current, {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                delay: 0.3,
+                ease: "power2.out",
+              });
+              
+              // Animate CTA buttons with stagger
+              gsap.to(ctaRef.current, {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                delay: 0.5,
+                ease: "power2.out",
+              });
+              
+              // Animate social icons
+              gsap.to(socialsRef.current, {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                delay: 0.7,
+                ease: "power2.out",
+              });
+            },
           });
         },
       });
@@ -105,10 +123,10 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col justify-center items-center bg-[var(--background)] text-[var(--foreground)] px-4 relative overflow-hidden">
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[var(--primary)]/5 via-transparent to-transparent pointer-events-none" />
+      {/* <div className="absolute inset-0 bg-gradient-to-b from-[var(--primary)]/5 via-transparent to-transparent pointer-events-none" /> */}
       
       <div className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16 relative z-10">
-        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-2">
+        <h1 ref={headingRef} className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-2 translate-y-24">
           Hi, I&apos;m {/* Container span to keep styling */}
           <span className="text-[var(--primary)]">
             {/* Span for the name part - initially "xditya" */}
@@ -118,18 +136,11 @@ export default function Home() {
           </span>
         </h1>
         
-        <p ref={subtitleRef} className="text-base sm:text-lg text-[var(--foreground)]/60 font-medium mb-2 font-sans opacity-0">
+        <p ref={subtitleRef} className="text-base sm:text-lg text-[var(--foreground)]/60 font-medium mb-6 font-sans opacity-0 translate-y-5">
           Full-stack dev. Open-source contributor. Bot builder.
         </p>
-        
-        {/* Quick stats */}
-        <div className="flex items-center gap-6 text-sm text-[var(--foreground)]/40 mb-6">
-          <span>{githubStats.repos}+ repos</span>
-          <span className="w-1 h-1 rounded-full bg-[var(--foreground)]/20" />
-          <span>{githubStats.stars}+ stars</span>
-        </div>
 
-        <div ref={ctaRef} className="flex flex-wrap justify-center gap-3 mb-10 opacity-0">
+        <div ref={ctaRef} className="flex flex-wrap justify-center gap-3 mb-10 opacity-0 translate-y-5">
           <a
             href="/projects"
             className="flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--background)] font-semibold rounded-full px-8 py-3 text-base shadow-lg shadow-[var(--primary)]/20 hover:shadow-[var(--primary)]/40 hover:scale-105 transition-all"
@@ -150,7 +161,7 @@ export default function Home() {
           </a>
         </div>
 
-        <div ref={socialsRef} className="flex gap-3 mt-2 opacity-0">
+        <div ref={socialsRef} className="flex gap-3 mt-2 opacity-0 translate-y-5">
           <a
             href="https://github.com/xditya"
             target="_blank"
