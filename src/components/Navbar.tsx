@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -8,6 +8,8 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const [open, setOpen] = React.useState(false);
   const active = usePathname() || "/";
+  const menuRef = useRef<HTMLDivElement>(null);
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
   const navLinks = React.useMemo(
     () => [
@@ -37,6 +39,23 @@ export default function Navbar() {
     return () => {
       document.body.style.overflow = "";
     };
+  }, [open]);
+
+  // Animate links on open
+  useEffect(() => {
+    if (open) {
+      linkRefs.current.forEach((link, i) => {
+        if (link) {
+          link.style.opacity = "0";
+          link.style.transform = "translateY(20px)";
+          setTimeout(() => {
+            link.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+            link.style.opacity = "1";
+            link.style.transform = "translateY(0)";
+          }, 80 + i * 60);
+        }
+      });
+    }
   }, [open]);
 
   return (
@@ -83,51 +102,88 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-3 z-50">
           <ThemeToggle />
           <button
-            className="flex items-center justify-center w-10 h-10 text-[var(--foreground)] focus:outline-none"
+            className="flex items-center justify-center w-10 h-10 text-[var(--foreground)] focus:outline-none relative"
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {open ? (
-                <>
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </>
-              ) : (
-                <>
-                  <line x1="4" y1="6" x2="20" y2="6" />
-                  <line x1="4" y1="12" x2="20" y2="12" />
-                  <line x1="4" y1="18" x2="20" y2="18" />
-                </>
-              )}
-            </svg>
+            {/* Animated hamburger */}
+            <div className="w-6 h-5 flex flex-col justify-between items-center">
+              <span 
+                className={`block w-full h-0.5 bg-current rounded-full transition-all duration-300 origin-center ${
+                  open ? "rotate-45 translate-y-[9px]" : ""
+                }`}
+              />
+              <span 
+                className={`block w-full h-0.5 bg-current rounded-full transition-all duration-200 ${
+                  open ? "opacity-0 scale-0" : ""
+                }`}
+              />
+              <span 
+                className={`block w-full h-0.5 bg-current rounded-full transition-all duration-300 origin-center ${
+                  open ? "-rotate-45 -translate-y-[9px]" : ""
+                }`}
+              />
+            </div>
           </button>
         </div>
       </div>
 
-      {/* Mobile menu - simple dropdown */}
+      {/* Mobile menu - glass overlay */}
       <div
-        className={`md:hidden absolute left-0 right-0 bg-[var(--background)] border-b border-[var(--foreground)]/10 transition-all duration-200 overflow-hidden ${
-          open ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
+        ref={menuRef}
+        className={`md:hidden fixed inset-0 transition-all duration-400 ease-out ${
+          open 
+            ? "opacity-100 pointer-events-auto" 
+            : "opacity-0 pointer-events-none"
         }`}
+        style={{ top: 0 }}
       >
-        <div className="flex flex-col py-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`px-6 py-3 text-base font-medium transition-colors duration-150
-                ${
+        {/* Blur backdrop */}
+        <div className="absolute inset-0 bg-[var(--background)]/70 backdrop-blur-xl" />
+        
+        <div className="flex flex-col justify-center items-start h-full pl-8 pr-4 relative z-10">
+          {/* Navigation links - left aligned */}
+          <div className="flex flex-col items-start gap-1">
+            {navLinks.map((link, index) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                ref={(el) => { linkRefs.current[index] = el; }}
+                className={`group relative py-3 transition-all duration-300 flex items-center gap-4 ${
                   active === link.href
-                    ? "text-[var(--primary)] bg-[var(--primary)]/5"
-                    : "text-[var(--foreground)] hover:bg-[var(--foreground)]/5"
-                }
-              `}
-              onClick={() => setOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
+                    ? "text-[var(--primary)]"
+                    : "text-[var(--foreground)]/60 hover:text-[var(--foreground)]"
+                }`}
+                onClick={() => setOpen(false)}
+                style={{ opacity: 0, transform: "translateY(20px)" }}
+              >
+                {/* Active indicator line */}
+                <span className={`w-6 h-px transition-all duration-300 ${
+                  active === link.href 
+                    ? "bg-[var(--primary)]" 
+                    : "bg-[var(--foreground)]/20 group-hover:bg-[var(--primary)]/50 group-hover:w-8"
+                }`} />
+                
+                {/* Link text */}
+                <span className={`text-4xl font-bold tracking-tight transition-all duration-300 ${
+                  active === link.href 
+                    ? "" 
+                    : "group-hover:translate-x-1"
+                }`}>
+                  {link.label}
+                </span>
+                
+                {/* Number indicator */}
+                <span className={`text-xs font-mono transition-all duration-300 ${
+                  active === link.href 
+                    ? "text-[var(--primary)]/60" 
+                    : "text-[var(--foreground)]/20 group-hover:text-[var(--foreground)]/40"
+                }`}>
+                  .0{index + 1}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </nav>
