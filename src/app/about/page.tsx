@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { IoArrowBack, IoDownload, IoLocationSharp, IoSchool } from "react-icons/io5";
+import { IoArrowBack, IoDownload, IoLocationSharp, IoSchool, IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { SiGithub, SiTelegram, SiPython, SiTypescript, SiNextdotjs, SiMongodb, SiDeno } from "react-icons/si";
 import { FiMail, FiCode, FiUsers, FiStar } from "react-icons/fi";
 import { useRouter } from "next/navigation";
@@ -64,7 +64,38 @@ export default function AboutPage() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [age, setAge] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Get card dimensions
+  const getCardDimensions = () => {
+    if (!scrollContainerRef.current) return { itemWidth: 380, gap: 24 };
+    const item = scrollContainerRef.current.querySelector('.timeline-item');
+    const itemWidth = item?.clientWidth || 380;
+    const gap = 24;
+    return { itemWidth, gap };
+  };
+
+  // Handle scroll to update active indicator
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const { itemWidth, gap } = getCardDimensions();
+    const scrollPosition = scrollContainerRef.current.scrollLeft;
+    const index = Math.round(scrollPosition / (itemWidth + gap));
+    setActiveIndex(Math.min(index, experiences.length));
+  };
+
+  // Scroll to specific card when clicking indicator or arrows
+  const scrollToCard = (index: number) => {
+    if (!scrollContainerRef.current) return;
+    const { itemWidth, gap } = getCardDimensions();
+    scrollContainerRef.current.scrollTo({
+      left: index * (itemWidth + gap),
+      behavior: 'smooth'
+    });
+  };
+
   const handleBack = () => {
     if (window.history.length > 1) {
       router.back();
@@ -290,7 +321,7 @@ export default function AboutPage() {
                     <SiTelegram className="text-lg" />
                   </a>
                   <a
-                    href="mailto:me@xditya.me"
+                    href="mailto:contact@xditya.me"
                     className="w-10 h-10 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-all duration-200"
                   >
                     <FiMail className="text-lg" />
@@ -407,16 +438,21 @@ export default function AboutPage() {
             
             {/* Horizontal scroll container */}
             <div className="relative -mx-4 px-4">
-              <div className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <div 
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide" 
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
                 {experiences.map((exp, index) => (
                   <div 
                     key={index} 
                     className="timeline-item flex-shrink-0 w-[320px] md:w-[380px] snap-center"
                   >
-                    <div className={`h-full rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.02] ${
+                    <div className={`h-full rounded-2xl p-6 border ${
                       index === 0 
-                        ? "bg-[var(--foreground)]/5 border-[var(--accent)]/30 hover:border-[var(--accent)]/50 hover:shadow-lg hover:shadow-[var(--accent)]/5" 
-                        : "bg-[var(--foreground)]/5 border-[var(--primary)]/10 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/5"
+                        ? "bg-[var(--foreground)]/5 border-[var(--accent)]/30" 
+                        : "bg-[var(--foreground)]/5 border-[var(--primary)]/10"
                     }`}>
                       {/* Header */}
                       <div className="flex items-start justify-between mb-4">
@@ -468,17 +504,45 @@ export default function AboutPage() {
                 </div>
               </div>
               
+              {/* Navigation arrows */}
+              <button
+                onClick={() => scrollToCard(Math.max(0, activeIndex - 1))}
+                className={`hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-10 h-10 rounded-full bg-[var(--background)] border border-[var(--primary)]/20 items-center justify-center text-[var(--primary)] hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/40 transition-all duration-200 shadow-lg ${
+                  activeIndex === 0 ? "opacity-30 pointer-events-none" : ""
+                }`}
+                aria-label="Previous experience"
+              >
+                <IoChevronBack className="text-xl" />
+              </button>
+              <button
+                onClick={() => scrollToCard(Math.min(experiences.length, activeIndex + 1))}
+                className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-10 h-10 rounded-full bg-[var(--background)] border border-[var(--primary)]/20 items-center justify-center text-[var(--primary)] hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/40 transition-all duration-200 shadow-lg ${
+                  activeIndex === experiences.length ? "opacity-30 pointer-events-none" : ""
+                }`}
+                aria-label="Next experience"
+              >
+                <IoChevronForward className="text-xl" />
+              </button>
+
               {/* Scroll indicator */}
-              <div className="flex justify-center gap-2 mt-4">
+              <div className="flex justify-center items-center gap-2 mt-6">
                 {experiences.map((_, index) => (
-                  <div 
+                  <button 
                     key={index}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      index === 0 ? "w-6 bg-[var(--accent)]" : "w-1.5 bg-[var(--primary)]/20"
+                    onClick={() => scrollToCard(index)}
+                    className={`h-2 rounded-full transition-all duration-300 hover:opacity-80 ${
+                      index === activeIndex ? "w-8 bg-[var(--accent)]" : "w-2 bg-[var(--primary)]/20 hover:bg-[var(--primary)]/40"
                     }`}
+                    aria-label={`Go to experience ${index + 1}`}
                   />
                 ))}
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]/20" />
+                <button 
+                  onClick={() => scrollToCard(experiences.length)}
+                  className={`h-2 rounded-full transition-all duration-300 hover:opacity-80 ${
+                    activeIndex === experiences.length ? "w-8 bg-[var(--accent)]" : "w-2 bg-[var(--primary)]/20 hover:bg-[var(--primary)]/40"
+                  }`}
+                  aria-label="Go to future card"
+                />
               </div>
             </div>
           </div>
