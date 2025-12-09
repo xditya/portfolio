@@ -197,19 +197,19 @@ export default function Home() {
         <div ref={ctaRef} className="flex flex-wrap justify-center gap-3 mb-10 opacity-0 translate-y-5">
           <a
             href="/projects"
-            className="flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--background)] font-semibold rounded-full px-8 py-3 text-base shadow-lg shadow-[var(--primary)]/20 hover:shadow-[var(--primary)]/40 hover:scale-105 transition-all"
+            className="flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--background)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)] hover:bg-[var(--accent)] hover:border-[var(--accent)] hover:scale-105 transition-all"
           >
             <LuFolderOpen className="text-lg" /> View Projects
           </a>
           <a
             href="/about"
-            className="flex items-center justify-center gap-2 bg-[var(--foreground)]/5 text-[var(--foreground)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)]/10 hover:border-[var(--primary)]/30 hover:bg-[var(--foreground)]/10 transition-all"
+            className="flex items-center justify-center gap-2 bg-[var(--foreground)]/5 text-[var(--foreground)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)]/10 hover:bg-[var(--primary)] hover:text-[var(--background)] hover:border-[var(--primary)] hover:scale-105 transition-all"
           >
             <LuUser className="text-lg" /> About Me
           </a>
           <a
             href="/contact"
-            className="flex items-center justify-center gap-2 bg-[var(--foreground)]/5 text-[var(--foreground)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)]/10 hover:border-[var(--primary)]/30 hover:bg-[var(--foreground)]/10 transition-all"
+            className="flex items-center justify-center gap-2 bg-[var(--foreground)]/5 text-[var(--foreground)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)]/10 hover:bg-[var(--primary)] hover:text-[var(--background)] hover:border-[var(--primary)] hover:scale-105 transition-all"
           >
             <LuMail className="text-lg" /> Contact
           </a>
