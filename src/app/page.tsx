@@ -25,6 +25,7 @@ export default function Home() {
   const subtitleRef = useRef(null);
   const ctaRef = useRef(null);
   const socialsRef = useRef(null);
+  const availabilityRef = useRef(null);
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Listen for mobile menu toggle
@@ -129,6 +130,17 @@ export default function Home() {
                 duration: 0.8,
                 ease: "power2.out",
               });
+
+              // Reveal availability badge
+              if (availabilityRef.current) {
+                gsap.to(availabilityRef.current, {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.6,
+                  delay: 1.0,
+                  ease: "power2.out",
+                });
+              }
               
               // After heading moves up, reveal subtitle and buttons in sequence
               gsap.to(subtitleRef.current, {
@@ -180,6 +192,7 @@ export default function Home() {
       {/* <div className="absolute inset-0 bg-gradient-to-b from-[var(--primary)]/5 via-transparent to-transparent pointer-events-none" /> */}
       
       <div ref={contentRef} className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16 relative z-10">
+        
         <h1 ref={headingRef} className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-2 translate-y-24">
           Hi, I&apos;m {/* Container span to keep styling */}
           <span className="text-[var(--primary)]">
@@ -193,6 +206,8 @@ export default function Home() {
         <p ref={subtitleRef} className="text-base sm:text-lg text-[var(--foreground)]/60 font-medium mb-6 font-sans opacity-0 translate-y-5">
           Full-stack dev. Open-source contributor. Bot builder.
         </p>
+
+
 
         <div ref={ctaRef} className="flex flex-wrap justify-center gap-3 mb-10 opacity-0 translate-y-5">
           <a
@@ -258,6 +273,18 @@ export default function Home() {
           </a>
         </div>
       </div>
+
+      <a
+        ref={availabilityRef}
+        href="/contact"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--background)]/80 backdrop-blur-md border border-[var(--primary)]/20 text-[var(--primary)] text-sm font-medium opacity-0 translate-y-10 hover:bg-[var(--primary)]/10 transition-all hover:scale-105 hover:border-[var(--primary)]/40 shadow-lg cursor-pointer"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        Available for Work
+      </a>
     </main>
   );
 }
