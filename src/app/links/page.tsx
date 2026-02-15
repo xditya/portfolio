@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { FiExternalLink } from "react-icons/fi";
-import { IoArrowBack } from "react-icons/io5";
+import { IoArrowBack, IoLink } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import Footer from "@/components/Footer";
@@ -135,21 +135,28 @@ const LinksPage = () => {
                     target: "_blank",
                     rel: "noopener noreferrer",
                   })}
-                  className="block border border-[var(--foreground)] rounded-lg p-6 transition-all duration-300 hover:border-[var(--primary)] hover:bg-[var(--primary)]/5"
+                  className="block bg-[var(--foreground)]/5 border border-[var(--primary)]/10 rounded-2xl p-6 transition-all duration-300 hover:border-[var(--primary)]/30 hover:bg-[var(--foreground)]/8 hover:scale-[1.02] hover:shadow-lg hover:shadow-[var(--primary)]/5 relative overflow-hidden"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold text-[var(--primary)] mb-2">
-                        {link.name}
-                      </h2>
-                      {link.description && (
-                        <p className="text-[var(--foreground)]/70">
-                          {link.description}
-                        </p>
-                      )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/0 via-[var(--primary)]/5 to-[var(--primary)]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-[var(--background)] transition-colors duration-300">
+                             <IoLink className="text-xl" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-[var(--primary)] mb-1 group-hover:text-[var(--accent)] transition-colors duration-300">
+                                {link.name}
+                            </h2>
+                            {link.description && (
+                                <p className="text-sm text-[var(--foreground)]/60 group-hover:text-[var(--foreground)]/80 transition-colors duration-300">
+                                {link.description}
+                                </p>
+                            )}
+                        </div>
                     </div>
                     {isExternalLink(link.url) && (
-                      <FiExternalLink className="w-6 h-6 text-[var(--primary)] group-hover:text-[var(--accent)] transition-colors duration-300" />
+                      <FiExternalLink className="w-5 h-5 text-[var(--foreground)]/40 group-hover:text-[var(--accent)] transition-colors duration-300" />
                     )}
                   </div>
                 </Link>

@@ -72,7 +72,7 @@ const TermsPage = () => {
           </div>
 
           <div ref={contentRef} className="space-y-8 text-lg">
-            <div className="text-center mb-8">
+            <div className="text-center mb-10">
               <h2 className="text-2xl font-bold text-[var(--primary)] mb-2">
                 Refund Policy and Subscription Terms*
               </h2>
@@ -81,7 +81,7 @@ const TermsPage = () => {
                   href="https://t.me/BuyYourBots"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[var(--primary)] transition-colors duration-200"
+                  className="font-semibold text-[var(--accent)] hover:text-[var(--primary)] transition-colors duration-200"
                 >
                   @BuyYourBots
                 </a>{" "}
@@ -90,7 +90,7 @@ const TermsPage = () => {
                   href="https://t.me/Bots4Sale"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[var(--primary)] transition-colors duration-200"
+                  className="font-semibold text-[var(--accent)] hover:text-[var(--primary)] transition-colors duration-200"
                 >
                   @Bots4Sale
                 </a>
@@ -98,73 +98,52 @@ const TermsPage = () => {
             </div>
 
             <div className="space-y-6">
-              <div className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300">
-                <h3 className="text-xl font-semibold text-[var(--primary)] mb-2">
-                  Non-Refundable Source Codes
-                </h3>
-                <p className="text-[var(--foreground)]/80">
-                  Purchased source codes are non-refundable.
-                </p>
-              </div>
-
-              <div className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300">
-                <h3 className="text-xl font-semibold text-[var(--primary)] mb-2">
-                  Subscription Cancellation Policy
-                </h3>
-                <p className="text-[var(--foreground)]/80">
-                  Refunds will not be issued for subscription cancellations made
-                  after two days from the start of the subscription period.
-                </p>
-              </div>
-
-              <div className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300">
-                <h3 className="text-xl font-semibold text-[var(--primary)] mb-2">
-                  Automatic Subscription Cancellation
-                </h3>
-                <p className="text-[var(--foreground)]/80">
-                  Subscriptions will be automatically canceled if the user fails
-                  to respond within 24 hours of the subscription expiry.
-                </p>
-              </div>
-
-              <div className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300">
-                <h3 className="text-xl font-semibold text-[var(--primary)] mb-2">
-                  Server and Usage Issues
-                </h3>
-                <p className="text-[var(--foreground)]/80">
-                  We are not responsible for issues arising from Telegram
-                  servers or improper usage of scripts/bots. Please refrain from
-                  disputing these matters.
-                </p>
-              </div>
-
-              <div className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300">
-                <h3 className="text-xl font-semibold text-[var(--primary)] mb-2">
-                  Initial Payment Refunds
-                </h3>
-                <p className="text-[var(--foreground)]/80">
-                  Refunds for initial payments cannot be issued once work has
-                  commenced and proof of work has been provided.
-                </p>
-              </div>
-
-              <div className="border border-[var(--foreground)]/20 rounded-lg p-6 hover:border-[var(--primary)]/50 transition-colors duration-300">
-                <h3 className="text-xl font-semibold text-[var(--primary)] mb-2">
-                  Source Code Deployment
-                </h3>
-                <p className="text-[var(--foreground)]/80">
-                  Deployment services for the source codes created are offered,
-                  with renewals on a monthly basis.
-                </p>
-              </div>
+              {[
+                {
+                  title: "Non-Refundable Source Codes",
+                  description: "Purchased source codes are non-refundable."
+                },
+                {
+                  title: "Subscription Cancellation Policy",
+                  description: "Refunds will not be issued for subscription cancellations made after two days from the start of the subscription period."
+                },
+                {
+                  title: "Automatic Subscription Cancellation",
+                  description: "Subscriptions will be automatically canceled if the user fails to respond within 24 hours of the subscription expiry."
+                },
+                {
+                  title: "Server and Usage Issues",
+                  description: "We are not responsible for issues arising from Telegram servers or improper usage of scripts/bots. Please refrain from disputing these matters."
+                },
+                {
+                  title: "Initial Payment Refunds",
+                  description: "Refunds for initial payments cannot be issued once work has commenced and proof of work has been provided."
+                },
+                {
+                  title: "Source Code Deployment",
+                  description: "Deployment services for the source codes created are offered, with renewals on a monthly basis."
+                }
+              ].map((term, index) => (
+                <div 
+                  key={index}
+                  className="bg-[var(--foreground)]/5 border border-[var(--primary)]/10 rounded-2xl p-6 transition-all duration-300 hover:border-[var(--primary)]/30 hover:bg-[var(--foreground)]/8 hover:shadow-lg hover:shadow-[var(--primary)]/5"
+                >
+                  <h3 className="text-xl font-semibold text-[var(--primary)] mb-2">
+                    {term.title}
+                  </h3>
+                  <p className="text-[var(--foreground)]/80 leading-relaxed">
+                    {term.description}
+                  </p>
+                </div>
+              ))}
             </div>
 
-            <div className="text-center mt-12 space-y-4">
-              <p className="text-[var(--foreground)]/80">
+            <div className="text-center mt-12 space-y-4 pt-8 border-t border-[var(--primary)]/10">
+              <p className="text-[var(--foreground)]/80 font-medium">
                 By purchasing, you agree to the terms and conditions outlined
                 above.
               </p>
-              <p className="text-[var(--foreground)]/60 text-sm">
+              <p className="text-[var(--foreground)]/50 text-sm">
                 * Terms are subject to change.
               </p>
             </div>
