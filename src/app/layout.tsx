@@ -1,45 +1,72 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "../components/Navbar";
-// import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
-
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Aditya S",
-  description: "Portfolio of Aditya S - Open-Source Developer & Freelancer",
+  title: {
+    default: "Aditya — Full-stack Developer",
+    template: "%s · Aditya",
+  },
+  description:
+    "Full-stack developer building web apps, Telegram bots, and open-source tools. Based in Kerala, India.",
+  keywords: [
+    "Aditya",
+    "xditya",
+    "full-stack developer",
+    "open source",
+    "Telegram bot",
+    "Python",
+    "TypeScript",
+    "Next.js",
+    "portfolio",
+  ],
+  authors: [{ name: "Aditya", url: "https://xditya.me" }],
+  creator: "Aditya",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://xditya.me",
+    siteName: "Aditya Portfolio",
+    title: "Aditya — Full-stack Developer",
+    description:
+      "Full-stack developer building web apps, Telegram bots, and open-source tools.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@xditya",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <link rel="icon" href="/icon.png" sizes="any" />
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <SpeedInsights />
-        <SmoothScroll />
-        {/* <CustomCursor /> */}
-        <Navbar />
-        <div>{children}</div>
-        <Analytics />
+    <html lang="en" className="dark">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="grid-bg">
+          <SmoothScroll />
+          <Navbar />
+          <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
+          <Footer />
       </body>
     </html>
   );

@@ -1,554 +1,293 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { IoArrowBack, IoDownload, IoLocationSharp, IoSchool, IoChevronBack, IoChevronForward } from "react-icons/io5";
-import { SiGithub, SiTelegram, SiPython, SiTypescript, SiNextdotjs, SiMongodb, SiDeno } from "react-icons/si";
-import { FiMail, FiCode, FiUsers, FiStar } from "react-icons/fi";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SplitText } from "gsap/SplitText";
-import Footer from "@/components/Footer";
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger);
 
-interface Experience {
-  title: string;
-  company: string;
-  period: string;
-  description: string;
-}
+const TECH_STACK = [
+  { name: "Python", color: "#3776AB" },
+  { name: "TypeScript", color: "#3178C6" },
+  { name: "Next.js", color: "#F0F6FC" },
+  { name: "Deno", color: "#70FFAF" },
+  { name: "MongoDB", color: "#47A248" },
+  { name: "Kotlin", color: "#7F52FF" },
+];
 
-const experiences: Experience[] = [
+const EXPERIENCE = [
   {
     title: "Product Engineer",
     company: "UST",
-    period: "2025 - Present",
-    description:
-      "Working on product development and engineering solutions.",
+    period: "2025 – Present",
+    description: "Working on product development and engineering solutions.",
+    current: true,
   },
   {
     title: "Lead Developer",
     company: "TeamUltroid",
-    period: "2021 - Present",
+    period: "2021 – Present",
     description:
       "Built the core architecture and key modules of the project. Handle GitHub repos, code reviews, and work with contributors from around the world.",
+    current: false,
   },
   {
     title: "Tech Intern",
     company: "BreadcrumbsAI",
     period: "2024",
     description:
-      "Developed web scraping scripts in Python, using Playwright to extract web data and BeautifulSoup for parsing. Implemented error handling and logging mechanisms to ensure reliable data collection.",
+      "Developed web scraping scripts in Python using Playwright and BeautifulSoup. Implemented error handling and logging for reliable data collection.",
+    current: false,
   },
   {
-    title: "Project Lead and Backend Developer",
-    company:
-      "Google Developer Student Clubs, Mar Baselios College of Engineering and Technology",
-    period: "2022 - 2024",
+    title: "Project Lead & Backend Developer",
+    company: "GDSC MBCET",
+    period: "2022 – 2024",
     description:
-      "Coordinated club activities. Developed automation scripts for various events and the backend of GDSC MBCET website.",
+      "Coordinated club activities. Developed automation scripts for events and the backend of the GDSC MBCET website.",
+    current: false,
   },
   {
     title: "Campus Lead",
-    company: "GTECH μLearn, Mar Baselios College of Engineering and Technology",
-    period: "2023 - 2024",
+    company: "GTECH μLearn, MBCET",
+    period: "2023 – 2024",
     description:
       "Managed campus-wide learning and skill development initiatives. Achieved 1 Million karma points in the campus.",
+    current: false,
   },
 ];
 
+function useCountUp(target: number, duration = 1.5, start = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    let startTime: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(ease * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [start, target, duration]);
+  return count;
+}
+
+function StatCard({ label, value, suffix = "", animate }: { label: string; value: number; suffix?: string; animate: boolean }) {
+  const count = useCountUp(value, 1.5, animate);
+  return (
+    <div className="card" style={{ padding: "20px 16px", textAlign: "center", cursor: "default", minWidth: 0 }}>
+      <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: "clamp(24px, 4vw, 36px)", letterSpacing: "-0.03em", color: "var(--text-primary)", lineHeight: 1, marginBottom: "6px" }}>
+        {count}{suffix}
+      </div>
+      <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 500 }}>{label}</div>
+    </div>
+  );
+}
+
 export default function AboutPage() {
-  const router = useRouter();
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [age, setAge] = useState<number | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  // Get card dimensions
-  const getCardDimensions = () => {
-    if (!scrollContainerRef.current) return { itemWidth: 380, gap: 24 };
-    const item = scrollContainerRef.current.querySelector('.timeline-item');
-    const itemWidth = item?.clientWidth || 380;
-    const gap = 24;
-    return { itemWidth, gap };
-  };
-
-  // Handle scroll to update active indicator
-  const handleScroll = () => {
-    if (!scrollContainerRef.current) return;
-    const { itemWidth, gap } = getCardDimensions();
-    const scrollPosition = scrollContainerRef.current.scrollLeft;
-    const index = Math.round(scrollPosition / (itemWidth + gap));
-    setActiveIndex(Math.min(index, experiences.length));
-  };
-
-  // Scroll to specific card when clicking indicator or arrows
-  const scrollToCard = (index: number) => {
-    if (!scrollContainerRef.current) return;
-    const { itemWidth, gap } = getCardDimensions();
-    scrollContainerRef.current.scrollTo({
-      left: index * (itemWidth + gap),
-      behavior: 'smooth'
-    });
-  };
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
-    }
-  };
-
-  const [stats, setStats] = useState({
-    projects: 0,
-    stars: 0,
-    followers: 0,
-    yearsCode: 0,
-  });
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [activeCard, setActiveCard] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [githubStats, setGithubStats] = useState({ repos: 20, stars: 1770, followers: 576 });
 
   useEffect(() => {
-    // Calculate age programmatically
-    const birthDate = new Date(2003, 8, 18); // Month is 0-indexed (8 for September)
-    const today = new Date();
-    let calculatedAge = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      calculatedAge--;
-    }
-    setAge(calculatedAge);
-
-    // Calculate years of coding (started in 2020)
-    const codingStartYear = 2020;
-    const yearsOfCoding = today.getFullYear() - codingStartYear;
-
-    // Fetch GitHub stats with pagination
-    const fetchGitHubStats = async () => {
-      try {
-        // Fetch user info for followers
-        const userResponse = await fetch("https://api.github.com/users/xditya");
-        const userData = await userResponse.json();
-        const followers = userData.followers || 0;
-
-        let allRepos: { fork: boolean; archived: boolean; stargazers_count: number }[] = [];
-        let page = 1;
-        let hasMore = true;
-
-        // Paginate through all repos
-        while (hasMore) {
-          const response = await fetch(
-            `https://api.github.com/users/xditya/repos?per_page=100&page=${page}`
-          );
-          const repos = await response.json();
-
-          if (Array.isArray(repos) && repos.length > 0) {
-            allRepos = [...allRepos, ...repos];
-            hasMore = repos.length === 100;
-            page++;
-          } else {
-            hasMore = false;
-          }
-        }
-
-        if (allRepos.length > 0) {
-          const ownRepos = allRepos.filter((repo) => !repo.fork && !repo.archived);
-          const totalStars = allRepos.reduce((acc, repo) => acc + repo.stargazers_count, 0);
-
-          setStats({
-            projects: ownRepos.length,
-            stars: totalStars,
-            followers,
-            yearsCode: yearsOfCoding,
-          });
-        } else {
-          // Fallback if API fails
-          setStats({
-            projects: 20,
-            stars: 1770,
-            followers: 576,
-            yearsCode: yearsOfCoding,
-          });
-        }
-      } catch {
-        // Fallback values
-        setStats({
-          projects: 20,
-          stars: 1770,
-          followers: 576,
-          yearsCode: yearsOfCoding,
-        });
-      }
-    };
-
-    fetchGitHubStats();
-
-    const ctx = gsap.context(() => {
-      // Title animation
-      if (titleRef.current) {
-        gsap.fromTo(
-          titleRef.current,
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out",
-          }
-        );
-      }
-
-      // Content glow effect
-      if (contentRef.current) {
-        gsap.set(contentRef.current.children, { opacity: 0.7 }); // Apply to children (paragraphs and divs)
-        gsap.to(contentRef.current.children, {
-          opacity: 1,
-          duration: 1.2,
-          ease: "power2.inOut",
-          delay: 0.3,
-          onComplete: () => {
-            // Start timeline animations after text is done
-            if (timelineRef.current) {
-              const timelineItems =
-                timelineRef.current.querySelectorAll(".timeline-item");
-
-              timelineItems.forEach((item, index) => {
-                gsap.set(item, { opacity: 0.7 });
-                gsap.to(item, {
-                  opacity: 1,
-                  duration: 1.2,
-                  ease: "power2.inOut",
-                  scrollTrigger: {
-                    trigger: item,
-                    start: "top 85%",
-                    toggleActions: "play none none none",
-                  },
-                  delay: index * 0.2,
-                });
-              });
-            }
-          },
-        });
-      }
-    });
-
-    // Cleanup
-    return () => {
-      ctx.revert();
-    };
+    fetch("https://api.github.com/users/xditya")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.public_repos) setGithubStats((p) => ({ ...p, repos: d.public_repos, followers: d.followers }));
+      })
+      .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStatsVisible(true); observer.disconnect(); } },
+      { threshold: 0.2 }
+    );
+    if (statsRef.current) observer.observe(statsRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const els = document.querySelectorAll(".reveal-on-scroll");
+    els.forEach((el) => {
+      gsap.fromTo(el,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out",
+          scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none none" } }
+      );
+    });
+  }, []);
+
+  const scrollToCard = useCallback((idx: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const card = container.children[idx] as HTMLElement;
+    if (card) {
+      container.scrollTo({ left: card.offsetLeft - 16, behavior: "smooth" });
+      setActiveCard(idx);
+    }
+  }, []);
+
+  const yearsOfCoding = new Date().getFullYear() - 2020;
+
   return (
-    <>
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
-        <div className="max-w-5xl mx-auto relative">
-          {/* Header Section */}
-          <div className="mb-8">
-            <button
-              onClick={handleBack}
-              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 p-2 rounded-lg hover:bg-[var(--primary)]/10 mb-4 flex items-center gap-2 relative z-20"
-              aria-label="Go back"
-            >
-              <IoArrowBack className="text-xl" />
-              <span className="text-sm font-medium">Back</span>
-            </button>
-            <h1
-              ref={titleRef}
-              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center"
-            >
-              About Me
-            </h1>
+    <div style={{ paddingTop: "80px" }}>
+      {/* ── Page Header ── */}
+      <div className="container-wide" style={{ paddingTop: "40px", paddingBottom: "48px" }}>
+        <span className="badge badge-muted" style={{ marginBottom: "14px" }}>About me</span>
+        <h1 style={{ fontSize: "clamp(28px, 5vw, 52px)", marginBottom: "14px", maxWidth: "640px" }}>
+          Building things for the web & Telegram
+        </h1>
+        <p style={{ fontSize: "16px", color: "var(--text-secondary)", lineHeight: 1.7, maxWidth: "580px" }}>
+          Full-stack developer interested in Python, TypeScript, and automation. I build Telegram bots, web apps, and open-source tools.
+        </p>
+      </div>
+
+      <div className="container-wide" style={{ paddingBottom: "80px" }}>
+
+        {/* ── Profile strip ── */}
+        <div className="reveal-on-scroll" style={{ display: "flex", alignItems: "center", gap: "20px", padding: "20px 24px", background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "14px", marginBottom: "24px", flexWrap: "wrap" }}>
+          {/* Avatar */}
+          <div style={{ width: "64px", height: "64px", borderRadius: "50%", overflow: "hidden", border: "2px solid var(--accent-border)", background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Aditya" style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; const p = (e.currentTarget as HTMLImageElement).parentElement!; p.innerHTML = `<span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:var(--accent)">A</span>`; }} />
           </div>
-
-          {/* Hero Section */}
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mt-12">
-            {/* Profile Card */}
-            <div className="lg:w-1/3">
-              <div className="bg-[var(--foreground)]/5 rounded-2xl p-6 border border-[var(--primary)]/10 sticky top-20">
-                {/* Avatar */}
-                <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-6 border-2 border-[var(--primary)]/20">
-                  <Image
-                    src="/logo.png"
-                    alt="Aditya"
-                    width={128}
-                    height={128}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                <h2 className="text-2xl font-bold text-center text-[var(--primary)] mb-1">Aditya</h2>
-                <p className="text-center text-[var(--foreground)]/60 mb-4">Full Stack Developer</p>
-                
-                {/* Quick Info */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-3 text-sm text-[var(--foreground)]/70">
-                    <IoLocationSharp className="text-[var(--accent)]" />
-                    <span>Kerala, India</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-[var(--foreground)]/70">
-                    <IoSchool className="text-[var(--accent)]" />
-                    <span>{age !== null ? `${age} years old` : "Student"}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-[var(--foreground)]/70">
-                    <FiCode className="text-[var(--accent)]" />
-                    <span>Open Source Enthusiast</span>
-                  </div>
-                </div>
-                
-                {/* Social Links */}
-                <div className="flex justify-center gap-3 pt-4 border-t border-[var(--primary)]/10">
-                  <a
-                    href="https://github.com/xditya"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-all duration-200"
-                  >
-                    <SiGithub className="text-lg" />
-                  </a>
-                  <a
-                    href="https://t.me/xditya"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-all duration-200"
-                  >
-                    <SiTelegram className="text-lg" />
-                  </a>
-                  <a
-                    href="mailto:contact@xditya.me"
-                    className="w-10 h-10 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-all duration-200"
-                  >
-                    <FiMail className="text-lg" />
-                  </a>
-                </div>
-                
-                {/* Download Resume */}
-                <a
-                  href="/resume.pdf"
-                  download
-                  className="mt-6 w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-[var(--primary)] text-[var(--background)] rounded-lg font-semibold hover:bg-[var(--accent)] transition-colors duration-200"
-                >
-                  <IoDownload className="text-lg" />
-                  Download Resume
-                </a>
-              </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="lg:w-2/3 space-y-8" ref={contentRef}>
-              {/* Introduction */}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-[var(--primary)]">Hey there! 👋</h2>
-                <p className="text-lg text-[var(--foreground)]/80 leading-relaxed">
-                  I&apos;m Aditya — I build stuff for the web and Telegram. Most of my work is open-source, 
-                  and I spend a lot of time tinkering with bots, automation, and whatever catches my interest.
-                </p>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-[var(--foreground)]/5 rounded-xl p-4 text-center border border-[var(--primary)]/10">
-                  <FiCode className="text-2xl text-[var(--accent)] mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-[var(--primary)]">{stats.projects}+</p>
-                  <p className="text-xs text-[var(--foreground)]/60">Projects</p>
-                </div>
-                <div className="bg-[var(--foreground)]/5 rounded-xl p-4 text-center border border-[var(--primary)]/10">
-                  <FiStar className="text-2xl text-[var(--accent)] mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-[var(--primary)]">{stats.stars}+</p>
-                  <p className="text-xs text-[var(--foreground)]/60">GitHub Stars</p>
-                </div>
-                <div className="bg-[var(--foreground)]/5 rounded-xl p-4 text-center border border-[var(--primary)]/10">
-                  <FiUsers className="text-2xl text-[var(--accent)] mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-[var(--primary)]">{stats.followers}</p>
-                  <p className="text-xs text-[var(--foreground)]/60">Followers</p>
-                </div>
-                <div className="bg-[var(--foreground)]/5 rounded-xl p-4 text-center border border-[var(--primary)]/10">
-                  <IoSchool className="text-2xl text-[var(--accent)] mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-[var(--primary)]">{stats.yearsCode}+</p>
-                  <p className="text-xs text-[var(--foreground)]/60">Years Coding</p>
-                </div>
-              </div>
-
-              {/* What I Do & Approach */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-[var(--foreground)]/5 rounded-2xl p-6 border border-[var(--primary)]/10">
-                  <h3 className="text-xl font-bold text-[var(--primary)] mb-3">What I Do</h3>
-                  <p className="text-[var(--foreground)]/80 leading-relaxed">
-                    Mostly Python and TypeScript. I maintain Ultroid (a Telegram userbot with 3k+ stars), 
-                    build Telegram bots that people actually use, and occasionally do freelance web dev work.
-                  </p>
-                </div>
-                <div className="bg-[var(--foreground)]/5 rounded-2xl p-6 border border-[var(--primary)]/10">
-                  <h3 className="text-xl font-bold text-[var(--primary)] mb-3">How I Work</h3>
-                  <p className="text-[var(--foreground)]/80 leading-relaxed">
-                    I like keeping things simple. If something can be automated, I&apos;ll automate it. 
-                    I prefer writing code that just works over over-engineering solutions.
-                  </p>
-                </div>
-              </div>
-
-              {/* Tech Stack */}
-              <div className="bg-[var(--foreground)]/5 rounded-2xl p-6 border border-[var(--primary)]/10">
-                <h3 className="text-xl font-bold text-[var(--primary)] mb-4">Tech Stack</h3>
-                <div className="flex flex-wrap gap-3">
-                  {[
-                    { icon: <SiPython />, name: "Python" },
-                    { icon: <SiTypescript />, name: "TypeScript" },
-                    { icon: <SiNextdotjs />, name: "Next.js" },
-                    { icon: <SiDeno />, name: "Deno" },
-                    { icon: <SiMongodb />, name: "MongoDB" },
-                  ].map((tech) => (
-                    <span
-                      key={tech.name}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] text-sm font-medium"
-                    >
-                      {tech.icon}
-                      {tech.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Why I Do It */}
-              <div className="bg-gradient-to-br from-[var(--primary)]/10 to-[var(--accent)]/10 rounded-2xl p-6 border border-[var(--primary)]/20">
-                <h3 className="text-xl font-bold text-[var(--primary)] mb-3">Why?</h3>
-                <p className="text-[var(--foreground)]/80 leading-relaxed">
-                  Honestly? I just like building things. Started with Telegram bots in 2020, 
-                  got hooked on open-source, and haven&apos;t stopped since. It&apos;s fun seeing people 
-                  actually use what I make.
-                </p>
-              </div>
-            </div>
+          {/* Name / role */}
+          <div style={{ flex: 1, minWidth: "160px" }}>
+            <h2 style={{ fontSize: "18px", marginBottom: "2px" }}>Aditya</h2>
+            <p style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Full-stack Developer · Kerala, India</p>
           </div>
+          {/* Badges + links */}
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+            <span className="badge badge-accent">Open Source</span>
+            <span style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>
+              {new Date().getFullYear() - 2003}y old
+            </span>
+          </div>
+          {/* Socials */}
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            {[
+              { label: "GitHub", href: "https://github.com/xditya" },
+              { label: "Telegram", href: "https://t.me/xditya" },
+              { label: "Email", href: "mailto:contact@xditya.me" },
+            ].map(({ label, href }) => (
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace", transition: "color 200ms ease", cursor: "pointer" }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent)")}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}>
+                {label}
+              </a>
+            ))}
+          </div>
+          {/* Resume */}
+          <a href="/resume.pdf" download className="btn btn-ghost" style={{ fontSize: "13px", padding: "8px 14px", flexShrink: 0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Resume
+          </a>
+        </div>
 
-          {/* Experience Section */}
-          <div ref={timelineRef} className="mt-20">
-            <h2 className="text-3xl font-bold text-[var(--primary)] mb-4 text-center">
-              Where I&apos;ve Been
-            </h2>
-            <p className="text-center text-[var(--foreground)]/60 mb-12">
-              Scroll through my journey →
-            </p>
-            
-            {/* Horizontal scroll container */}
-            <div className="relative -mx-4 px-4">
-              <div 
-                ref={scrollContainerRef}
-                onScroll={handleScroll}
-                className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide" 
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {experiences.map((exp, index) => (
-                  <div 
-                    key={index} 
-                    className="timeline-item flex-shrink-0 w-[320px] md:w-[380px] snap-center"
-                  >
-                    <div className={`h-full rounded-2xl p-6 border ${
-                      index === 0 
-                        ? "bg-[var(--foreground)]/5 border-[var(--accent)]/30" 
-                        : "bg-[var(--foreground)]/5 border-[var(--primary)]/10"
-                    }`}>
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className={`text-4xl font-black ${index === 0 ? "text-[var(--accent)]/30" : "text-[var(--primary)]/15"}`}>
-                          {String(index + 1).padStart(2, '0')}
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <span className={`text-xs font-medium px-2 py-1 rounded-md ${
-                            index === 0 
-                              ? "bg-[var(--accent)]/10 text-[var(--accent)]" 
-                              : "bg-[var(--primary)]/10 text-[var(--primary)]/70"
-                          }`}>
-                            {exp.period}
-                          </span>
-                          {index === 0 && (
-                            <span className="text-[10px] px-2 py-0.5 bg-[var(--accent)]/10 text-[var(--accent)] rounded-md font-medium">
-                              NOW
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Content */}
-                      <h3 className={`text-xl font-bold mb-1 ${index === 0 ? "text-[var(--accent)]" : "text-[var(--primary)]"}`}>
-                        {exp.title}
-                      </h3>
-                      <p className="text-sm font-medium text-[var(--foreground)]/50 mb-4">
-                        @ {exp.company}
-                      </p>
-                      
-                      {/* Divider */}
-                      <div className={`h-px mb-4 ${index === 0 ? "bg-[var(--accent)]/20" : "bg-[var(--primary)]/10"}`} />
-                      
-                      {/* Description */}
-                      <p className="text-sm text-[var(--foreground)]/60 leading-relaxed">
-                        {exp.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Future card */}
-                <div className="flex-shrink-0 w-[320px] md:w-[380px] snap-center">
-                  <div className="h-full rounded-2xl p-6 border-2 border-dashed border-[var(--primary)]/15 flex flex-col items-center justify-center text-center bg-[var(--foreground)]/[0.02]">
-                    <div className="text-4xl mb-4">🚀</div>
-                    <p className="text-[var(--primary)]/50 font-medium">What&apos;s next?</p>
-                    <p className="text-sm text-[var(--foreground)]/30 mt-2">Building the future...</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Navigation arrows */}
-              <button
-                onClick={() => scrollToCard(Math.max(0, activeIndex - 1))}
-                className={`hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-10 h-10 rounded-full bg-[var(--background)] border border-[var(--primary)]/20 items-center justify-center text-[var(--primary)] hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/40 transition-all duration-200 shadow-lg ${
-                  activeIndex === 0 ? "opacity-30 pointer-events-none" : ""
-                }`}
-                aria-label="Previous experience"
-              >
-                <IoChevronBack className="text-xl" />
-              </button>
-              <button
-                onClick={() => scrollToCard(Math.min(experiences.length, activeIndex + 1))}
-                className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-10 h-10 rounded-full bg-[var(--background)] border border-[var(--primary)]/20 items-center justify-center text-[var(--primary)] hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/40 transition-all duration-200 shadow-lg ${
-                  activeIndex === experiences.length ? "opacity-30 pointer-events-none" : ""
-                }`}
-                aria-label="Next experience"
-              >
-                <IoChevronForward className="text-xl" />
-              </button>
+        {/* ── Stats ── */}
+        <div ref={statsRef} className="reveal-on-scroll" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "24px" }} id="stats-grid">
+          <StatCard label="Repos" value={githubStats.repos} suffix="+" animate={statsVisible} />
+          <StatCard label="Stars" value={githubStats.stars} suffix="+" animate={statsVisible} />
+          <StatCard label="Followers" value={githubStats.followers} suffix="+" animate={statsVisible} />
+          <StatCard label="Years Coding" value={yearsOfCoding} suffix="+" animate={statsVisible} />
+        </div>
 
-              {/* Scroll indicator */}
-              <div className="flex justify-center items-center gap-2 mt-6">
-                {experiences.map((_, index) => (
-                  <button 
-                    key={index}
-                    onClick={() => scrollToCard(index)}
-                    className={`h-2 rounded-full transition-all duration-300 hover:opacity-80 ${
-                      index === activeIndex ? "w-8 bg-[var(--accent)]" : "w-2 bg-[var(--primary)]/20 hover:bg-[var(--primary)]/40"
-                    }`}
-                    aria-label={`Go to experience ${index + 1}`}
-                  />
-                ))}
-                <button 
-                  onClick={() => scrollToCard(experiences.length)}
-                  className={`h-2 rounded-full transition-all duration-300 hover:opacity-80 ${
-                    activeIndex === experiences.length ? "w-8 bg-[var(--accent)]" : "w-2 bg-[var(--primary)]/20 hover:bg-[var(--primary)]/40"
-                  }`}
-                  aria-label="Go to future card"
-                />
+        {/* ── Two columns: What I Do + How I Work ── */}
+        <div className="reveal-on-scroll" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "24px" }} id="what-how-grid">
+          {[
+            { title: "What I Do", content: "Build Telegram bots, web applications, and automation tools using Python and TypeScript.", tags: ["Python", "TypeScript", "Telegram"] },
+            { title: "How I Work", content: "Simple and automated. I focus on solving real problems efficiently and building scalable solutions.", tags: ["Efficiency", "Automation", "Open Source"] },
+          ].map(({ title, content, tags }) => (
+            <div key={title} className="card" style={{ padding: "20px", borderLeft: "2px solid var(--accent-border)" }}>
+              <h3 style={{ fontSize: "14px", marginBottom: "10px" }}>{title}</h3>
+              <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: "14px" }}>{content}</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                {tags.map((t) => <span key={t} className="tech-chip">{t}</span>)}
               </div>
             </div>
+          ))}
+        </div>
+
+        {/* ── Tech Stack ── */}
+        <div className="reveal-on-scroll card" style={{ padding: "20px", marginBottom: "24px" }}>
+          <h2 style={{ fontSize: "14px", marginBottom: "16px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>Tech Stack</h2>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {TECH_STACK.map(({ name, color }) => (
+              <div key={name} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: "8px", cursor: "default", transition: "all 200ms ease" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = color + "55"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}>
+                <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: color, flexShrink: 0 }} />
+                <span style={{ fontSize: "13px", fontWeight: 500, fontFamily: "'JetBrains Mono', monospace" }}>{name}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </main>
-      <Footer />
-    </>
+
+        {/* ── Experience ── */}
+        <div className="reveal-on-scroll">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <h2 style={{ fontSize: "16px" }}>Experience</h2>
+            <div style={{ display: "flex", gap: "6px" }}>
+              {[
+                { label: "←", action: () => scrollToCard(Math.max(0, activeCard - 1)), disabled: activeCard === 0 },
+                { label: "→", action: () => scrollToCard(Math.min(EXPERIENCE.length - 1, activeCard + 1)), disabled: activeCard === EXPERIENCE.length - 1 },
+              ].map(({ label, action, disabled }) => (
+                <button key={label} onClick={action} disabled={disabled} aria-label={label}
+                  style={{ width: "30px", height: "30px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--bg-surface)", color: disabled ? "var(--text-muted)" : "var(--text-primary)", cursor: disabled ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", transition: "all 200ms ease" }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Scrollable cards */}
+          <div ref={scrollRef} style={{ display: "flex", gap: "12px", overflowX: "auto", scrollbarWidth: "none", paddingBottom: "4px" }}>
+            {EXPERIENCE.map((exp, i) => (
+              <div key={i} onClick={() => setActiveCard(i)}
+                style={{ minWidth: "300px", maxWidth: "300px", padding: "20px", background: "var(--bg-surface)", border: `1px solid ${exp.current ? "var(--accent-border)" : "var(--border)"}`, borderRadius: "12px", cursor: "pointer", transition: "all 200ms ease", flexShrink: 0 }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)"; }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "10px" }}>
+                  <div>
+                    <h3 style={{ fontSize: "14px", fontWeight: 600, marginBottom: "3px" }}>{exp.title}</h3>
+                    <p style={{ fontSize: "12px", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace" }}>{exp.company}</p>
+                  </div>
+                  {exp.current && <span className="badge badge-accent" style={{ fontSize: "10px" }}>Now</span>}
+                </div>
+                <p style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace", marginBottom: "10px" }}>{exp.period}</p>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.6 }}>{exp.description}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Dot indicators */}
+          <div style={{ display: "flex", gap: "5px", justifyContent: "center", marginTop: "14px" }}>
+            {EXPERIENCE.map((_, i) => (
+              <button key={i} onClick={() => scrollToCard(i)} aria-label={`Experience ${i + 1}`}
+                style={{ width: i === activeCard ? "18px" : "5px", height: "5px", borderRadius: "3px", background: i === activeCard ? "var(--accent)" : "var(--border)", border: "none", cursor: "pointer", padding: 0, transition: "all 300ms ease" }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        #stats-grid    { grid-template-columns: repeat(4, 1fr) !important; }
+        #what-how-grid { grid-template-columns: 1fr 1fr !important; }
+        @media (max-width: 640px) {
+          #stats-grid    { grid-template-columns: repeat(2, 1fr) !important; }
+          #what-how-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </div>
   );
 }

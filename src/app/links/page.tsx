@@ -1,173 +1,98 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
 import Link from "next/link";
-import { FiExternalLink } from "react-icons/fi";
-import { IoArrowBack, IoLink } from "react-icons/io5";
-import { useRouter } from "next/navigation";
-import gsap from "gsap";
-import Footer from "@/components/Footer";
 
-interface LinkItem {
-  name: string;
-  url: string;
-  description?: string;
-}
-
-const links: LinkItem[] = [
-  {
-    name: "Website Status",
-    url: "/status",
-    description: "Check the status of my websites",
-  },
-  {
-    name: "Link Shortener",
-    url: "https://short.xditya.me",
-    description: "Shorten your links easily",
-  },
-  {
-    name: "PasteBin",
-    url: "https://paste.xditya.me",
-    description: "Paste your code snippets and share them",
-  },
-  {
-    name: "Collection of REST APIs",
-    url: "https://apis.xditya.me",
-    description: "A collection of REST APIs for various purposes",
-  },
-  {
-    name: "My Bots",
-    url: "/bots",
-    description: "Check out my bots",
-  },
-  {
-    name: "Terms & Conditions",
-    url: "/terms",
-    description: "Read the terms and conditions (for freelance clients)",
-  },
+const LINKS = [
+  { name: "Website Status", description: "Check the uptime of my services", href: "/status", external: false, icon: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+  )},
+  { name: "Link Shortener", description: "Shorten your links easily", href: "https://short.xditya.me", external: true, icon: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></svg>
+  )},
+  { name: "PasteBin", description: "Paste and share code snippets", href: "https://paste.xditya.me", external: true, icon: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" /><rect x="8" y="2" width="8" height="4" rx="1" ry="1" /></svg>
+  )},
+  { name: "REST APIs", description: "A collection of REST APIs for various purposes", href: "https://apis.xditya.me", external: true, icon: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2" /><path d="M16.24 7.76a6 6 0 010 8.49m-8.48-.01a6 6 0 010-8.49m11.31-2.82a10 10 0 010 14.14m-14.14 0a10 10 0 010-14.14" /></svg>
+  )},
+  { name: "Terms & Conditions", description: "Legal terms for freelance clients", href: "/terms", external: false, icon: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
+  )},
 ];
 
-const LinksPage = () => {
-  const router = useRouter();
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const linkRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
-    }
-  };
-
-  useEffect(() => {
-    // Title animation
-    if (titleRef.current) {
-      gsap.fromTo(
-        titleRef.current,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        }
-      );
-    }
-
-    // Link items animation
-    linkRefs.current.forEach((link, index) => {
-      if (link) {
-        gsap.fromTo(
-          link,
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            delay: 0.2 + index * 0.1,
-            ease: "power2.out",
-          }
-        );
-      }
-    });
-  }, []);
-
-  const setLinkRef = (el: HTMLDivElement | null, index: number) => {
-    linkRefs.current[index] = el;
-  };
-
-  const isExternalLink = (url: string) => {
-    return url.startsWith("http://") || url.startsWith("https://");
-  };
-
+function ExternalIcon() {
   return (
-    <>
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
-        <div className="max-w-2xl mx-auto relative">
-          <div className="mb-12">
-            <button
-              onClick={handleBack}
-              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 p-2 rounded-lg hover:bg-[var(--primary)]/10 mb-4 flex items-center gap-2"
-              aria-label="Go back"
-            >
-              <IoArrowBack className="text-xl" />
-              <span className="text-sm font-medium">Back</span>
-            </button>
-            <h1
-              ref={titleRef}
-              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center"
-            >
-              Links
-            </h1>
-          </div>
-
-          <div className="space-y-4">
-            {links.map((link, index) => (
-              <div
-                key={index}
-                ref={(el) => setLinkRef(el, index)}
-                className="group"
-              >
-                <Link
-                  href={link.url}
-                  {...(isExternalLink(link.url) && {
-                    target: "_blank",
-                    rel: "noopener noreferrer",
-                  })}
-                  className="block bg-[var(--foreground)]/5 border border-[var(--primary)]/10 rounded-2xl p-6 transition-all duration-300 hover:border-[var(--primary)]/30 hover:bg-[var(--foreground)]/8 hover:scale-[1.02] hover:shadow-lg hover:shadow-[var(--primary)]/5 relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/0 via-[var(--primary)]/5 to-[var(--primary)]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                  
-                  <div className="flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-[var(--background)] transition-colors duration-300">
-                             <IoLink className="text-xl" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-[var(--primary)] mb-1 group-hover:text-[var(--accent)] transition-colors duration-300">
-                                {link.name}
-                            </h2>
-                            {link.description && (
-                                <p className="text-sm text-[var(--foreground)]/60 group-hover:text-[var(--foreground)]/80 transition-colors duration-300">
-                                {link.description}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                    {isExternalLink(link.url) && (
-                      <FiExternalLink className="w-5 h-5 text-[var(--foreground)]/40 group-hover:text-[var(--accent)] transition-colors duration-300" />
-                    )}
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
   );
-};
+}
 
-export default LinksPage;
+export default function LinksPage() {
+  return (
+    <div style={{ paddingTop: "80px" }}>
+      <div className="container-md" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+        <div style={{ marginBottom: "48px" }}>
+          <span className="badge badge-muted" style={{ marginBottom: "16px" }}>Links</span>
+          <h1 style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: "16px" }}>Resources & Tools</h1>
+          <p style={{ fontSize: "17px", color: "var(--text-secondary)" }}>Useful links and tools I&apos;ve built or use.</p>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {LINKS.map(({ name, description, href, external, icon }) => {
+            const Tag = external ? "a" : Link;
+            const extraProps = external
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {};
+
+            return (
+              <Tag
+                key={name}
+                href={href}
+                {...extraProps}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "20px",
+                  padding: "20px 24px",
+                  background: "var(--bg-surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  transition: "all 200ms ease",
+                  textDecoration: "none",
+                  color: "inherit",
+                }}
+                onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                  (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--accent-border)";
+                  (e.currentTarget as HTMLElement).style.transform = "translateX(4px)";
+                }}
+                onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                  (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+                  (e.currentTarget as HTMLElement).style.transform = "translateX(0)";
+                }}
+              >
+                <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: "var(--bg-elevated)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)", flexShrink: 0 }}>
+                  {icon}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "15px", fontWeight: 600, marginBottom: "4px" }}>{name}</div>
+                  <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>{description}</div>
+                </div>
+                <div style={{ color: "var(--text-muted)", flexShrink: 0 }}>
+                  {external ? <ExternalIcon /> : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                  )}
+                </div>
+              </Tag>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

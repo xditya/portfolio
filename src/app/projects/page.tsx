@@ -1,728 +1,287 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import {
-  SiMongodb,
-  SiRedis,
-  SiDeno,
-  SiTypescript,
-  SiOpencv,
-  SiQt,
-  SiFlask,
-  SiNextdotjs,
-  SiKotlin,
-  SiJetpackcompose,
-  SiPython,
-  SiNodedotjs,
-  SiAndroid,
-  SiGithub,
-} from "react-icons/si";
-import { FiExternalLink } from "react-icons/fi";
-import { IoArrowBack } from "react-icons/io5";
-import { useRouter } from "next/navigation";
-import Footer from "@/components/Footer";
-import Image from "next/image";
 
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+gsap.registerPlugin(ScrollTrigger);
 
-interface TechStack {
+type Project = {
   name: string;
-  icon: React.ReactNode;
-}
-
-const techStacks: Record<string, TechStack> = {
-  python: {
-    name: "Python",
-    icon: <SiPython className="text-xl" />,
-  },
-  mongodb: {
-    name: "MongoDB",
-    icon: <SiMongodb className="text-xl" />,
-  },
-  redis: {
-    name: "Redis",
-    icon: <SiRedis className="text-xl" />,
-  },
-  deno: {
-    name: "Deno",
-    icon: <SiDeno className="text-xl" />,
-  },
-  typescript: {
-    name: "TypeScript",
-    icon: <SiTypescript className="text-xl" />,
-  },
-  opencv: {
-    name: "OpenCV",
-    icon: <SiOpencv className="text-xl" />,
-  },
-  pyqt: {
-    name: "PyQt5",
-    icon: <SiQt className="text-xl" />,
-  },
-  flask: {
-    name: "Flask",
-    icon: <SiFlask className="text-xl" />,
-  },
-  nextjs: {
-    name: "NextJS",
-    icon: <SiNextdotjs className="text-xl" />,
-  },
-  javascript: {
-    name: "JavaScript",
-    icon: <SiNodedotjs className="text-xl" />,
-  },
-  kotlin: {
-    name: "Kotlin",
-    icon: <SiKotlin className="text-xl" />,
-  },
-  android: {
-    name: "Android",
-    icon: <SiAndroid className="text-xl" />,
-  },
-  jetpack_compose: {
-    name: "Jetpack Compose",
-    icon: <SiJetpackcompose className="text-xl" />,
-  },
+  tagline: string;
+  description: string;
+  github: string;
+  url?: string;
+  tech: string[];
+  year: number;
+  stars?: number;
+  users?: string;
+  image?: string;
+  featured?: boolean;
 };
 
-interface Project {
-  name: string;
-  tagline?: string;
-  description: string;
-  githubUrl?: string;
-  projectUrl?: string;
-  imagePlaceholder?: string;
-  techStack?: string[];
-  year: number;
+const PROJECTS: Project[] = [
+  // 2024
+  { name: "Campus Services", tagline: "College services management app", description: "A comprehensive mobile app to streamline campus services — digital wallet, print services, vehicle pass, ID cards, lab access, and smart vending.", github: "https://github.com/xditya/CampusServicesManagementSystem", tech: ["Kotlin", "Android", "MongoDB"], year: 2024 },
+  { name: "GeminiBot", tagline: "AI-powered Telegram Bot", description: "A Telegram bot powered by Google's Gemini AI for intelligent conversations and assistance.", github: "https://github.com/xditya/GeminiBot", tech: ["TypeScript", "Deno"], year: 2024, image: "/images/geminibot.jpg" },
+  { name: "TGdetailsBot", tagline: "Telegram Bot to fetch message details", description: "Gets message details (as JSON) and chat IDs. A live instance is available on Telegram.", github: "https://github.com/xditya/TGdetailsBot", url: "https://t.me/TGdetailsBot", tech: ["TypeScript"], year: 2024, image: "/images/tgdetails.png" },
+  { name: "WhatsApp Utilities", tagline: "WhatsApp Bot", description: "A WhatsApp Bot using whatsapp-web.js to convert images into stickers.", github: "https://github.com/xditya/WhatsAppUtilitiesBot", tech: ["JavaScript"], year: 2024, image: "/images/whatsapputilities.png" },
+  // 2023
+  { name: "GetRestrictedMessages", tagline: "Copy messages from restricted chats", description: "A tool to copy messages from Telegram chats with forward restrictions enabled.", github: "https://github.com/xditya/GetRestrictedMessages", tech: ["Python"], year: 2023, stars: 83 },
+  { name: "VehicleDetection", tagline: "Real-time Traffic Management System", description: "Detects vehicles from video feeds and dynamically manages traffic lights using YOLO and PyQt5.", github: "https://github.com/xditya/VehicleDetection", tech: ["Python", "OpenCV", "PyQt5"], year: 2023, image: "/images/vehicledetection.png" },
+  { name: "AyuVritt", tagline: "Bridging ancient wisdom and modern healing via AI", description: "AI-driven platform bridging ancient wisdom and modern healing.", github: "https://github.com/xditya/AyuVritt", url: "https://camel-case.vercel.app/", tech: ["Python", "Flask", "Next.js"], year: 2023, image: "/images/ayuvritt.png" },
+  { name: "WebShortener", tagline: "Lightweight Link Shortener", description: "A lightweight and fast link shortener web application with a clean interface.", github: "https://github.com/xditya/WebShortener", tech: ["JavaScript"], year: 2023 },
+  { name: "Lyrics Searcher", tagline: "Song lyrics searching app", description: "Android application that allows users to search for lyrics based on song titles.", github: "https://github.com/xditya/LyricsSearcher/", url: "https://github.com/xditya/LyricsSearcher/releases/tag/v0.1", tech: ["Kotlin", "Jetpack Compose"], year: 2023 },
+  // 2022
+  { name: "ChannelActionsBot", tagline: "Telegram bot to auto approve chat join requests", description: "A bot built to automatically handle join requests for Telegram chats, with over 1M users.", github: "https://github.com/xditya/ChannelActionsBot", url: "https://channelactions.xditya.me", tech: ["Deno", "TypeScript", "MongoDB"], year: 2022, stars: 122, users: "1M+", image: "/images/channelactions.png", featured: true },
+  { name: "ChannelAutoPost", tagline: "Telegram bot to auto post messages", description: "Automatically posts messages from one channel to another without the forwarded tag.", github: "https://github.com/xditya/ChannelAutoPost", tech: ["Python"], year: 2022, stars: 224, image: "/images/channelautopost.png" },
+  { name: "captchaBot", tagline: "Telegram Captcha Bot", description: "A Telegram bot that provides captcha verification for group chats to prevent spam.", github: "https://github.com/xditya/captchaBot", tech: ["Python"], year: 2022 },
+  // 2021
+  { name: "YouTubeFeeds", tagline: "YouTube video notifications on Telegram", description: "Get new YouTube video notifications from multiple channels on multiple Telegram chats.", github: "https://github.com/xditya/YouTubeFeeds", tech: ["TypeScript"], year: 2021, stars: 60 },
+  { name: "Ultroid", tagline: "Pluggable Telegram userbot", description: "Advanced, multi-featured Telegram UserBot with plugin support. 3k+ stars on GitHub.", github: "https://github.com/TeamUltroid/Ultroid", url: "https://t.me/TeamUltroid", tech: ["Python", "MongoDB", "Redis"], year: 2021, stars: 3000, image: "/images/ultroid.png", featured: true },
+  { name: "ForceSub", tagline: "Force Subscribe Bot", description: "A Telegram bot that forces users to subscribe to a channel before they can interact.", github: "https://github.com/xditya/ForceSub", tech: ["Python"], year: 2021, stars: 63 },
+  { name: "Telethon Bot", tagline: "Telegram bot boilerplate", description: "Telegram Bot/UserBot boilerplate built with the Telethon library.", github: "https://github.com/xditya/TelethonBot", tech: ["Python"], year: 2021, stars: 54, image: "/images/telethonbot.png" },
+  { name: "BotStatus", tagline: "Bot status updater for Telegram", description: "Update your Telegram Bot's status on your channel periodically.", github: "https://github.com/xditya/BotStatus", tech: ["Python"], year: 2021, stars: 53 },
+  { name: "VCBot", tagline: "Voice chat music bot", description: "Minimal Telegram voice chat music bot built with Pyrogram.", github: "https://github.com/xditya/VCBot", tech: ["Python"], year: 2021, stars: 38 },
+  // 2020
+  { name: "GroupManager", tagline: "Python based group managing bot", description: "A comprehensive Telegram group management bot with moderation features.", github: "https://github.com/xditya/GroupManager", tech: ["Python", "MongoDB"], year: 2020, stars: 256, featured: true },
+];
+
+const YEARS = [2024, 2023, 2022, 2021, 2020];
+
+const TECH_COLORS: Record<string, string> = {
+  Python: "#3776AB",
+  TypeScript: "#3178C6",
+  JavaScript: "#F7DF1E",
+  "Next.js": "#F0F6FC",
+  Deno: "#70FFAF",
+  MongoDB: "#47A248",
+  Kotlin: "#7F52FF",
+  Android: "#3DDC84",
+  Redis: "#DC382D",
+  Flask: "#AAAAAA",
+  OpenCV: "#5C3EE8",
+  PyQt5: "#41CD52",
+  "Jetpack Compose": "#4285F4",
+};
+
+function ExternalIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
 }
 
 export default function ProjectsPage() {
-  const router = useRouter();
-  const projectsList: Project[] = [
-    {
-      name: "Campus Services",
-      tagline: "College services management app - BTech. Final Project.",
-      description:
-        "A comprehensive mobile app to streamline and digitize campus services - digital wallet, print services, vehicle pass, ID cards, lab access, and smart vending.",
-      githubUrl: "https://github.com/xditya/CampusServicesManagementSystem",
-      techStack: ["kotlin", "android", "mongodb"],
-      year: 2024,
-      imagePlaceholder: "",
-    },
-    {
-      name: "GeminiBot",
-      tagline: "AI-powered Telegram Bot.",
-      description:
-        "A Telegram bot powered by Google's Gemini AI for intelligent conversations and assistance.",
-      githubUrl: "https://github.com/xditya/GeminiBot",
-      projectUrl: "",
-      techStack: ["typescript", "deno"],
-      year: 2024,
-      imagePlaceholder: "/images/geminibot.jpg",
-    },
-    {
-      name: "TGdetailsBot",
-      tagline: "Telegram Bot to fetch message details.",
-      description:
-        "Gets message details (as JSON) and chat IDs (forwarded channel/user ID). A live instance is available on Telegram.",
-      githubUrl: "https://github.com/xditya/TGdetailsBot",
-      projectUrl: "https://t.me/TGdetailsBot",
-      techStack: ["typescript"],
-      year: 2024,
-      imagePlaceholder: "/images/tgdetails.png",
-    },
-    {
-      name: "WhatsApp Utilities",
-      tagline: "WhatsApp Bot.",
-      description:
-        "A WhatsApp Bot using whatsapp-web.js to convert images into stickers.",
-      githubUrl: "https://github.com/xditya/WhatsAppUtilitiesBot",
-      projectUrl: "",
-      techStack: ["javascript"],
-      year: 2024,
-      imagePlaceholder: "/images/whatsapputilities.png",
-    },
-    {
-      name: "GetRestrictedMessages",
-      tagline: "Copy messages from restricted chats.",
-      description:
-        "A tool to copy messages from Telegram chats with forward restrictions enabled. Popular utility with 83+ stars.",
-      githubUrl: "https://github.com/xditya/GetRestrictedMessages",
-      projectUrl: "",
-      techStack: ["python"],
-      year: 2023,
-      imagePlaceholder: "",
-    },
-    {
-      name: "VehicleDetection",
-      tagline: "Real-time Traffic Management System.",
-      description:
-        "Detects vehicles from video feeds and dynamically manages traffic lights using YOLO and PyQt5.",
-      githubUrl: "https://github.com/xditya/VehicleDetection",
-      projectUrl: "",
-      techStack: ["python", "opencv", "pyqt"],
-      year: 2023,
-      imagePlaceholder: "/images/vehicledetection.png",
-    },
-    {
-      name: "AyuVritt",
-      tagline: "Bridging gap between ancient wisdom and modern healing via AI.",
-      description:
-        "AI driven bridging gap between ancient wisdom and modern healing.",
-      githubUrl: "https://github.com/xditya/AyuVritt",
-      projectUrl: "https://camel-case.vercel.app/",
-      techStack: ["python", "flask", "nextjs"],
-      year: 2023,
-      imagePlaceholder: "/images/ayuvritt.png",
-    },
-    {
-      name: "WebShortener",
-      tagline: "Lightweight Link Shortener.",
-      description:
-        "A lightweight and fast link shortener web application with a clean interface.",
-      githubUrl: "https://github.com/xditya/WebShortener",
-      projectUrl: "",
-      techStack: ["javascript"],
-      year: 2023,
-      imagePlaceholder: "",
-    },
-    {
-      name: "Lyrics Searcher",
-      tagline: "Song lyrics searching app.",
-      description:
-        "Android application that allows users to search for lyrics based on song titles.",
-      githubUrl: "https://github.com/xditya/LyricsSearcher/",
-      projectUrl: "https://github.com/xditya/LyricsSearcher/releases/tag/v0.1",
-      techStack: ["kotlin", "jetpack_compose", "android"],
-      year: 2023,
-      imagePlaceholder: "",
-    },
-    {
-      name: "ChannelActionsBot",
-      tagline: "Telegram bot to auto approve chat join requests.",
-      description:
-        "A bot built to automatically handle join requests for Telegram chats, currently with over 1M users. 122+ stars on GitHub.",
-      githubUrl: "https://github.com/xditya/ChannelActionsBot",
-      projectUrl: "https://channelactions.xditya.me",
-      imagePlaceholder: "/images/channelactions.png",
-      techStack: ["deno", "typescript", "mongodb"],
-      year: 2022,
-    },
-    {
-      name: "ChannelAutoPost",
-      tagline: "Telegram bot to auto post messages.",
-      description:
-        "Automatically posts messages from one channel to another without the forwarded tag. 224+ stars on GitHub.",
-      githubUrl: "https://github.com/xditya/ChannelAutoPost",
-      projectUrl: "",
-      techStack: ["python"],
-      year: 2022,
-      imagePlaceholder: "/images/channelautopost.png",
-    },
-    {
-      name: "captchaBot",
-      tagline: "Telegram Captcha Bot.",
-      description:
-        "A Telegram bot that provides captcha verification for group chats to prevent spam and bots.",
-      githubUrl: "https://github.com/xditya/captchaBot",
-      projectUrl: "",
-      techStack: ["python"],
-      year: 2022,
-      imagePlaceholder: "",
-    },
-    {
-      name: "YouTubeFeeds",
-      tagline: "YouTube video notifications on Telegram.",
-      description:
-        "Get new YouTube video notifications from multiple YouTube channels on multiple Telegram chats. 60+ stars.",
-      githubUrl: "https://github.com/xditya/YouTubeFeeds",
-      projectUrl: "",
-      techStack: ["typescript"],
-      year: 2021,
-      imagePlaceholder: "",
-    },
-    {
-      name: "Ultroid",
-      tagline: "Pluggable telegram userbot.",
-      description:
-        "Advanced, multi-featured Telegram UserBot with plugin support.",
-      githubUrl: "https://github.com/TeamUltroid/Ultroid",
-      projectUrl: "https://t.me/TeamUltroid",
-      imagePlaceholder: "/images/ultroid.png",
-      techStack: ["python", "mongodb", "redis"],
-      year: 2021,
-    },
-    {
-      name: "ForceSub",
-      tagline: "Force Subscribe Bot.",
-      description:
-        "A Telegram bot that forces users to subscribe to a channel before they can interact. 63+ stars on GitHub.",
-      githubUrl: "https://github.com/xditya/ForceSub",
-      projectUrl: "",
-      techStack: ["python"],
-      year: 2021,
-      imagePlaceholder: "",
-    },
-    {
-      name: "Telethon Bot",
-      tagline: "Telegram bot boilerplate.",
-      description:
-        "Telegram Bot/UserBot boilerplate built with the Telethon library. 54+ stars on GitHub.",
-      githubUrl: "https://github.com/xditya/TelethonBot",
-      projectUrl: "",
-      techStack: ["python"],
-      year: 2021,
-      imagePlaceholder: "/images/telethonbot.png",
-    },
-    {
-      name: "BotStatus",
-      tagline: "Bot status updater for Telegram.",
-      description:
-        "Update your Telegram Bot's status on your channel periodically. 53+ stars on GitHub.",
-      githubUrl: "https://github.com/xditya/BotStatus",
-      projectUrl: "",
-      techStack: ["python"],
-      year: 2021,
-      imagePlaceholder: "",
-    },
-    {
-      name: "VCBot",
-      tagline: "Voice chat music bot.",
-      description:
-        "Minimal Telegram voice chat music bot built with Pyrogram. 38+ stars on GitHub.",
-      githubUrl: "https://github.com/xditya/VCBot",
-      projectUrl: "",
-      techStack: ["python"],
-      year: 2021,
-      imagePlaceholder: "",
-    },
-    {
-      name: "GroupManager",
-      tagline: "Python based Group managing bot.",
-      description:
-        "A comprehensive Telegram group management bot with moderation features. Most popular project with 256+ stars.",
-      githubUrl: "https://github.com/xditya/GroupManager",
-      projectUrl: "",
-      techStack: ["python", "mongodb"],
-      year: 2020,
-      imagePlaceholder: "",
-    },
-  ].sort((a, b) => b.year - a.year);
-
-  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
-
-  const allTechStacks = Array.from(
-    new Set(projectsList.flatMap((project) => project.techStack || []))
-  ).sort((a, b) => techStacks[a].name.localeCompare(techStacks[b].name));
-
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const projectsContainerRef = useRef<HTMLDivElement>(null);
-  const techStackRef = useRef<HTMLDivElement>(null);
+  const [activeYear, setActiveYear] = useState<number | null>(null);
+  const yearRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (titleRef.current) {
+    const els = document.querySelectorAll(".project-card");
+    els.forEach((el, i) => {
       gsap.fromTo(
-        titleRef.current,
-        { opacity: 0, y: 20 },
+        el,
+        { opacity: 0, y: 28 },
         {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
+          opacity: 1, y: 0, duration: 0.5, ease: "power2.out",
+          delay: (i % 3) * 0.07,
+          scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none none" },
         }
       );
-    }
+    });
+  }, []);
 
-    const container = projectsContainerRef.current;
-    if (container) {
-      const projectSections = gsap.utils.toArray(".project-section", container);
-
-      projectSections.forEach((sectionElement, index) => {
-        ScrollTrigger.create({
-          trigger: sectionElement as HTMLElement,
-          start: "top center",
-          end: "bottom center",
-          onEnter: () => {
-            setCurrentProjectIndex(index);
-            setCurrentYear(projectsList[index].year);
-          },
-          onEnterBack: () => {
-            setCurrentProjectIndex(index);
-            setCurrentYear(projectsList[index].year);
-          },
-        });
-
-        gsap.fromTo(
-          sectionElement as HTMLElement,
-          { opacity: 0, y: 50 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: sectionElement as HTMLElement,
-              start: "top 85%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
-      });
-    }
-
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [projectsList.length]);
-
-  const currentProject = projectsList[currentProjectIndex];
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
+  const scrollToYear = (year: number) => {
+    setActiveYear(year);
+    const el = yearRefs.current[year];
+    if (el) {
+      const offset = 120;
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: "smooth" });
     }
   };
 
-  // Group projects by year
-  const projectsByYear = projectsList.reduce((acc, project) => {
-    if (!acc[project.year]) {
-      acc[project.year] = [];
-    }
-    acc[project.year].push(project);
-    return acc;
-  }, {} as Record<number, Project[]>);
+  // Track scroll: update active year
+  useEffect(() => {
+    const handleScroll = () => {
+      const OFFSET = 140;
+      let current: number | null = null;
+      for (const year of YEARS) {
+        const el = yearRefs.current[year];
+        if (!el) continue;
+        if (el.getBoundingClientRect().top <= OFFSET) current = year;
+      }
+      setActiveYear(current);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    setTimeout(handleScroll, 100);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const projectsByYear = YEARS.map((year) => ({
+    year,
+    projects: PROJECTS.filter((p) => p.year === year),
+  }));
 
   return (
-    <>
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
-        <div className="max-w-6xl mx-auto relative">
-          {/* Header Section */}
-          <div className="mb-8">
-            <button
-              onClick={handleBack}
-              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 p-2 rounded-lg hover:bg-[var(--primary)]/10 mb-4 flex items-center gap-2 relative z-20"
-              aria-label="Go back"
-            >
-              <IoArrowBack className="text-xl" />
-              <span className="text-sm font-medium">Back</span>
-            </button>
-            <h1
-              ref={titleRef}
-              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center"
-            >
-              Projects
-            </h1>
-          </div>
-          
-          {/* Subtitle */}
-          <p className="text-center text-[var(--foreground)]/60 text-lg mb-12 max-w-2xl mx-auto">
-            A collection of open-source projects, bots, and applications I&apos;ve built over the years.
+    <div style={{ paddingTop: "80px" }}>
+      {/* Outer wrapper — wide enough to fit timeline + content side by side */}
+      <div style={{ maxWidth: "1300px", margin: "0 auto", padding: "48px 24px 80px" }}>
+        {/* Header */}
+        <div style={{ marginBottom: "48px" }}>
+          <span className="badge badge-muted" style={{ marginBottom: "16px" }}>Portfolio</span>
+          <h1 style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: "16px" }}>Projects</h1>
+          <p style={{ fontSize: "17px", color: "var(--text-secondary)" }}>
+            {PROJECTS.length} projects spanning {YEARS.length} years — from Telegram bots to mobile apps.
           </p>
+        </div>
 
-          <div className="flex flex-col lg:flex-row gap-12 mt-12">
-            <div className="hidden lg:block lg:w-1/6">
-              <div className="lg:sticky lg:top-20">
-                <h3 className="text-xl font-bold text-[var(--primary)] mb-6">
-                  Timeline
-                </h3>
-                <div className="relative ml-3">
-                  <div className="absolute left-0 transform -translate-x-1/2 w-0.5 bg-gradient-to-b from-[var(--accent)] via-[var(--primary)]/40 to-[var(--primary)]/10 h-full top-0"></div>
+        {/* Two-column: sidebar + content */}
+        <div style={{ display: "flex", gap: "40px", alignItems: "flex-start" }}>
 
-                  <ul className="list-none p-0 m-0 space-y-6">
-                    {Object.keys(projectsByYear)
-                      .sort((a, b) => Number(b) - Number(a))
-                      .map((year) => {
-                        const projectCount = projectsByYear[Number(year)].length;
-                        return (
-                          <li
-                            key={`timeline-${year}`}
-                            className="relative flex items-center cursor-pointer group"
-                            onClick={() => {
-                              const firstProjectOfYear = projectsList.findIndex(
-                                (p) => p.year === Number(year)
-                              );
-                              if (firstProjectOfYear !== -1) {
-                                const element = document.getElementById(
-                                  `project-${firstProjectOfYear}`
-                                );
-                                if (element) {
-                                  gsap.to(window, {
-                                    duration: 1,
-                                    scrollTo: {
-                                      y: element,
-                                      offsetY: 100,
-                                    },
-                                    ease: "power2.inOut",
-                                  });
-                                }
-                              }
-                            }}
-                            aria-label={`Scroll to projects from ${year}`}
-                          >
-                            <div
-                              className={`absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-300 z-10 ${
-                                currentYear === Number(year)
-                                  ? "w-4 h-4 bg-[var(--accent)] shadow-lg shadow-[var(--accent)]/50"
-                                  : "w-3 h-3 bg-[var(--primary)]/30 group-hover:bg-[var(--primary)]/60 group-hover:w-4 group-hover:h-4"
-                              }`}
-                            />
-                            <div className="ml-6 flex items-center gap-2">
-                              <span
-                                className={`text-lg font-semibold transition-all duration-300 ${
-                                  currentYear === Number(year)
-                                    ? "text-[var(--accent)]"
-                                    : "text-[var(--foreground)]/50 group-hover:text-[var(--foreground)]"
-                                }`}
-                              >
-                                {year}
-                              </span>
-                              <span
-                                className={`text-xs px-2 py-0.5 rounded-full transition-all duration-300 ${
-                                  currentYear === Number(year)
-                                    ? "bg-[var(--accent)]/20 text-[var(--accent)]"
-                                    : "bg-[var(--foreground)]/10 text-[var(--foreground)]/40 group-hover:bg-[var(--foreground)]/15"
-                                }`}
-                              >
-                                {projectCount}
-                              </span>
-                            </div>
-                          </li>
-                        );
-                      })}
-                  </ul>
-                </div>
-              </div>
+          {/* Sticky timeline sidebar */}
+          <div
+            ref={sidebarRef}
+            className="year-timeline"
+            style={{ position: "sticky", top: "90px", width: "140px", flexShrink: 0 }}
+          >
+            <p style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "12px" }}>Timeline</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              {YEARS.map((year) => (
+                <button
+                  key={year}
+                  onClick={() => scrollToYear(year)}
+                  style={{
+                    textAlign: "left", padding: "8px 12px", borderRadius: "8px", border: "none",
+                    background: activeYear === year ? "var(--accent-glow)" : "transparent",
+                    color: activeYear === year ? "var(--accent)" : "var(--text-muted)",
+                    fontFamily: "'JetBrains Mono',monospace", fontSize: "14px", fontWeight: 500,
+                    cursor: "pointer", transition: "all 200ms ease", width: "100%",
+                    borderLeft: `2px solid ${activeYear === year ? "var(--accent)" : "transparent"}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeYear !== year) {
+                      (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+                      (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeYear !== year) {
+                      (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                    }
+                  }}
+                >
+                  {year}
+                </button>
+              ))}
             </div>
+          </div>
 
-            <div className="lg:w-5/6 flex flex-col lg:flex-row gap-12">
-              <div className="lg:w-2/3 space-y-16" ref={projectsContainerRef}>
-                {Object.entries(projectsByYear)
-                  .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
-                  .map(([year, projects]) => (
-                    <div key={year} className="space-y-12">
-                      {/* Year Header */}
-                      <div className="flex items-center gap-4 lg:hidden">
-                        <span className="text-2xl font-bold text-[var(--accent)]">
-                          {year}
-                        </span>
-                        <div className="flex-1 h-px bg-[var(--primary)]/20"></div>
+          {/* Projects list */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+
+            {projectsByYear.map(({ year, projects }) => (
+              <div key={year} ref={(el) => { yearRefs.current[year] = el; }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                  <h2 style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>{year}</h2>
+                  <div className="divider" style={{ flex: 1 }} />
+                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{projects.length} projects</span>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
+                  {projects.map((project) => (
+                    <div
+                      key={project.name}
+                      className="project-card card"
+                      style={{
+                        padding: "20px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                        position: "relative",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {/* Featured accent line */}
+                      {project.featured && (
+                        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "var(--accent)", borderRadius: "12px 12px 0 0" }} />
+                      )}
+
+                      {/* Header */}
+                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
+                        <div>
+                          <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: "4px" }}>{project.name}</h3>
+                          {project.featured && <span className="badge badge-accent" style={{ fontSize: "10px" }}>Featured</span>}
+                        </div>
+                        {/* Badges */}
+                        <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                          {project.users && (
+                            <span className="badge badge-accent" style={{ fontSize: "10px" }}>{project.users} users</span>
+                          )}
+                          {project.stars && project.stars >= 100 && (
+                            <span className="badge badge-muted" style={{ fontSize: "10px" }}>★ {project.stars >= 1000 ? `${(project.stars / 1000).toFixed(0)}k+` : `${project.stars}+`}</span>
+                          )}
+                        </div>
                       </div>
-                      {projects.map((project, index) => (
-                        <section
-                          key={index}
-                          id={`project-${projectsList.findIndex(
-                            (p) => p === project
-                          )}`}
-                          className="project-section group"
-                        >
-                          {/* Project Card */}
-                          <div className="bg-[var(--foreground)]/5 rounded-2xl overflow-hidden border border-[var(--primary)]/10 hover:border-[var(--primary)]/30 transition-all duration-300 hover:shadow-lg hover:shadow-[var(--primary)]/5">
-                            {/* Image Section */}
-                            {project.imagePlaceholder ? (
-                              <div className="w-full h-56 sm:h-64 overflow-hidden relative">
-                                <Image
-                                  src={project.imagePlaceholder}
-                                  alt={`Preview image for ${project.name}`}
-                                  fill={true}
-                                  sizes="(max-width: 1024px) 100vw, 66vw"
-                                  style={{ objectFit: "cover" }}
-                                  className="group-hover:scale-105 transition-transform duration-500"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)]/80 via-transparent to-transparent"></div>
-                              </div>
-                            ) : (
-                              <div className="w-full h-56 sm:h-64 flex items-center justify-center text-center p-4 relative bg-gradient-to-br from-[var(--primary)]/10 via-[var(--secondary)]/10 to-[var(--accent)]/10">
-                                <div className="absolute inset-0 opacity-30">
-                                  <div className="absolute inset-0" style={{
-                                    backgroundImage: `radial-gradient(circle at 25% 25%, var(--primary) 1px, transparent 1px),
-                                                      radial-gradient(circle at 75% 75%, var(--accent) 1px, transparent 1px)`,
-                                    backgroundSize: '40px 40px'
-                                  }}></div>
-                                </div>
-                                <div className="z-10 flex flex-col items-center gap-2">
-                                  <div className="w-16 h-16 rounded-full bg-[var(--primary)]/20 flex items-center justify-center">
-                                    <SiGithub className="text-3xl text-[var(--primary)]" />
-                                  </div>
-                                  <span className="text-xl font-semibold text-[var(--primary)]">
-                                    {project.name}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
 
-                            {/* Content Section */}
-                            <div className="p-6 space-y-4">
-                              {/* Header with Year Badge */}
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  <h2 className="text-2xl sm:text-3xl font-bold text-[var(--primary)] mb-1 group-hover:text-[var(--accent)] transition-colors duration-300">
-                                    {project.name}
-                                  </h2>
-                                  {project.tagline && (
-                                    <p className="text-base text-[var(--foreground)]/70 font-medium">
-                                      {project.tagline}
-                                    </p>
-                                  )}
-                                </div>
-                                <span className="hidden sm:inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-[var(--primary)]/10 text-[var(--primary)] whitespace-nowrap">
-                                  {project.year}
-                                </span>
-                              </div>
+                      {/* Tagline */}
+                      <p style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>{project.tagline}</p>
 
-                              {/* Description */}
-                              <p className="text-sm sm:text-base text-[var(--foreground)]/80 leading-relaxed">
-                                {project.description}
-                              </p>
+                      {/* Description */}
+                      <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.6, flex: 1 }}>{project.description}</p>
 
-                              {/* Tech Stack Tags */}
-                              {project.techStack && project.techStack.length > 0 && (
-                                <div className="flex flex-wrap gap-2 pt-2">
-                                  {project.techStack.map((stack) => (
-                                    <span
-                                      key={stack}
-                                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--secondary)]/20 text-[var(--foreground)]/80"
-                                    >
-                                      {techStacks[stack]?.icon && (
-                                        <span className="text-sm">{techStacks[stack].icon}</span>
-                                      )}
-                                      {techStacks[stack]?.name}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
+                      {/* Stars (small) */}
+                      {project.stars && project.stars < 100 && (
+                        <div style={{ fontSize: "12px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                          {project.stars}+
+                        </div>
+                      )}
 
-                              {/* Action Buttons */}
-                              <div className="flex flex-wrap gap-3 pt-4 border-t border-[var(--primary)]/10">
-                                {project.githubUrl && (
-                                  <a
-                                    href={project.githubUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--background)] transition-all duration-200 text-sm font-medium"
-                                    aria-label={`GitHub repository for ${project.name}`}
-                                  >
-                                    <SiGithub className="text-lg" />
-                                    View Code
-                                  </a>
-                                )}
-                                {project.projectUrl && (
-                                  <a
-                                    href={project.projectUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--background)] transition-all duration-200 text-sm font-medium"
-                                    aria-label={`Live demo of ${project.name}`}
-                                  >
-                                    <FiExternalLink className="text-lg" />
-                                    Live Demo
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </section>
-                      ))}
+                      {/* Tech Stack */}
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                        {project.tech.map((t) => (
+                          <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "2px 8px", borderRadius: "4px", background: "var(--bg-hover)", fontSize: "11px", fontFamily: "'JetBrains Mono',monospace", color: TECH_COLORS[t] || "var(--text-secondary)", border: `1px solid ${(TECH_COLORS[t] || "#484F58") + "30"}` }}>
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Links */}
+                      <div style={{ display: "flex", gap: "8px", paddingTop: "4px" }}>
+                        <a href={project.github} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: "var(--text-muted)", cursor: "pointer", transition: "color 200ms ease" }}
+                          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
+                          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" /></svg>
+                          GitHub
+                        </a>
+                        {project.url && (
+                          <a href={project.url} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: "var(--accent)", cursor: "pointer", transition: "color 200ms ease" }}
+                            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent-dim)")}
+                            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent)")}>
+                            <ExternalIcon /> Live
+                          </a>
+                        )}
+                      </div>
                     </div>
                   ))}
-              </div>
-
-              <div
-                className="hidden lg:block lg:w-1/3 lg:sticky lg:top-20 h-fit"
-                ref={techStackRef}
-              >
-                {/* Current Project */}
-                <div className="bg-[var(--foreground)]/5 rounded-2xl p-6 border border-[var(--primary)]/10 mb-6 overflow-hidden relative">
-                  {/* Progress Bar */}
-                  <div className="absolute top-0 left-0 h-1 bg-[var(--accent)] transition-all duration-500" 
-                       style={{ width: `${((currentProjectIndex + 1) / projectsList.length) * 100}%` }}></div>
-                  
-                  <p className="text-xs font-medium text-[var(--foreground)]/40 uppercase tracking-wider mb-3 mt-1">
-                    Currently Viewing
-                  </p>
-                  <h3 className="text-xl font-bold text-[var(--primary)] mb-1">
-                    {currentProject.name}
-                  </h3>
-                  <p className="text-sm text-[var(--foreground)]/60">
-                    {currentProject.tagline}
-                  </p>
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--primary)]/10">
-                    <span className="text-xs text-[var(--foreground)]/40">{currentProject.year}</span>
-                    {currentProject.githubUrl && (
-                      <a
-                        href={currentProject.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-auto text-[var(--primary)] hover:text-[var(--accent)] transition-colors"
-                      >
-                        <SiGithub className="text-lg" />
-                      </a>
-                    )}
-                  </div>
-                  
-                  {/* Remaining Count */}
-                  <p className="text-xs text-center text-[var(--foreground)]/40 mt-4 pt-3 border-t border-[var(--primary)]/10">
-                    {projectsList.length - currentProjectIndex - 1 > 0 
-                      ? `${projectsList.length - currentProjectIndex - 1} more to explore`
-                      : "✓ All projects explored"
-                    }
-                  </p>
-                </div>
-
-                {/* Tech Stacks */}
-                <div className="bg-[var(--foreground)]/5 rounded-2xl p-6 border border-[var(--primary)]/10">
-                  <h3 className="text-lg font-bold text-[var(--primary)] mb-4">
-                    Technologies Used
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {allTechStacks.map((stack) => (
-                      <span
-                        key={stack}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2
-                        ${
-                          currentProject.techStack &&
-                          currentProject.techStack.includes(stack)
-                            ? "bg-[var(--accent)] text-[var(--background)] scale-105 shadow-md"
-                            : "bg-[var(--foreground)]/10 text-[var(--foreground)]/60 hover:bg-[var(--foreground)]/15"
-                        }
-                      `}
-                      >
-                        {techStacks[stack]?.icon}
-                        {techStacks[stack]?.name}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="mt-16 lg:hidden">
-            <div className="bg-[var(--foreground)]/5 rounded-2xl p-6 border border-[var(--primary)]/10">
-              <h3 className="text-xl font-bold text-[var(--primary)] mb-4">
-                Technologies Used
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {allTechStacks.map((stack) => (
-                  <span
-                    key={stack}
-                    className="px-3 py-1.5 rounded-lg text-sm font-medium bg-[var(--foreground)]/10 text-[var(--foreground)]/80 flex items-center gap-2"
-                  >
-                    {techStacks[stack]?.icon}
-                    {techStacks[stack]?.name}
-                  </span>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-      </main>
-      <Footer />
-    </>
+      </div>
+
+      <style>{`
+        .year-timeline { display: block !important; }
+        @media (max-width: 860px) {
+          .year-timeline { display: none !important; }
+        }
+      `}</style>
+    </div>
   );
 }

@@ -1,240 +1,205 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { IoArrowBack, IoRefreshOutline } from "react-icons/io5";
-import { useRouter } from "next/navigation";
-import gsap from "gsap";
-import Footer from "@/components/Footer";
+import { useEffect, useState, useCallback } from "react";
 
 interface StatusData {
   key: string;
   url: string;
-  data: {
-    [key: string]: number | null;
-    upTime: number | null;
-  } | null;
+  data: { [key: string]: number | null; upTime: number | null } | null;
 }
 
-const getStatusColor = (uptimeVal: number | null | undefined) => {
-  if (uptimeVal === null || uptimeVal === undefined) return "nodata";
-  if (uptimeVal === 1) return "success";
-  if (uptimeVal < 0.3) return "failure";
+const getStatusColor = (v: number | null | undefined) => {
+  if (v === null || v === undefined) return "nodata";
+  if (v === 1) return "success";
+  if (v < 0.3) return "failure";
   return "partial";
 };
 
-const getStatusText = (color: string) => {
-  switch (color) {
-    case "nodata":
-      return "No Data Available";
-    case "success":
-      return "Fully Operational";
-    case "failure":
-      return "Major Outage";
-    case "partial":
-      return "Partial Outage";
-    default:
-      return "Unknown";
-  }
+const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
+  success: { label: "Operational", color: "#4ade80", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.2)", dot: "#4ade80" },
+  failure: { label: "Major Outage", color: "#f87171", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)", dot: "#f87171" },
+  partial: { label: "Partial Outage", color: "#fbbf24", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.2)", dot: "#fbbf24" },
+  nodata: { label: "No Data", color: "var(--text-muted)", bg: "var(--bg-elevated)", border: "var(--border)", dot: "var(--text-muted)" },
 };
 
-const StatusPage = () => {
-  const router = useRouter();
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const loadingIconRef = useRef<HTMLDivElement>(null);
+const BAR_COLORS: Record<string, string> = {
+  success: "rgba(34,197,94,0.7)",
+  failure: "rgba(239,68,68,0.7)",
+  partial: "rgba(251,191,36,0.7)",
+  nodata: "rgba(48,54,61,0.6)",
+};
 
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
-    }
-  };
-  const [statusData, setStatusData] = useState<StatusData[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Title animation
-    if (titleRef.current) {
-      gsap.fromTo(
-        titleRef.current,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        }
-      );
-    }
-
-    // Fetch status data
-    const fetchStatus = async () => {
-      try {
-        const response = await fetch("/api/status");
-        const data = await response.json();
-        if (data.status === "success") {
-          setStatusData(data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching status:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStatus();
-  }, []);
-
-  useEffect(() => {
-    // Loading animation
-    if (loading && loadingIconRef.current) {
-      gsap.to(loadingIconRef.current, {
-        rotation: 360,
-        duration: 1,
-        repeat: -1,
-        ease: "linear",
-      });
-    } else if (!loading && loadingIconRef.current) {
-      gsap.killTweensOf(loadingIconRef.current);
-      gsap.set(loadingIconRef.current, { rotation: 0 });
-    }
-  }, [loading]);
+function ServiceCard({ service }: { service: StatusData }) {
+  const today = service.data?.[0];
+  const statusKey = getStatusColor(today);
+  const meta = STATUS_META[statusKey];
+  const uptime = service.data?.upTime;
+  const serviceName = service.key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <>
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-20">
-        <div className="max-w-4xl mx-auto relative">
-          <div className="mb-12">
-            <button
-              onClick={handleBack}
-              className="text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 p-2 rounded-lg hover:bg-[var(--primary)]/10 mb-4 flex items-center gap-2"
-              aria-label="Go back"
-            >
-              <IoArrowBack className="text-xl" />
-              <span className="text-sm font-medium">Back</span>
-            </button>
-            <h1
-              ref={titleRef}
-              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-[var(--primary)] text-center"
-            >
-              Website Status
-            </h1>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-20">
-              <div
-                ref={loadingIconRef}
-                className="text-[var(--accent)] text-5xl flex justify-center items-center opacity-80"
-              >
-                <IoRefreshOutline />
-              </div>
-              <p className="mt-4 text-[var(--foreground)]/60 font-medium">Fetching status...</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {statusData.map((service, index) => (
-                <div
-                  key={service.key}
-                  className="bg-[var(--foreground)]/5 border border-[var(--primary)]/10 rounded-2xl p-6 transition-all duration-300 hover:border-[var(--primary)]/30 hover:bg-[var(--foreground)]/8 hover:scale-[1.01] hover:shadow-lg hover:shadow-[var(--primary)]/5"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-[var(--primary)] mb-1">
-                        {service.key.charAt(0).toUpperCase() +
-                          service.key.slice(1)}
-                      </h2>
-                      <a
-                        href={service.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[var(--foreground)]/50 hover:text-[var(--accent)] transition-colors duration-200 text-sm flex items-center gap-1"
-                      >
-                        {service.url}
-                      </a>
-                    </div>
-                    {service.data && (
-                      <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1">
-                         <div
-                          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold border ${
-                            getStatusColor(service.data[0]) === "success"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                              : getStatusColor(service.data[0]) === "failure"
-                              ? "bg-red-500/10 text-red-400 border-red-500/20"
-                              : getStatusColor(service.data[0]) === "partial"
-                              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                              : "bg-[var(--foreground)]/10 text-[var(--foreground)]/60 border-[var(--foreground)]/20"
-                          }`}
-                        >
-                           <span className={`w-2 h-2 rounded-full ${
-                             getStatusColor(service.data[0]) === "success" ? "bg-emerald-400" :
-                             getStatusColor(service.data[0]) === "failure" ? "bg-red-400" :
-                             getStatusColor(service.data[0]) === "partial" ? "bg-amber-400" : "bg-[var(--foreground)]/40"
-                           }`}></span>
-                          {getStatusText(getStatusColor(service.data[0]))}
-                        </div>
-                        <div className="text-[var(--foreground)]/40 text-xs font-mono">
-                          Uptime: {service.data.upTime}%
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {service.data && (
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-[var(--foreground)]/40 px-1">
-                            <span>30 days ago</span>
-                            <span>Today</span>
-                        </div>
-                        <div className="grid grid-cols-[repeat(30,1fr)] gap-1">
-                        {Array.from({ length: 30 }, (_, i) => {
-                            // Reverse index to show latest on right (assuming data is [latest, ..., oldest] which is typical, actually usually typical is [oldest, ..., latest] for charts but let's assume index 0 is latest based on getStatusColor(service.data[0]) usage above. 
-                            // Wait, getStatusColor(service.data[0]) checks the first item. Usually API returns 0 as latest or 0 as oldest. 
-                            // Based on typical status pages, right is today. 
-                            // If index 0 is used for current status text, then index 0 is likely "today".
-                            // So we should map straightforwardly if we want left-to-right to be old-to-new, we need to reverse the array or handle indices.
-                            // The original code used: `getStatusColor(service.data?.[i])` where i goes 0 to 29.
-                            // And displayed tooltip `Date.now() - i * 24...`. So i=0 is today, i=1 is yesterday.
-                            // If we render left-to-right as 0..29, then 0 (today) is on the left? That's counter-intuitive for a timeline.
-                            // Timelines usually go Old -> New (Left -> Right).
-                            // So we should probably render index 29 (oldest) to index 0 (newest).
-                            
-                            const dayIndex = 29 - i; // 29, 28, ... 0.
-                            const status = service.data?.[dayIndex]; // Get data from oldest to newest
-                            const color = getStatusColor(status);
-                            
-                            // Re-calculating date for tooltip based on the actual data index
-                            const date = new Date(Date.now() - dayIndex * 24 * 60 * 60 * 1000);
-
-                            return (
-                            <div
-                                key={i}
-                                className={`aspect-[1/2] sm:aspect-square rounded-sm transition-all duration-300 hover:scale-125 hover:z-10 cursor-help ${
-                                color === "success"
-                                    ? "bg-emerald-500/80 hover:bg-emerald-400"
-                                    : color === "failure"
-                                    ? "bg-red-500/80 hover:bg-red-400"
-                                    : color === "partial"
-                                    ? "bg-amber-500/80 hover:bg-amber-400"
-                                    : "bg-[var(--foreground)]/10 hover:bg-[var(--foreground)]/20"
-                                }`}
-                                title={`${date.toLocaleDateString()}: ${getStatusText(color)}`}
-                            />
-                            );
-                        })}
-                        </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+    <div className="card" style={{ padding: "24px" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", marginBottom: "20px", flexWrap: "wrap" }}>
+        <div>
+          <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "4px" }}>{serviceName}</h2>
+          <a href={service.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace", cursor: "pointer", transition: "color 200ms ease" }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}>
+            {service.url}
+          </a>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", borderRadius: "999px", background: meta.bg, border: `1px solid ${meta.border}`, fontSize: "12px", fontWeight: 500, color: meta.color }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: meta.dot, flexShrink: 0 }} />
+            {meta.label}
+          </span>
+          {uptime !== null && uptime !== undefined && (
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>{uptime}% uptime</span>
           )}
         </div>
-      </main>
-      <Footer />
-    </>
-  );
-};
+      </div>
 
-export default StatusPage;
+      {/* 30-day chart */}
+      {service.data && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-muted)", marginBottom: "6px", fontFamily: "'JetBrains Mono',monospace" }}>
+            <span>30d ago</span>
+            <span>Today</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(30, 1fr)", gap: "3px" }}>
+            {Array.from({ length: 30 }, (_, i) => {
+              const dayIndex = 29 - i;
+              const val = service.data?.[dayIndex];
+              const color = getStatusColor(val);
+              const date = new Date(Date.now() - dayIndex * 24 * 60 * 60 * 1000);
+              return (
+                <div
+                  key={i}
+                  title={`${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}: ${STATUS_META[color].label}`}
+                  style={{
+                    height: "28px",
+                    borderRadius: "3px",
+                    background: BAR_COLORS[color],
+                    cursor: "help",
+                    transition: "all 150ms ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "scaleY(1.15)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "scaleY(1)"; }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function StatusPage() {
+  const [statusData, setStatusData] = useState<StatusData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const fetchStatus = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    try {
+      const res = await fetch("/api/status");
+      const data = await res.json();
+      if (data.status === "success") {
+        setStatusData(data.data);
+        setLastUpdated(new Date());
+      }
+    } catch (err) {
+      console.error("Error fetching status:", err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchStatus(); }, [fetchStatus]);
+
+  const overallStatus = statusData.length > 0
+    ? statusData.every((s) => getStatusColor(s.data?.[0]) === "success") ? "success"
+    : statusData.some((s) => getStatusColor(s.data?.[0]) === "failure") ? "failure"
+    : "partial"
+    : "nodata";
+
+  return (
+    <div style={{ paddingTop: "80px" }}>
+      <div className="container-wide" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "16px" }}>
+          <div>
+            <span className="badge badge-muted" style={{ marginBottom: "16px" }}>Monitoring</span>
+            <h1 style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: "12px" }}>Website Status</h1>
+            {!loading && statusData.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: STATUS_META[overallStatus].dot, flexShrink: 0 }}
+                  className={overallStatus === "success" ? "pulse" : ""} />
+                <span style={{ fontSize: "15px", color: STATUS_META[overallStatus].color, fontWeight: 500 }}>
+                  {overallStatus === "success" ? "All systems operational" : overallStatus === "failure" ? "Major outage detected" : "Partial outage"}
+                </span>
+              </div>
+            )}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+            <button
+              onClick={() => fetchStatus(true)}
+              disabled={refreshing}
+              aria-label="Refresh status"
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                padding: "8px 14px", borderRadius: "8px",
+                border: "1px solid var(--border)", background: "var(--bg-surface)",
+                color: "var(--text-secondary)", fontSize: "13px", cursor: "pointer",
+                transition: "all 200ms ease", fontFamily: "'Space Grotesk',sans-serif",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border-strong)"; (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                style={{ animation: refreshing ? "spin 1s linear infinite" : "none" }}>
+                <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+              </svg>
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
+            {lastUpdated && (
+              <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>
+                Updated {lastUpdated.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Content */}
+        {loading ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", gap: "16px" }}>
+            <div style={{ width: "32px", height: "32px", border: "2px solid var(--border)", borderTopColor: "var(--accent)", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+            <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>Fetching status data...</p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {statusData.map((service) => (
+              <ServiceCard key={service.key} service={service} />
+            ))}
+          </div>
+        )}
+
+        {/* Legend */}
+        {!loading && (
+          <div style={{ display: "flex", gap: "20px", marginTop: "32px", flexWrap: "wrap" }}>
+            {(["success", "partial", "failure", "nodata"] as const).map((key) => (
+              <div key={key} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: BAR_COLORS[key], flexShrink: 0 }} />
+                <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{STATUS_META[key].label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

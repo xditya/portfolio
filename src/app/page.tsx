@@ -1,290 +1,305 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
-import { LuFolderOpen, LuUser, LuMail } from "react-icons/lu";
-import {
-  FaGithub,
-  FaXTwitter,
-  FaLinkedin,
-  FaTelegram,
-  FaYoutube,
-} from "react-icons/fa6";
-
+import { useEffect, useRef } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 
-// Register the plugin once
 gsap.registerPlugin(ScrambleTextPlugin);
 
-export default function Home() {
-  // Ref for the "xditya" part
-  const nameRef = useRef(null);
-  // Ref for the "?" part
-  const punctRef = useRef(null);
-  const headingRef = useRef(null);
-  const subtitleRef = useRef(null);
-  const ctaRef = useRef(null);
-  const socialsRef = useRef(null);
-  const availabilityRef = useRef(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  
-  // Listen for mobile menu toggle
+const SOCIAL_LINKS = [
+  {
+    label: "GitHub",
+    href: "https://github.com/xditya",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+      </svg>
+    ),
+  },
+  {
+    label: "X / Twitter",
+    href: "https://twitter.com/xditya",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L2.066 2.25H8.79l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+      </svg>
+    ),
+  },
+  {
+    label: "LinkedIn",
+    href: "https://linkedin.com/in/xditya",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Telegram",
+    href: "https://t.me/xditya",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+      </svg>
+    ),
+  },
+  {
+    label: "YouTube",
+    href: "https://youtube.com/@xditya",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+      </svg>
+    ),
+  },
+];
+
+export default function HomePage() {
+  const nameRef = useRef<HTMLSpanElement>(null);
+  const dotRef = useRef<HTMLSpanElement>(null);
+  const taglineRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const socialRef = useRef<HTMLDivElement>(null);
+  const badgeRef = useRef<HTMLAnchorElement>(null);
+
   useEffect(() => {
-    const handleMenuToggle = (e: CustomEvent<{ open: boolean }>) => {
-      if (!contentRef.current || !ctaRef.current || !socialsRef.current) return;
-      
-      if (e.detail.open) {
-        // Menu opened - move content down below the navbar menu
-        gsap.to(contentRef.current, {
-          y: 200,
-          duration: 0.4,
-          ease: "power2.out",
-        });
-        gsap.to(ctaRef.current, {
-          opacity: 0,
-          scale: 0.95,
-          duration: 0.2,
-          ease: "power2.in",
-        });
-        // Move social icons up to stay visible on screen
-        gsap.to(socialsRef.current, {
-          y: -180,
-          duration: 0.4,
-          ease: "power2.out",
-        });
-      } else {
-        // Menu closed - restore content
-        gsap.to(contentRef.current, {
-          y: 0,
-          duration: 0.4,
-          ease: "power2.out",
-        });
-        gsap.to(ctaRef.current, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.3,
-          delay: 0.15,
-          ease: "power2.out",
-        });
-        // Restore social icons position
-        gsap.to(socialsRef.current, {
-          y: 0,
-          duration: 0.4,
-          ease: "power2.out",
-        });
-      }
-    };
-    
-    window.addEventListener("mobileMenuToggle", handleMenuToggle as EventListener);
-    return () => {
-      window.removeEventListener("mobileMenuToggle", handleMenuToggle as EventListener);
-    };
+    // Set initial hidden state via GSAP so it only hides when JS is running
+    gsap.set([taglineRef.current, ctaRef.current, socialRef.current, badgeRef.current], {
+      opacity: 0,
+      y: 16,
+    });
+
+    const tl = gsap.timeline({ delay: 0.2 });
+
+    tl.to(nameRef.current, {
+      duration: 0.9,
+      scrambleText: {
+        text: "Aditya",
+        chars: "abcdefghijklmnopqrstuvwxyz",
+        speed: 0.4,
+        revealDelay: 0.1,
+      },
+      ease: "none",
+    })
+      .to(
+        dotRef.current,
+        {
+          duration: 0.5,
+          scrambleText: { text: ".", chars: "!@#$%", speed: 0.6 },
+          ease: "none",
+        },
+        "-=0.3"
+      )
+      .to(taglineRef.current, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.1")
+      .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.2")
+      .to(socialRef.current, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.2")
+      .to(badgeRef.current, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, "-=0.1");
   }, []);
-  
-  // const [githubStats, setGithubStats] = useState({ stars: 0, repos: 0 });
-
-  useEffect(() => {
-    // Fetch GitHub stats
-    // const fetchStats = async () => {
-    //   try {
-    //     const response = await fetch("https://api.github.com/users/xditya");
-    //     const data = await response.json();
-    //     setGithubStats({ stars: 1770, repos: data.public_repos || 0 });
-    //   } catch {
-    //     setGithubStats({ stars: 1770, repos: 200 });
-    //   }
-    // };
-    // fetchStats();
-
-    const nameElement = nameRef.current;
-    const punctElement = punctRef.current;
-
-    // Ensure both refs are connected to DOM elements before animating
-    if (nameElement && punctElement) {
-      // Tween for the name part ("xditya" -> "Aditya")
-      const nameTween = gsap.to(nameElement, {
-        delay: 0.3, // Short delay before starting
-        scrambleText: {
-          text: "Aditya", // The final text for this span
-          chars: "abcdefghijklmnopqrstuvwxyz", // Characters to use for scrambling the name
-          speed: 0.4, // Speed of the name scramble/reveal
-        },
-        duration: 0.8, // Faster scramble duration
-        ease: "power1.inOut",
-        onComplete: () => {
-          // This function runs *after* the name tween finishes
-
-          // Tween for the punctuation part ("?" -> ".")
-          gsap.to(punctElement, {
-            scrambleText: {
-              text: ".", // The final text for this span
-              chars: "!@#$%", // Scramble with symbols before resolving to '.'
-              speed: 0.5, // Speed of the punctuation change (can be faster)
-            },
-            duration: 0.5, // Duration for the punctuation change (adjust as needed)
-            ease: "power1.inOut",
-            onComplete: () => {
-              // Move heading up smoothly
-              gsap.to(headingRef.current, {
-                y: 0,
-                duration: 0.8,
-                ease: "power2.out",
-              });
-
-              // Reveal availability badge
-              if (availabilityRef.current) {
-                gsap.to(availabilityRef.current, {
-                  opacity: 1,
-                  y: 0,
-                  duration: 0.6,
-                  delay: 1.0,
-                  ease: "power2.out",
-                });
-              }
-              
-              // After heading moves up, reveal subtitle and buttons in sequence
-              gsap.to(subtitleRef.current, {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-                delay: 0.3,
-                ease: "power2.out",
-              });
-              
-              // Animate CTA buttons with stagger
-              gsap.to(ctaRef.current, {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-                delay: 0.5,
-                ease: "power2.out",
-              });
-              
-              // Animate social icons
-              gsap.to(socialsRef.current, {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-                delay: 0.7,
-                ease: "power2.out",
-              });
-            },
-          });
-        },
-      });
-
-      // Optional: Clean up tweens on component unmount
-      return () => {
-        nameTween.kill();
-        // The second tween is tied to the first's onComplete,
-        // killing the first should prevent the second from starting if unmounted early.
-      };
-    } else {
-      console.error(
-        "Refs not connected - elements not found for GSAP animation."
-      );
-    }
-  }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center bg-[var(--background)] text-[var(--foreground)] px-4 relative overflow-hidden">
-      {/* Subtle background gradient */}
-      {/* <div className="absolute inset-0 bg-gradient-to-b from-[var(--primary)]/5 via-transparent to-transparent pointer-events-none" /> */}
-      
-      <div ref={contentRef} className="w-full max-w-2xl flex flex-col items-center text-center gap-4 pt-32 pb-16 relative z-10">
-        
-        <h1 ref={headingRef} className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-2 translate-y-24">
-          Hi, I&apos;m {/* Container span to keep styling */}
-          <span className="text-[var(--primary)]">
-            {/* Span for the name part - initially "xditya" */}
-            <span ref={nameRef}>xditya</span>
-            {/* Span for the punctuation part - initially "?" */}
-            <span ref={punctRef}>?</span>
-          </span>
-        </h1>
-        
-        <p ref={subtitleRef} className="text-base sm:text-lg text-[var(--foreground)]/60 font-medium mb-6 font-sans opacity-0 translate-y-5">
-          Full-stack dev. Open-source contributor. Bot builder.
-        </p>
-
-
-
-        <div ref={ctaRef} className="flex flex-wrap justify-center gap-3 mb-10 opacity-0 translate-y-5">
-          <a
-            href="/projects"
-            className="flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--background)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)] hover:bg-[var(--accent)] hover:border-[var(--accent)] hover:scale-105 transition-all"
-          >
-            <LuFolderOpen className="text-lg" /> View Projects
-          </a>
-          <a
-            href="/about"
-            className="flex items-center justify-center gap-2 bg-[var(--foreground)]/5 text-[var(--foreground)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)]/10 hover:bg-[var(--primary)] hover:text-[var(--background)] hover:border-[var(--primary)] hover:scale-105 transition-all"
-          >
-            <LuUser className="text-lg" /> About Me
-          </a>
-          <a
-            href="/contact"
-            className="flex items-center justify-center gap-2 bg-[var(--foreground)]/5 text-[var(--foreground)] font-semibold rounded-full px-8 py-3 text-base border border-[var(--primary)]/10 hover:bg-[var(--primary)] hover:text-[var(--background)] hover:border-[var(--primary)] hover:scale-105 transition-all"
-          >
-            <LuMail className="text-lg" /> Contact
-          </a>
-        </div>
-
-        <div ref={socialsRef} className="flex gap-3 mt-2 opacity-0 translate-y-5">
-          <a
-            href="https://github.com/xditya"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
-          >
-            <FaGithub />
-          </a>
-          <a
-            href="https://x.com/its_xditya"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
-          >
-            <FaXTwitter />
-          </a>
-          <a
-            href="https://linkedin.com/in/xditya"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
-          >
-            <FaLinkedin />
-          </a>
-          <a
-            href="https://t.me/xditya"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
-          >
-            <FaTelegram />
-          </a>
-          <a
-            href="https://youtube.com/@xditya"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[var(--foreground)]/5 hover:bg-[var(--primary)] hover:text-[var(--background)] text-[var(--foreground)]/70 rounded-xl p-3 transition-all hover:scale-110 text-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]"
-          >
-            <FaYoutube />
-          </a>
-        </div>
+    <div
+      className="hero-glow"
+      style={{
+        minHeight: "100svh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "clamp(90px, 16vw, 140px) 20px clamp(60px, 10vw, 80px)",
+        position: "relative",
+        textAlign: "center",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* Location Badge */}
+      <div
+        style={{
+          marginBottom: "clamp(24px, 5vw, 40px)",
+          opacity: 0,
+          animation: "fade-in-up 0.5s ease 0.1s forwards",
+        }}
+      >
+        <span className="badge badge-muted">
+          <span
+            style={{
+              width: "7px",
+              height: "7px",
+              borderRadius: "50%",
+              background: "var(--accent)",
+              display: "inline-block",
+              flexShrink: 0,
+            }}
+            className="pulse"
+          />
+          Based in Kerala, India
+        </span>
       </div>
 
-      <a
-        ref={availabilityRef}
-        href="/contact"
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--background)]/80 backdrop-blur-md border border-[var(--primary)]/20 text-[var(--primary)] text-sm font-medium opacity-0 translate-y-10 hover:bg-[var(--primary)]/10 transition-all hover:scale-105 hover:border-[var(--primary)]/40 shadow-lg cursor-pointer"
+      {/* Hero Heading */}
+      <h1
+        style={{
+          fontFamily: "'Archivo', sans-serif",
+          fontWeight: 900,
+          fontSize: "clamp(52px, 14vw, 112px)",
+          letterSpacing: "-0.04em",
+          lineHeight: 1,
+          marginBottom: "clamp(16px, 4vw, 24px)",
+          color: "var(--text-primary)",
+        }}
       >
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-        </span>
+        <span ref={nameRef}>xditya</span>
+        <span ref={dotRef} style={{ color: "var(--accent)" }}>?</span>
+      </h1>
+
+      {/* Tagline */}
+      <p
+        ref={taglineRef}
+        style={{
+          fontSize: "clamp(15px, 3vw, 20px)",
+          color: "var(--text-secondary)",
+          maxWidth: "480px",
+          lineHeight: 1.6,
+          marginBottom: "clamp(32px, 6vw, 48px)",
+        }}
+      >
+        Full-stack dev.{" "}
+        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+          Open-source contributor.
+        </span>{" "}
+        Bot builder.
+      </p>
+
+      {/* CTA Buttons */}
+      <div
+        ref={ctaRef}
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          marginBottom: "clamp(40px, 8vw, 64px)",
+        }}
+      >
+        <Link href="/projects" className="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+          </svg>
+          View Projects
+        </Link>
+        <Link href="/about" className="btn btn-ghost">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          About Me
+        </Link>
+        <Link href="/contact" className="btn btn-outline-accent">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+          Get In Touch
+        </Link>
+      </div>
+
+      {/* Social Links */}
+      <div
+        ref={socialRef}
+        style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}
+      >
+        {SOCIAL_LINKS.map(({ label, href, icon }) => (
+          <a
+            key={label}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={label}
+            title={label}
+            style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "10px",
+              border: "1px solid var(--border)",
+              background: "var(--bg-surface)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--text-muted)",
+              cursor: "pointer",
+              transition: "all 200ms ease",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.color = "var(--text-primary)";
+              el.style.borderColor = "var(--accent-border)";
+              el.style.background = "var(--bg-elevated)";
+              el.style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.color = "var(--text-muted)";
+              el.style.borderColor = "var(--border)";
+              el.style.background = "var(--bg-surface)";
+              el.style.transform = "translateY(0)";
+            }}
+          >
+            {icon}
+          </a>
+        ))}
+      </div>
+
+      {/* Availability Badge — Fixed bottom-right */}
+      <Link
+        ref={badgeRef}
+        href="/contact"
+        style={{
+          position: "fixed",
+          bottom: "24px",
+          right: "24px",
+          zIndex: 50,
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "10px 16px",
+          borderRadius: "999px",
+          background: "rgba(6, 8, 11, 0.88)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          border: "1px solid var(--accent-border)",
+          color: "var(--text-primary)",
+          fontSize: "13px",
+          fontWeight: 500,
+          cursor: "pointer",
+          textDecoration: "none",
+          transition: "all 200ms ease",
+          boxShadow: "0 4px 16px rgba(59,130,246,0.15)",
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.background = "rgba(59,130,246,0.12)";
+          el.style.transform = "translateY(-2px)";
+          el.style.boxShadow = "0 8px 24px rgba(59,130,246,0.25)";
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.background = "rgba(6, 8, 11, 0.88)";
+          el.style.transform = "translateY(0)";
+          el.style.boxShadow = "0 4px 16px rgba(59,130,246,0.15)";
+        }}
+      >
+        <span
+          style={{
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            background: "var(--accent)",
+            flexShrink: 0,
+          }}
+          className="pulse"
+        />
         Available for Work
-      </a>
-    </main>
+      </Link>
+    </div>
   );
 }
