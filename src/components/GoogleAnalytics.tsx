@@ -2,26 +2,44 @@
 
 import { useEffect } from "react";
 import Script from "next/script";
-import { usePathname, useSearchParams } from "next/navigation";
 import { GA_MEASUREMENT_ID, pageview } from "@/lib/gtag";
 
 export default function GoogleAnalytics() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID || !pathname) {
-      return;
-    }
+    if (!GA_MEASUREMENT_ID) return;
 
-    const query = searchParams.toString();
-    const url = query ? `${pathname}?${query}` : pathname;
-    pageview(url);
-  }, [pathname, searchParams]);
+    const handleRoute = () => {
+      try {
+        const url = window.location.pathname + window.location.search;
+        pageview(url);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        // ignore in non-browser environments
+      }
+    };
 
-  if (!GA_MEASUREMENT_ID) {
-    return null;
-  }
+    // initial pageview
+    handleRoute();
+
+    // listen to back/forward
+    window.addEventListener("popstate", handleRoute);
+
+    // monkey-patch pushState to capture client navigations
+    const origPush = history.pushState;
+    // @ts-expect-ignore
+    history.pushState = function (...args: unknown[]) {
+      const result = origPush.apply(this, args as never);
+      handleRoute();
+      return result;
+    };
+
+    return () => {
+      window.removeEventListener("popstate", handleRoute);
+      history.pushState = origPush;
+    };
+  }, []);
+
+  if (!GA_MEASUREMENT_ID) return null;
 
   return (
     <>
