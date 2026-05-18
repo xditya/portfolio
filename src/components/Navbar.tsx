@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { event as trackEvent } from "@/lib/gtag";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -31,7 +32,7 @@ export default function Navbar() {
   // Dispatch event for home page hero
   useEffect(() => {
     window.dispatchEvent(
-      new CustomEvent("mobileMenuToggle", { detail: { open: menuOpen } })
+      new CustomEvent("mobileMenuToggle", { detail: { open: menuOpen } }),
     );
     if (menuOpen) {
       document.body.style.overflow = "hidden";
@@ -80,6 +81,13 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
+            onClick={() =>
+              trackEvent("nav_click", {
+                link_label: "Home",
+                link_url: "/",
+                source: "logo",
+              })
+            }
             style={{
               display: "flex",
               alignItems: "center",
@@ -95,9 +103,22 @@ export default function Navbar() {
               alt="logo"
               width={28}
               height={28}
-              style={{ width: "28px", height: "28px", objectFit: "contain", filter: "brightness(3) saturate(0.7)" }}
+              style={{
+                width: "28px",
+                height: "28px",
+                objectFit: "contain",
+                filter: "brightness(3) saturate(0.7)",
+              }}
             />
-            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: "17px", letterSpacing: "-0.03em", color: "var(--text-primary)" }}>
+            <span
+              style={{
+                fontFamily: "'Archivo', sans-serif",
+                fontWeight: 800,
+                fontSize: "17px",
+                letterSpacing: "-0.03em",
+                color: "var(--text-primary)",
+              }}
+            >
               Aditya
             </span>
           </Link>
@@ -115,6 +136,13 @@ export default function Navbar() {
               <Link
                 key={href}
                 href={href}
+                onClick={() =>
+                  trackEvent("nav_click", {
+                    link_label: label,
+                    link_url: href,
+                    source: "desktop",
+                  })
+                }
                 style={{
                   padding: "6px 14px",
                   borderRadius: "8px",
@@ -157,7 +185,13 @@ export default function Navbar() {
 
           {/* Mobile Hamburger */}
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={() => {
+              const nextOpen = !menuOpen;
+              setMenuOpen(nextOpen);
+              trackEvent("mobile_menu_toggle", {
+                state: nextOpen ? "open" : "close",
+              });
+            }}
             aria-label="Toggle navigation menu"
             aria-expanded={menuOpen}
             style={{
@@ -201,6 +235,13 @@ export default function Navbar() {
           <Link
             key={href}
             href={href}
+            onClick={() =>
+              trackEvent("nav_click", {
+                link_label: label,
+                link_url: href,
+                source: "mobile_overlay",
+              })
+            }
             style={{
               fontFamily: "'Archivo', sans-serif",
               fontWeight: 700,

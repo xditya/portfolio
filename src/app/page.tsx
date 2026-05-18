@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
+import { event as trackEvent } from "@/lib/gtag";
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
@@ -65,10 +66,13 @@ export default function HomePage() {
 
   useEffect(() => {
     // Set initial hidden state via GSAP so it only hides when JS is running
-    gsap.set([taglineRef.current, ctaRef.current, socialRef.current, badgeRef.current], {
-      opacity: 0,
-      y: 16,
-    });
+    gsap.set(
+      [taglineRef.current, ctaRef.current, socialRef.current, badgeRef.current],
+      {
+        opacity: 0,
+        y: 16,
+      },
+    );
 
     const tl = gsap.timeline({ delay: 0.2 });
 
@@ -89,12 +93,28 @@ export default function HomePage() {
           scrambleText: { text: ".", chars: "!@#$%", speed: 0.6 },
           ease: "none",
         },
-        "-=0.3"
+        "-=0.3",
       )
-      .to(taglineRef.current, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.1")
-      .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.2")
-      .to(socialRef.current, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "-=0.2")
-      .to(badgeRef.current, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, "-=0.1");
+      .to(
+        taglineRef.current,
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+        "-=0.1",
+      )
+      .to(
+        ctaRef.current,
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+        "-=0.2",
+      )
+      .to(
+        socialRef.current,
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+        "-=0.2",
+      )
+      .to(
+        badgeRef.current,
+        { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+        "-=0.1",
+      );
   }, []);
 
   return (
@@ -149,7 +169,9 @@ export default function HomePage() {
         }}
       >
         <span ref={nameRef}>xditya</span>
-        <span ref={dotRef} style={{ color: "var(--accent)" }}>?</span>
+        <span ref={dotRef} style={{ color: "var(--accent)" }}>
+          ?
+        </span>
       </h1>
 
       {/* Tagline */}
@@ -181,21 +203,78 @@ export default function HomePage() {
           marginBottom: "clamp(40px, 8vw, 64px)",
         }}
       >
-        <Link href="/projects" className="btn btn-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <Link
+          href="/projects"
+          className="btn btn-primary"
+          onClick={() =>
+            trackEvent("cta_click", {
+              cta_label: "View Projects",
+              link_url: "/projects",
+              source: "home_hero",
+            })
+          }
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
           </svg>
           View Projects
         </Link>
-        <Link href="/about" className="btn btn-ghost">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <Link
+          href="/about"
+          className="btn btn-ghost"
+          onClick={() =>
+            trackEvent("cta_click", {
+              cta_label: "About Me",
+              link_url: "/about",
+              source: "home_hero",
+            })
+          }
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
           About Me
         </Link>
-        <Link href="/contact" className="btn btn-outline-accent">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <Link
+          href="/contact"
+          className="btn btn-outline-accent"
+          onClick={() =>
+            trackEvent("cta_click", {
+              cta_label: "Get In Touch",
+              link_url: "/contact",
+              source: "home_hero",
+            })
+          }
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
             <polyline points="22,6 12,13 2,6" />
           </svg>
@@ -206,7 +285,12 @@ export default function HomePage() {
       {/* Social Links */}
       <div
         ref={socialRef}
-        style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
       >
         {SOCIAL_LINKS.map(({ label, href, icon }) => (
           <a
@@ -214,6 +298,13 @@ export default function HomePage() {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              trackEvent("social_click", {
+                social_platform: label,
+                link_url: href,
+                source: "home",
+              })
+            }
             aria-label={label}
             title={label}
             style={{
@@ -253,6 +344,13 @@ export default function HomePage() {
       <Link
         ref={badgeRef}
         href="/contact"
+        onClick={() =>
+          trackEvent("cta_click", {
+            cta_label: "Available for Work",
+            link_url: "/contact",
+            source: "home_floating_badge",
+          })
+        }
         style={{
           position: "fixed",
           bottom: "24px",

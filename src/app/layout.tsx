@@ -3,6 +3,29 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { Archivo, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+
+const space = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-space",
+  display: "swap",
+});
+
+const jetmono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -50,23 +73,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="grid-bg">
-          <SmoothScroll />
-          <Navbar />
-          <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
-          <Footer />
+      <head />
+      <body
+        className={`${archivo.variable} ${space.variable} ${jetmono.variable} grid-bg`}
+      >
+        <GoogleAnalytics />
+        <SmoothScroll />
+        <Navbar />
+        <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
+        <Footer />
       </body>
     </html>
   );
