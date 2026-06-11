@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -75,14 +74,35 @@ function useCountUp(target: number, duration = 1.5, start = false) {
   return count;
 }
 
-function StatCard({ label, value, suffix = "", animate }: { label: string; value: number; suffix?: string; animate: boolean }) {
+function Stat({
+  label,
+  value,
+  suffix = "",
+  animate,
+}: {
+  label: string;
+  value: number;
+  suffix?: string;
+  animate: boolean;
+}) {
   const count = useCountUp(value, 1.5, animate);
   return (
-    <div className="card" style={{ padding: "20px 16px", textAlign: "center", cursor: "default", minWidth: 0 }}>
-      <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: "clamp(24px, 4vw, 36px)", letterSpacing: "-0.03em", color: "var(--text-primary)", lineHeight: 1, marginBottom: "6px" }}>
-        {count}{suffix}
+    <div style={{ padding: "24px 0", borderTop: "1px solid var(--line)" }}>
+      <div
+        style={{
+          fontFamily: "var(--font-display)",
+          fontWeight: 900,
+          fontSize: "clamp(36px, 5vw, 64px)",
+          letterSpacing: "-0.03em",
+          lineHeight: 1,
+        }}
+      >
+        {count}
+        <span style={{ color: "var(--accent)" }}>{suffix}</span>
       </div>
-      <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 500 }}>{label}</div>
+      <div className="mono-label" style={{ marginTop: "10px" }}>
+        {label}
+      </div>
     </div>
   );
 }
@@ -90,202 +110,316 @@ function StatCard({ label, value, suffix = "", animate }: { label: string; value
 export default function AboutPage() {
   const statsRef = useRef<HTMLDivElement>(null);
   const [statsVisible, setStatsVisible] = useState(false);
-  const [activeCard, setActiveCard] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [githubStats, setGithubStats] = useState({ repos: 20, stars: 1770, followers: 576 });
+  const [githubStats, setGithubStats] = useState({
+    repos: 20,
+    stars: 1770,
+    followers: 576,
+  });
 
   useEffect(() => {
     fetch("https://api.github.com/users/xditya")
       .then((r) => r.json())
       .then((d) => {
-        if (d.public_repos) setGithubStats((p) => ({ ...p, repos: d.public_repos, followers: d.followers }));
+        if (d.public_repos)
+          setGithubStats((p) => ({
+            ...p,
+            repos: d.public_repos,
+            followers: d.followers,
+          }));
       })
       .catch(() => {});
   }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setStatsVisible(true); observer.disconnect(); } },
-      { threshold: 0.2 }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStatsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 },
     );
     if (statsRef.current) observer.observe(statsRef.current);
     return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal-on-scroll");
-    els.forEach((el) => {
-      gsap.fromTo(el,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out",
-          scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none none" } }
-      );
-    });
-  }, []);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
 
-  const scrollToCard = useCallback((idx: number) => {
-    const container = scrollRef.current;
-    if (!container) return;
-    const card = container.children[idx] as HTMLElement;
-    if (card) {
-      container.scrollTo({ left: card.offsetLeft - 16, behavior: "smooth" });
-      setActiveCard(idx);
-    }
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>(".reveal-on-scroll").forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+            scrollTrigger: { trigger: el, start: "top 88%" },
+          },
+        );
+      });
+    });
+    return () => ctx.revert();
   }, []);
 
   const yearsOfCoding = new Date().getFullYear() - 2020;
+  const age = new Date().getFullYear() - 2003;
 
   return (
-    <div style={{ paddingTop: "80px" }}>
-      {/* ── Page Header ── */}
-      <div className="container-wide" style={{ paddingTop: "40px", paddingBottom: "48px" }}>
-        <span className="badge badge-muted" style={{ marginBottom: "14px" }}>About me</span>
-        <h1 style={{ fontSize: "clamp(28px, 5vw, 52px)", marginBottom: "14px", maxWidth: "640px" }}>
-          Building things for the web & Telegram
+    <div style={{ paddingTop: "110px" }}>
+      {/* ── Header ── */}
+      <div className="container-x" style={{ paddingBottom: "clamp(40px, 6vw, 72px)" }}>
+        <p className="mono-label" style={{ marginBottom: "24px" }}>
+          01 — About me
+        </p>
+        <h1 className="display-lg" style={{ marginBottom: "28px", maxWidth: "12ch" }}>
+          Building things for the web &amp; Telegram
         </h1>
-        <p style={{ fontSize: "16px", color: "var(--text-secondary)", lineHeight: 1.7, maxWidth: "580px" }}>
-          Full-stack developer interested in Python, TypeScript, and automation. I build Telegram bots, web apps, and open-source tools.
+        <p className="body-lg" style={{ maxWidth: "560px", margin: 0 }}>
+          Full-stack developer interested in Python, TypeScript, and
+          automation. I build Telegram bots, web apps, and open-source tools.
         </p>
       </div>
 
-      <div className="container-wide" style={{ paddingBottom: "80px" }}>
-
-        {/* ── Profile strip ── */}
-        <div className="reveal-on-scroll" style={{ display: "flex", alignItems: "center", gap: "20px", padding: "20px 24px", background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "14px", marginBottom: "24px", flexWrap: "wrap" }}>
-          {/* Avatar */}
-          <div style={{ width: "64px", height: "64px", borderRadius: "50%", overflow: "hidden", border: "2px solid var(--accent-border)", background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      {/* ── Profile strip ── */}
+      <div className="container-x reveal-on-scroll">
+        <div
+          className="hairline-t hairline-b"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "24px",
+            paddingBlock: "28px",
+          }}
+        >
+          <div
+            style={{
+              width: "72px",
+              height: "72px",
+              borderRadius: "50%",
+              overflow: "hidden",
+              border: "1px solid var(--line-strong)",
+              background: "var(--bg-card)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Aditya" style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; const p = (e.currentTarget as HTMLImageElement).parentElement!; p.innerHTML = `<span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:var(--accent)">A</span>`; }} />
+            <img
+              src="/logo.png"
+              alt="Aditya"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+                const p = (e.currentTarget as HTMLImageElement).parentElement!;
+                p.innerHTML = `<span style="font-family:var(--font-display);font-weight:900;font-size:26px;color:var(--accent)">A</span>`;
+              }}
+            />
           </div>
-          {/* Name / role */}
-          <div style={{ flex: 1, minWidth: "160px" }}>
-            <h2 style={{ fontSize: "18px", marginBottom: "2px" }}>Aditya</h2>
-            <p style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Full-stack Developer · Kerala, India</p>
+
+          <div style={{ flex: 1, minWidth: "180px" }}>
+            <h2
+              style={{
+                fontSize: "20px",
+                textTransform: "uppercase",
+                marginBottom: "4px",
+              }}
+            >
+              Aditya
+            </h2>
+            <p className="mono-sm" style={{ color: "var(--ink-dim)", margin: 0 }}>
+              Full-stack Developer · Kerala, India · {age}y old
+            </p>
           </div>
-          {/* Badges + links */}
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+
+          <div style={{ display: "flex", gap: "18px", flexWrap: "wrap", alignItems: "center" }}>
             <span className="badge badge-accent">Open Source</span>
-            <span style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>
-              {new Date().getFullYear() - 2003}y old
-            </span>
-          </div>
-          {/* Socials */}
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             {[
               { label: "GitHub", href: "https://github.com/xditya" },
               { label: "Telegram", href: "https://t.me/xditya" },
               { label: "Email", href: "mailto:contact@xditya.me" },
             ].map(({ label, href }) => (
-              <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace", transition: "color 200ms ease", cursor: "pointer" }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent)")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}>
-                {label}
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-u mono-sm"
+                style={{ color: "var(--muted)" }}
+              >
+                {label} ↗
               </a>
             ))}
           </div>
-          {/* Resume */}
-          <a href="/resume.pdf" download className="btn btn-ghost" style={{ fontSize: "13px", padding: "8px 14px", flexShrink: 0 }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Resume
+
+          <a href="/resume.pdf" download className="btn-line" style={{ padding: "12px 24px" }}>
+            Resume ↓
           </a>
         </div>
+      </div>
 
-        {/* ── Stats ── */}
-        <div ref={statsRef} className="reveal-on-scroll" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "24px" }} id="stats-grid">
-          <StatCard label="Repos" value={githubStats.repos} suffix="+" animate={statsVisible} />
-          <StatCard label="Stars" value={githubStats.stars} suffix="+" animate={statsVisible} />
-          <StatCard label="Followers" value={githubStats.followers} suffix="+" animate={statsVisible} />
-          <StatCard label="Years Coding" value={yearsOfCoding} suffix="+" animate={statsVisible} />
+      {/* ── Stats ── */}
+      <div className="container-x reveal-on-scroll" ref={statsRef}>
+        <div
+          className="about-stats"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "clamp(20px, 3vw, 48px)",
+            paddingBlock: "clamp(40px, 6vw, 72px)",
+          }}
+        >
+          <Stat label="Repos" value={githubStats.repos} suffix="+" animate={statsVisible} />
+          <Stat label="Stars" value={githubStats.stars} suffix="+" animate={statsVisible} />
+          <Stat label="Followers" value={githubStats.followers} suffix="+" animate={statsVisible} />
+          <Stat label="Years Coding" value={yearsOfCoding} suffix="+" animate={statsVisible} />
         </div>
+      </div>
 
-        {/* ── Two columns: What I Do + How I Work ── */}
-        <div className="reveal-on-scroll" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "24px" }} id="what-how-grid">
+      {/* ── What I Do / How I Work ── */}
+      <div className="container-x reveal-on-scroll">
+        <div
+          className="about-two-col"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "clamp(24px, 4vw, 64px)",
+          }}
+        >
           {[
-            { title: "What I Do", content: "Build Telegram bots, web applications, and automation tools using Python and TypeScript.", tags: ["Python", "TypeScript", "Telegram"] },
-            { title: "How I Work", content: "Simple and automated. I focus on solving real problems efficiently and building scalable solutions.", tags: ["Efficiency", "Automation", "Open Source"] },
+            {
+              title: "What I Do",
+              content:
+                "Build Telegram bots, web applications, and automation tools using Python and TypeScript.",
+              tags: ["Python", "TypeScript", "Telegram"],
+            },
+            {
+              title: "How I Work",
+              content:
+                "Simple and automated. I focus on solving real problems efficiently and building scalable solutions.",
+              tags: ["Efficiency", "Automation", "Open Source"],
+            },
           ].map(({ title, content, tags }) => (
-            <div key={title} className="card" style={{ padding: "20px", borderLeft: "2px solid var(--accent-border)" }}>
-              <h3 style={{ fontSize: "14px", marginBottom: "10px" }}>{title}</h3>
-              <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: "14px" }}>{content}</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                {tags.map((t) => <span key={t} className="tech-chip">{t}</span>)}
+            <div key={title} className="hairline-t" style={{ paddingTop: "24px" }}>
+              <h3
+                style={{
+                  fontSize: "18px",
+                  textTransform: "uppercase",
+                  marginBottom: "14px",
+                }}
+              >
+                {title}
+              </h3>
+              <p className="body-lg" style={{ marginTop: 0, marginBottom: "20px" }}>
+                {content}
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {tags.map((t) => (
+                  <span key={t} className="chip">
+                    {t}
+                  </span>
+                ))}
               </div>
             </div>
           ))}
         </div>
+      </div>
 
-        {/* ── Tech Stack ── */}
-        <div className="reveal-on-scroll card" style={{ padding: "20px", marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "14px", marginBottom: "16px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>Tech Stack</h2>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-            {TECH_STACK.map(({ name, color }) => (
-              <div key={name} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: "8px", cursor: "default", transition: "all 200ms ease" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = color + "55"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}>
-                <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: color, flexShrink: 0 }} />
-                <span style={{ fontSize: "13px", fontWeight: 500, fontFamily: "'JetBrains Mono', monospace" }}>{name}</span>
-              </div>
-            ))}
-          </div>
+      {/* ── Tech Stack ── */}
+      <div className="container-x reveal-on-scroll" style={{ marginTop: "clamp(48px, 7vw, 96px)" }}>
+        <p className="mono-label" style={{ marginBottom: "24px" }}>
+          02 — Tech Stack
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+          {TECH_STACK.map(({ name, color }) => (
+            <span
+              key={name}
+              className="chip"
+              style={{ padding: "12px 22px", fontSize: "14px" }}
+            >
+              <span
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: color,
+                  flexShrink: 0,
+                }}
+              />
+              {name}
+            </span>
+          ))}
         </div>
+      </div>
 
-        {/* ── Experience ── */}
-        <div className="reveal-on-scroll">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-            <h2 style={{ fontSize: "16px" }}>Experience</h2>
-            <div style={{ display: "flex", gap: "6px" }}>
-              {[
-                { label: "←", action: () => scrollToCard(Math.max(0, activeCard - 1)), disabled: activeCard === 0 },
-                { label: "→", action: () => scrollToCard(Math.min(EXPERIENCE.length - 1, activeCard + 1)), disabled: activeCard === EXPERIENCE.length - 1 },
-              ].map(({ label, action, disabled }) => (
-                <button key={label} onClick={action} disabled={disabled} aria-label={label}
-                  style={{ width: "30px", height: "30px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--bg-surface)", color: disabled ? "var(--text-muted)" : "var(--text-primary)", cursor: disabled ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", transition: "all 200ms ease" }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* ── Experience ── */}
+      <div className="container-x" style={{ marginTop: "clamp(48px, 7vw, 96px)" }}>
+        <p className="mono-label reveal-on-scroll" style={{ marginBottom: "32px" }}>
+          03 — Experience
+        </p>
 
-          {/* Scrollable cards */}
-          <div ref={scrollRef} style={{ display: "flex", gap: "12px", overflowX: "auto", scrollbarWidth: "none", paddingBottom: "4px" }}>
-            {EXPERIENCE.map((exp, i) => (
-              <div key={i} onClick={() => setActiveCard(i)}
-                style={{ minWidth: "300px", maxWidth: "300px", padding: "20px", background: "var(--bg-surface)", border: `1px solid ${exp.current ? "var(--accent-border)" : "var(--border)"}`, borderRadius: "12px", cursor: "pointer", transition: "all 200ms ease", flexShrink: 0 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--bg-surface)"; }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "10px" }}>
-                  <div>
-                    <h3 style={{ fontSize: "14px", fontWeight: 600, marginBottom: "3px" }}>{exp.title}</h3>
-                    <p style={{ fontSize: "12px", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace" }}>{exp.company}</p>
-                  </div>
-                  {exp.current && <span className="badge badge-accent" style={{ fontSize: "10px" }}>Now</span>}
-                </div>
-                <p style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace", marginBottom: "10px" }}>{exp.period}</p>
-                <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.6 }}>{exp.description}</p>
+        <div>
+          {EXPERIENCE.map((exp) => (
+            <div
+              key={`${exp.title}-${exp.company}`}
+              className="reveal-on-scroll exp-row hairline-t"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "200px 1fr",
+                gap: "24px",
+                paddingBlock: "28px",
+              }}
+            >
+              <div>
+                <p className="mono-sm" style={{ color: "var(--muted)", margin: 0 }}>
+                  {exp.period}
+                </p>
+                {exp.current && (
+                  <span
+                    className="badge badge-accent"
+                    style={{ marginTop: "10px" }}
+                  >
+                    Now
+                  </span>
+                )}
               </div>
-            ))}
-          </div>
-
-          {/* Dot indicators */}
-          <div style={{ display: "flex", gap: "5px", justifyContent: "center", marginTop: "14px" }}>
-            {EXPERIENCE.map((_, i) => (
-              <button key={i} onClick={() => scrollToCard(i)} aria-label={`Experience ${i + 1}`}
-                style={{ width: i === activeCard ? "18px" : "5px", height: "5px", borderRadius: "3px", background: i === activeCard ? "var(--accent)" : "var(--border)", border: "none", cursor: "pointer", padding: 0, transition: "all 300ms ease" }} />
-            ))}
-          </div>
+              <div>
+                <h3
+                  style={{
+                    fontSize: "clamp(20px, 2.6vw, 28px)",
+                    textTransform: "uppercase",
+                    marginBottom: "6px",
+                  }}
+                >
+                  {exp.title}
+                </h3>
+                <p
+                  className="mono-sm"
+                  style={{ color: "var(--accent-soft)", marginTop: 0, marginBottom: "12px" }}
+                >
+                  {exp.company}
+                </p>
+                <p className="body-lg" style={{ maxWidth: "640px", margin: 0 }}>
+                  {exp.description}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       <style>{`
-        #stats-grid    { grid-template-columns: repeat(4, 1fr) !important; }
-        #what-how-grid { grid-template-columns: 1fr 1fr !important; }
-        @media (max-width: 640px) {
-          #stats-grid    { grid-template-columns: repeat(2, 1fr) !important; }
-          #what-how-grid { grid-template-columns: 1fr !important; }
+        @media (max-width: 720px) {
+          .about-stats   { grid-template-columns: repeat(2, 1fr) !important; }
+          .about-two-col { grid-template-columns: 1fr !important; }
+          .exp-row       { grid-template-columns: 1fr !important; gap: 10px !important; }
         }
       `}</style>
     </div>

@@ -29,7 +29,7 @@ export default function Navbar() {
     setMenuOpen(false);
   }, [pathname]);
 
-  // Dispatch event for home page hero
+  // Dispatch event + lock body scroll while the overlay is open
   useEffect(() => {
     window.dispatchEvent(
       new CustomEvent("mobileMenuToggle", { detail: { open: menuOpen } }),
@@ -46,39 +46,34 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop + Mobile Navbar */}
       <header
         style={{
           position: "fixed",
-          top: "12px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 100,
-          width: "calc(100% - 32px)",
-          maxWidth: "860px",
-          transition: "all 300ms ease",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 102,
+          background:
+            scrolled && !menuOpen ? "rgba(5, 6, 10, 0.82)" : "transparent",
+          backdropFilter: scrolled && !menuOpen ? "blur(14px)" : "none",
+          WebkitBackdropFilter: scrolled && !menuOpen ? "blur(14px)" : "none",
+          borderBottom:
+            scrolled && !menuOpen
+              ? "1px solid var(--line)"
+              : "1px solid transparent",
+          transition: "background 300ms ease, border-color 300ms ease",
         }}
       >
         <nav
+          className="container-x"
           style={{
-            background: scrolled
-              ? "rgba(6, 8, 11, 0.88)"
-              : "rgba(6, 8, 11, 0.65)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            border: "1px solid rgba(48, 54, 61, 0.9)",
-            borderRadius: "14px",
-            padding: "10px 14px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            boxShadow: scrolled
-              ? "0 8px 32px rgba(0,0,0,0.4)"
-              : "0 2px 8px rgba(0,0,0,0.2)",
-            transition: "all 300ms ease",
+            height: "68px",
           }}
         >
-          {/* Logo */}
+          {/* Wordmark */}
           <Link
             href="/"
             onClick={() =>
@@ -88,54 +83,33 @@ export default function Navbar() {
                 source: "logo",
               })
             }
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              textDecoration: "none",
-              flexShrink: 0,
-            }}
             aria-label="xditya — home"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 900,
+              fontSize: "18px",
+              letterSpacing: "-0.03em",
+              textTransform: "uppercase",
+              display: "flex",
+              alignItems: "baseline",
+              zIndex: 102,
+              position: "relative",
+            }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo.svg"
-              alt="logo"
-              width={28}
-              height={28}
-              style={{
-                width: "28px",
-                height: "28px",
-                objectFit: "contain",
-                filter: "brightness(3) saturate(0.7)",
-              }}
-            />
-            <span
-              style={{
-                fontFamily: "'Archivo', sans-serif",
-                fontWeight: 800,
-                fontSize: "17px",
-                letterSpacing: "-0.03em",
-                color: "var(--text-primary)",
-              }}
-            >
-              Aditya
-            </span>
+            xditya
+            <span style={{ color: "var(--accent)" }}>.</span>
           </Link>
 
-          {/* Desktop Links */}
+          {/* Desktop links */}
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            className="hidden-mobile"
+            className="nav-desktop"
+            style={{ display: "flex", alignItems: "center", gap: "32px" }}
           >
-            {NAV_LINKS.map(({ href, label }) => (
+            {NAV_LINKS.map(({ href, label }, i) => (
               <Link
                 key={href}
                 href={href}
+                className="link-u"
                 onClick={() =>
                   trackEvent("nav_click", {
                     link_label: label,
@@ -144,46 +118,22 @@ export default function Navbar() {
                   })
                 }
                 style={{
-                  padding: "6px 14px",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: isActive(href)
-                    ? "var(--accent)"
-                    : "var(--text-secondary)",
-                  background: isActive(href)
-                    ? "var(--accent-glow)"
-                    : "transparent",
-                  border: isActive(href)
-                    ? "1px solid var(--accent-border)"
-                    : "1px solid transparent",
-                  transition: "all 200ms ease",
-                  textDecoration: "none",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive(href)) {
-                    (e.currentTarget as HTMLElement).style.color =
-                      "var(--text-primary)";
-                    (e.currentTarget as HTMLElement).style.background =
-                      "var(--bg-elevated)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive(href)) {
-                    (e.currentTarget as HTMLElement).style.color =
-                      "var(--text-secondary)";
-                    (e.currentTarget as HTMLElement).style.background =
-                      "transparent";
-                  }
+                  fontFamily: "var(--font-mono-stack)",
+                  fontSize: "12px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: isActive(href) ? "var(--accent-soft)" : "var(--ink-dim)",
                 }}
               >
+                <span style={{ color: "var(--muted)", marginRight: "6px" }}>
+                  0{i + 1}
+                </span>
                 {label}
               </Link>
             ))}
           </div>
 
-          {/* Mobile Hamburger */}
+          {/* Hamburger */}
           <button
             onClick={() => {
               const nextOpen = !menuOpen;
@@ -194,41 +144,40 @@ export default function Navbar() {
             }}
             aria-label="Toggle navigation menu"
             aria-expanded={menuOpen}
+            className="nav-burger"
             style={{
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: "6px",
-              color: "var(--text-primary)",
-              borderRadius: "6px",
+              padding: "8px",
+              color: "var(--ink)",
               display: "none",
               alignItems: "center",
               justifyContent: "center",
+              zIndex: 102,
+              position: "relative",
             }}
-            className="show-mobile"
           >
             <HamburgerIcon open={menuOpen} />
           </button>
         </nav>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Full-screen overlay menu */}
       <div
+        aria-hidden={!menuOpen}
         style={{
           position: "fixed",
           inset: 0,
-          zIndex: 90,
-          background: "rgba(6, 8, 11, 0.97)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
+          zIndex: 101,
+          background: "var(--bg)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          alignItems: "center",
-          gap: "8px",
+          padding: "0 clamp(24px, 8vw, 80px)",
           opacity: menuOpen ? 1 : 0,
           pointerEvents: menuOpen ? "all" : "none",
-          transition: "opacity 300ms ease",
+          transition: "opacity 350ms ease",
         }}
       >
         {NAV_LINKS.map(({ href, label }, i) => (
@@ -243,46 +192,51 @@ export default function Navbar() {
               })
             }
             style={{
-              fontFamily: "'Archivo', sans-serif",
-              fontWeight: 700,
-              fontSize: "32px",
-              letterSpacing: "-0.02em",
-              color: isActive(href) ? "var(--accent)" : "var(--text-secondary)",
-              textDecoration: "none",
-              padding: "12px 32px",
-              borderRadius: "12px",
-              transition: "all 200ms ease",
-              transform: menuOpen
-                ? "translateY(0)"
-                : `translateY(${20 * (i + 1)}px)`,
+              fontFamily: "var(--font-display)",
+              fontWeight: 900,
+              fontSize: "clamp(40px, 11vw, 72px)",
+              letterSpacing: "-0.03em",
+              textTransform: "uppercase",
+              lineHeight: 1.15,
+              color: isActive(href) ? "var(--accent)" : "var(--ink)",
+              display: "flex",
+              alignItems: "baseline",
+              gap: "16px",
+              borderBottom: "1px solid var(--line)",
+              padding: "14px 0",
+              transform: menuOpen ? "translateY(0)" : "translateY(28px)",
               opacity: menuOpen ? 1 : 0,
-              transitionDelay: menuOpen ? `${i * 60}ms` : "0ms",
+              transition: `transform 450ms cubic-bezier(0.22,1,0.36,1) ${i * 55}ms, opacity 450ms ease ${i * 55}ms, color 250ms ease`,
             }}
           >
+            <span
+              style={{
+                fontFamily: "var(--font-mono-stack)",
+                fontWeight: 400,
+                fontSize: "13px",
+                letterSpacing: "0.15em",
+                color: "var(--muted)",
+              }}
+            >
+              0{i + 1}
+            </span>
             {label}
           </Link>
         ))}
 
         <div
-          style={{
-            position: "absolute",
-            bottom: "32px",
-            fontSize: "13px",
-            color: "var(--text-muted)",
-            fontFamily: "'JetBrains Mono', monospace",
-          }}
+          className="mono-label"
+          style={{ position: "absolute", bottom: "32px", left: "clamp(24px, 8vw, 80px)" }}
         >
-          © {new Date().getFullYear()} Aditya
+          © {new Date().getFullYear()} Aditya — Kerala, India
         </div>
       </div>
 
-      {/* Responsive styles */}
+      {/* Responsive switch */}
       <style>{`
-        .hidden-mobile { display: flex; }
-        .show-mobile   { display: none !important; }
-        @media (max-width: 680px) {
-          .hidden-mobile { display: none !important; }
-          .show-mobile   { display: flex !important; }
+        @media (max-width: 720px) {
+          .nav-desktop { display: none !important; }
+          .nav-burger  { display: flex !important; }
         }
       `}</style>
     </>
@@ -292,17 +246,17 @@ export default function Navbar() {
 function HamburgerIcon({ open }: { open: boolean }) {
   return (
     <svg
-      width="22"
-      height="22"
+      width="24"
+      height="24"
       viewBox="0 0 22 22"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <line
         x1="3"
-        y1={open ? "11" : "6"}
+        y1={open ? "11" : "7"}
         x2="19"
-        y2={open ? "11" : "6"}
+        y2={open ? "11" : "7"}
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
@@ -312,22 +266,11 @@ function HamburgerIcon({ open }: { open: boolean }) {
           transition: "all 300ms ease",
         }}
       />
-      {!open && (
-        <line
-          x1="3"
-          y1="11"
-          x2="19"
-          y2="11"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      )}
       <line
         x1="3"
-        y1={open ? "11" : "16"}
+        y1={open ? "11" : "15"}
         x2="19"
-        y2={open ? "11" : "16"}
+        y2={open ? "11" : "15"}
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"

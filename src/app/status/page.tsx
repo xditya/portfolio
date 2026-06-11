@@ -42,7 +42,7 @@ function ServiceCard({ service }: { service: StatusData }) {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", marginBottom: "20px", flexWrap: "wrap" }}>
         <div>
           <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "4px" }}>{serviceName}</h2>
-          <a href={service.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace", cursor: "pointer", transition: "color 200ms ease" }}
+          <a href={service.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "var(--font-mono), 'JetBrains Mono', monospace", cursor: "pointer", transition: "color 200ms ease" }}
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent)")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}>
             {service.url}
@@ -54,7 +54,7 @@ function ServiceCard({ service }: { service: StatusData }) {
             {meta.label}
           </span>
           {uptime !== null && uptime !== undefined && (
-            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>{uptime}% uptime</span>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono), 'JetBrains Mono', monospace" }}>{uptime}% uptime</span>
           )}
         </div>
       </div>
@@ -62,7 +62,7 @@ function ServiceCard({ service }: { service: StatusData }) {
       {/* 30-day chart */}
       {service.data && (
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-muted)", marginBottom: "6px", fontFamily: "'JetBrains Mono',monospace" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-muted)", marginBottom: "6px", fontFamily: "var(--font-mono), 'JetBrains Mono', monospace" }}>
             <span>30d ago</span>
             <span>Today</span>
           </div>
@@ -127,16 +127,16 @@ export default function StatusPage() {
     : "nodata";
 
   return (
-    <div style={{ paddingTop: "80px" }}>
-      <div className="container-wide" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+    <div style={{ paddingTop: "110px" }}>
+      <div className="container-x" style={{ paddingBottom: "80px" }}>
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "16px" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "16px" }}>
           <div>
-            <span className="badge badge-muted" style={{ marginBottom: "16px" }}>Monitoring</span>
-            <h1 style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: "12px" }}>Website Status</h1>
+            <p className="mono-label" style={{ marginBottom: "24px" }}>Monitoring — Live uptime</p>
+            <h1 className="display-md" style={{ marginBottom: "20px" }}>Website Status</h1>
             {!loading && statusData.length > 0 && (
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: STATUS_META[overallStatus].dot, flexShrink: 0 }}
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: STATUS_META[overallStatus].dot, color: STATUS_META[overallStatus].dot, flexShrink: 0 }}
                   className={overallStatus === "success" ? "pulse" : ""} />
                 <span style={{ fontSize: "15px", color: STATUS_META[overallStatus].color, fontWeight: 500 }}>
                   {overallStatus === "success" ? "All systems operational" : overallStatus === "failure" ? "Major outage detected" : "Partial outage"}
@@ -154,7 +154,7 @@ export default function StatusPage() {
                 padding: "8px 14px", borderRadius: "8px",
                 border: "1px solid var(--border)", background: "var(--bg-surface)",
                 color: "var(--text-secondary)", fontSize: "13px", cursor: "pointer",
-                transition: "all 200ms ease", fontFamily: "'Space Grotesk',sans-serif",
+                transition: "all 200ms ease", fontFamily: "var(--font-space), 'Space Grotesk', sans-serif",
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border-strong)"; (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; }}
@@ -167,7 +167,7 @@ export default function StatusPage() {
               {refreshing ? "Refreshing..." : "Refresh"}
             </button>
             {lastUpdated && (
-              <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono), 'JetBrains Mono', monospace" }}>
                 Updated {lastUpdated.toLocaleTimeString()}
               </span>
             )}

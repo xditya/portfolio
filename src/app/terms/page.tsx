@@ -16,48 +16,90 @@ const TERMS = [
 
 export default function TermsPage() {
   return (
-    <div style={{ paddingTop: "80px" }}>
-      <div className="container-md" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
-        {/* Header */}
-        <div style={{ marginBottom: "48px" }}>
-          <span className="badge badge-muted" style={{ marginBottom: "16px" }}>Legal</span>
-          <h1 style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: "16px" }}>Terms & Conditions</h1>
-          <p style={{ fontSize: "15px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
-            These terms apply to purchases made via{" "}
-            <a href="https://t.me/BuyYourBots" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", cursor: "pointer" }}>@BuyYourBots</a>
-            {" "}and{" "}
-            <a href="https://t.me/Bots4Sale" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", cursor: "pointer" }}>@Bots4Sale</a>.
-            {" "}Please read carefully before purchasing.
-          </p>
-        </div>
+    <div style={{ paddingTop: "110px" }}>
+      <div className="container-x" style={{ paddingBottom: "40px" }}>
+        <p className="mono-label" style={{ marginBottom: "24px" }}>
+          Legal — Freelance &amp; bot services
+        </p>
+        <h1 className="display-lg" style={{ marginBottom: "28px" }}>
+          Terms
+        </h1>
+        <p className="body-lg" style={{ maxWidth: "620px", margin: 0 }}>
+          These terms apply to purchases made via{" "}
+          <a
+            href="https://t.me/BuyYourBots"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-u"
+            style={{ color: "var(--accent-soft)" }}
+          >
+            @BuyYourBots
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://t.me/Bots4Sale"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-u"
+            style={{ color: "var(--accent-soft)" }}
+          >
+            @Bots4Sale
+          </a>
+          . Please read carefully before purchasing.
+        </p>
+      </div>
 
-        {/* Terms Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px", marginBottom: "40px" }}>
+      <div className="container-x" style={{ paddingTop: "32px" }}>
+        <div style={{ maxWidth: "880px" }}>
           {TERMS.map(({ title, description }, i) => (
             <div
               key={title}
-              className="card"
-              style={{ padding: "24px" }}
+              className="hairline-t terms-row"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "80px 1fr",
+                gap: "24px",
+                paddingBlock: "28px",
+              }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", color: "var(--text-muted)", background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: "4px", padding: "2px 6px" }}>
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h2 style={{ fontSize: "14px", fontWeight: 600, color: "var(--accent)" }}>{title}</h2>
+              <span
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 900,
+                  fontSize: "clamp(24px, 3vw, 36px)",
+                  lineHeight: 1,
+                  color: "transparent",
+                  WebkitTextStroke: "1px var(--line-strong)",
+                }}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <h2
+                  style={{
+                    fontSize: "clamp(17px, 2vw, 22px)",
+                    textTransform: "uppercase",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {title}
+                </h2>
+                <p className="body-lg" style={{ margin: 0 }}>
+                  {description}
+                </p>
               </div>
-              <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.7 }}>{description}</p>
             </div>
           ))}
-        </div>
 
-        {/* Footer Notice */}
-        <div style={{ borderTop: "1px solid var(--border)", paddingTop: "24px", display: "flex", flexDirection: "column", gap: "8px" }}>
-          <p style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-            By purchasing, you agree to the terms and conditions outlined above.
-          </p>
-          <p style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>
-            * Terms are subject to change.
-          </p>
+          <div className="hairline-t" style={{ paddingTop: "28px" }}>
+            <p className="body-lg" style={{ marginTop: 0, marginBottom: "8px" }}>
+              By purchasing, you agree to the terms and conditions outlined
+              above.
+            </p>
+            <p className="mono-sm" style={{ color: "var(--muted)", margin: 0 }}>
+              * Terms are subject to change.
+            </p>
+          </div>
         </div>
       </div>
     </div>
