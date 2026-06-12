@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/projects", label: "Projects" },
   { href: "/contact", label: "Contact" },
   { href: "/links", label: "Links" },
+  { href: "/game", label: "Game" },
 ];
 
 export default function Navbar() {
