@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { event as trackEvent } from "@/lib/gtag";
 import {
   GAME_PROJECTS,
@@ -38,7 +42,6 @@ type Interactable = {
   radius: number;
   panel: Omit<HudPanel, "id" | "kind">;
   object: THREE.Object3D;
-  onEnter?: () => void;
 };
 
 type Floater = {
@@ -47,7 +50,26 @@ type Floater = {
   amp: number;
   speed: number;
   phase: number;
-  spin: number;
+};
+
+type Spinner = { obj: THREE.Object3D; speed: number; axis: "x" | "y" | "z" };
+
+type Pulse = {
+  mat: THREE.Material & { opacity: number };
+  base: number;
+  amp: number;
+  speed: number;
+  phase: number;
+};
+
+type Orbiter = {
+  geo: THREE.BufferGeometry;
+  center: THREE.Vector3;
+  radius: number;
+  speed: number;
+  phase: number;
+  count: number;
+  plane: "yz" | "xz";
 };
 
 type Burst = {
@@ -112,7 +134,6 @@ function makeTextSprite(
   ctx.fillStyle = color;
   lines.forEach((line, i) => {
     if (spacing > 0) {
-      // manual letter-spacing
       const total = ctx.measureText(line).width + line.length * spacing;
       let x = w / 2 - total / 2;
       ctx.textAlign = "left";
@@ -167,13 +188,92 @@ function makeCounterSprite(suffix: string, size: number) {
     const tw = ctx.measureText(label + suffix).width;
     ctx.fillStyle = "#F4F4EF";
     ctx.fillText(label, -tw / 2 + lw / 2, 0);
-    ctx.fillStyle = "#4D62FF";
+    ctx.fillStyle = "#6E80FF";
     ctx.fillText(suffix, -tw / 2 + lw + (tw - lw) / 2, 0);
     ctx.restore();
     texture.needsUpdate = true;
   };
   draw(0);
   return { sprite, draw };
+}
+
+/* ─────────────── Shared procedural textures ─────────────── */
+
+function makeGlowTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const ctx = c.getContext("2d")!;
+  const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.35, "rgba(255,255,255,0.45)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(c);
+}
+
+function makeGroundTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = c.height = 1024;
+  const ctx = c.getContext("2d")!;
+  const g = ctx.createRadialGradient(512, 512, 60, 512, 512, 512);
+  g.addColorStop(0, "#0e1228");
+  g.addColorStop(0.45, "#090c18");
+  g.addColorStop(1, "#04050a");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 1024, 1024);
+  // faint concentric rings
+  ctx.strokeStyle = "rgba(77,98,255,0.10)";
+  for (let r = 90; r < 512; r += 84) {
+    ctx.beginPath();
+    ctx.arc(512, 512, r, 0, Math.PI * 2);
+    ctx.lineWidth = r % 168 === 90 ? 2.5 : 1;
+    ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function makeChevronTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 128;
+  c.height = 128;
+  const ctx = c.getContext("2d")!;
+  ctx.strokeStyle = "#FFFFFF";
+  ctx.lineWidth = 16;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(20, 88);
+  ctx.lineTo(64, 40);
+  ctx.lineTo(108, 88);
+  ctx.stroke();
+  return new THREE.CanvasTexture(c);
+}
+
+function makeTowerTexture(accentHex: string): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 128;
+  c.height = 256;
+  const ctx = c.getContext("2d")!;
+  ctx.fillStyle = "#0a0d17";
+  ctx.fillRect(0, 0, 128, 256);
+  const cols = 5;
+  const rows = 12;
+  const cw = 128 / cols;
+  const ch = 256 / rows;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const r = Math.random();
+      if (r > 0.62) ctx.fillStyle = accentHex;
+      else if (r > 0.45) ctx.fillStyle = "#2b3354";
+      else ctx.fillStyle = "#10131f";
+      ctx.fillRect(x * cw + 4, y * ch + 5, cw - 8, ch - 10);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
 /* ─────────────────────── Component ─────────────────────── */
@@ -206,91 +306,144 @@ export default function PortfolioGame() {
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
+    const touchDevice = "ontouchstart" in window;
 
-    /* ── Renderer / scene / camera ── */
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    /* ── Renderer / scene / camera / bloom ── */
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    const pixelRatio = Math.min(window.devicePixelRatio, touchDevice ? 1.4 : 2);
+    renderer.setPixelRatio(pixelRatio);
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(C.bg);
-    scene.fog = new THREE.Fog(C.bg, 70, 240);
+    scene.fog = new THREE.Fog(0x070a16, 70, 250);
 
     const camera = new THREE.PerspectiveCamera(
       58,
       mount.clientWidth / mount.clientHeight,
       0.1,
-      500,
+      600,
     );
     camera.position.set(0, 14, 22);
 
-    scene.add(new THREE.AmbientLight(0x8890b8, 0.55));
-    const keyLight = new THREE.DirectionalLight(0xc9cfff, 0.9);
-    keyLight.position.set(40, 80, 30);
+    const composer = new EffectComposer(renderer);
+    composer.setPixelRatio(pixelRatio);
+    composer.setSize(mount.clientWidth, mount.clientHeight);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(mount.clientWidth, mount.clientHeight),
+      touchDevice ? 0.65 : 0.85, // strength
+      0.55, // radius
+      0.32, // threshold
+    );
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+
+    /* ── Lights ── */
+    scene.add(new THREE.HemisphereLight(0x36427e, 0x05060a, 0.85));
+    scene.add(new THREE.AmbientLight(0x3c4468, 0.5));
+    const keyLight = new THREE.DirectionalLight(0xaab4ff, 0.75);
+    keyLight.position.set(40, 90, 30);
     scene.add(keyLight);
 
+    /* ── Sky dome ── */
+    const sky = new THREE.Mesh(
+      new THREE.SphereGeometry(440, 32, 16),
+      new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        depthWrite: false,
+        fog: false,
+        uniforms: {
+          top: { value: new THREE.Color(0x05070f) },
+          horizon: { value: new THREE.Color(0x141a38) },
+          bottom: { value: new THREE.Color(0x04050a) },
+        },
+        vertexShader: `
+          varying vec3 vDir;
+          void main() {
+            vDir = normalize(position);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 top; uniform vec3 horizon; uniform vec3 bottom;
+          varying vec3 vDir;
+          void main() {
+            float y = vDir.y;
+            vec3 col = y > 0.0
+              ? mix(horizon, top, pow(min(y * 2.2, 1.0), 0.7))
+              : mix(horizon, bottom, min(-y * 3.0, 1.0));
+            gl_FragColor = vec4(col, 1.0);
+          }
+        `,
+      }),
+    );
+    scene.add(sky);
+
     /* ── Ground ── */
+    const groundTex = makeGroundTexture();
     const ground = new THREE.Mesh(
-      new THREE.CircleGeometry(WORLD_RADIUS + 60, 64),
-      new THREE.MeshStandardMaterial({ color: 0x07080d, roughness: 1 }),
+      new THREE.CircleGeometry(WORLD_RADIUS + 80, 80),
+      new THREE.MeshBasicMaterial({ map: groundTex }),
     );
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -0.05;
+    ground.position.y = -0.06;
     scene.add(ground);
 
-    const grid = new THREE.GridHelper(360, 72, C.accent, 0x141a2e);
-    (grid.material as THREE.Material).transparent = true;
-    (grid.material as THREE.Material).opacity = 0.35;
+    const grid = new THREE.GridHelper(380, 76, 0x3346cc, 0x10162e);
+    const gridMat = grid.material as THREE.Material;
+    gridMat.transparent = true;
+    gridMat.opacity = 0.28;
     scene.add(grid);
 
-    // world edge ring
+    // world edge ring + light pillars
     const edge = new THREE.Mesh(
-      new THREE.TorusGeometry(WORLD_RADIUS, 0.25, 8, 128),
-      new THREE.MeshBasicMaterial({ color: C.accent, transparent: true, opacity: 0.5 }),
+      new THREE.TorusGeometry(WORLD_RADIUS, 0.3, 8, 160),
+      new THREE.MeshBasicMaterial({ color: C.accent, transparent: true, opacity: 0.55 }),
     );
     edge.rotation.x = Math.PI / 2;
     edge.position.y = 0.3;
     scene.add(edge);
 
-    /* ── Stars ── */
-    {
-      const starGeo = new THREE.BufferGeometry();
-      const n = 900;
-      const pos = new Float32Array(n * 3);
-      for (let i = 0; i < n; i++) {
-        const r = 180 + Math.random() * 160;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1) * 0.5; // upper hemisphere bias
-        pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-        pos[i * 3 + 1] = 10 + Math.abs(r * Math.cos(phi)) * 0.6;
-        pos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
-      }
-      starGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-      scene.add(
-        new THREE.Points(
-          starGeo,
-          new THREE.PointsMaterial({ color: 0x9aa4c8, size: 0.7, sizeAttenuation: true }),
-        ),
-      );
-    }
-
     /* ── Bookkeeping ── */
     const floaters: Floater[] = [];
+    const spinners: Spinner[] = [];
+    const pulses: Pulse[] = [];
+    const orbiters: Orbiter[] = [];
     const interactables: Interactable[] = [];
     const clickTargets: THREE.Object3D[] = [];
     const bursts: Burst[] = [];
-    const disposables: { dispose: () => void }[] = [];
+    const textures: THREE.Texture[] = [groundTex];
 
-    const addFloater = (obj: THREE.Object3D, amp = 0.4, speed = 1, spin = 0) => {
-      floaters.push({
-        obj,
-        baseY: obj.position.y,
-        amp,
-        speed,
-        phase: Math.random() * Math.PI * 2,
-        spin,
-      });
+    const glowTex = makeGlowTexture();
+    textures.push(glowTex);
+
+    const addFloater = (obj: THREE.Object3D, amp = 0.4, speed = 1) => {
+      floaters.push({ obj, baseY: obj.position.y, amp, speed, phase: Math.random() * Math.PI * 2 });
+    };
+    const addSpinner = (obj: THREE.Object3D, speed: number, axis: "x" | "y" | "z" = "y") => {
+      spinners.push({ obj, speed, axis });
+    };
+    const addPulse = (mat: THREE.Material & { opacity: number }, base: number, amp: number, speed = 2) => {
+      pulses.push({ mat, base, amp, speed, phase: Math.random() * Math.PI * 2 });
+    };
+
+    const addGlow = (parent: THREE.Object3D, color: number, scale: number, y: number, opacity = 0.55) => {
+      const s = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glowTex,
+          color,
+          transparent: true,
+          opacity,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
+      s.scale.set(scale, scale, 1);
+      s.position.y = y;
+      parent.add(s);
+      return s;
     };
 
     const registerInteractable = (i: Interactable) => {
@@ -310,35 +463,223 @@ export default function PortfolioGame() {
         metalness: 0.2,
       });
 
+    // edge light pillars at compass points
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const pillar = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.35, 0.55, 22, 8, 1, true),
+        new THREE.MeshBasicMaterial({
+          color: C.accent,
+          transparent: true,
+          opacity: 0.16,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+        }),
+      );
+      pillar.position.set(Math.cos(a) * WORLD_RADIUS, 11, Math.sin(a) * WORLD_RADIUS);
+      scene.add(pillar);
+      addPulse(pillar.material, 0.16, 0.08, 0.8 + i * 0.13);
+    }
+
+    /* ── Stars ── */
+    {
+      const starGeo = new THREE.BufferGeometry();
+      const n = 1200;
+      const pos = new Float32Array(n * 3);
+      const sizes = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        const r = 200 + Math.random() * 180;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1) * 0.5;
+        pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        pos[i * 3 + 1] = 14 + Math.abs(r * Math.cos(phi)) * 0.65;
+        pos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+        sizes[i] = Math.random();
+      }
+      starGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      scene.add(
+        new THREE.Points(
+          starGeo,
+          new THREE.PointsMaterial({
+            color: 0xc7cdf0,
+            size: 0.9,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.85,
+          }),
+        ),
+      );
+    }
+
+    /* ── Ambient drifting dust ── */
+    const dust = (() => {
+      const n = 320;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) {
+        const r = Math.sqrt(Math.random()) * (WORLD_RADIUS + 10);
+        const a = Math.random() * Math.PI * 2;
+        pos[i * 3] = Math.cos(a) * r;
+        pos[i * 3 + 1] = Math.random() * 36;
+        pos[i * 3 + 2] = Math.sin(a) * r;
+      }
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      const pts = new THREE.Points(
+        geo,
+        new THREE.PointsMaterial({
+          color: 0x6b7cff,
+          size: 0.28,
+          transparent: true,
+          opacity: 0.45,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
+      scene.add(pts);
+      return geo;
+    })();
+
+    /* ── Decorative low-poly rocks ── */
+    {
+      const zoneCenters = [
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0, -80),
+        new THREE.Vector3(82, 0, 0),
+        new THREE.Vector3(0, 0, 84),
+        new THREE.Vector3(-42, 0, 62),
+        new THREE.Vector3(-88, 0, 0),
+        new THREE.Vector3(58, 0, -52),
+      ];
+      const rockMat = new THREE.MeshStandardMaterial({
+        color: 0x0b0e1a,
+        emissive: C.accent,
+        emissiveIntensity: 0.05,
+        roughness: 0.9,
+        flatShading: true,
+      });
+      for (let i = 0; i < 30; i++) {
+        const r = 28 + Math.random() * 100;
+        const a = Math.random() * Math.PI * 2;
+        const p = new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r);
+        if (zoneCenters.some((c) => p.distanceTo(c) < 24)) continue;
+        const size = 0.8 + Math.random() * 2.2;
+        const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(size, 0), rockMat);
+        rock.position.set(p.x, size * (0.5 + Math.random() * 1.6), p.z);
+        rock.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+        scene.add(rock);
+        addFloater(rock, 0.15 + Math.random() * 0.25, 0.3 + Math.random() * 0.4);
+        addSpinner(rock, (Math.random() - 0.5) * 0.3);
+      }
+    }
+
+    /* ── Glowing chevron paths to each zone ── */
+    {
+      const chevTex = makeChevronTexture();
+      textures.push(chevTex);
+      const routes = [
+        { to: new THREE.Vector3(0, 0, -80) },
+        { to: new THREE.Vector3(82, 0, 0) },
+        { to: new THREE.Vector3(0, 0, 84) },
+        { to: new THREE.Vector3(-88, 0, 0) },
+        { to: new THREE.Vector3(58, 0, -52) },
+      ];
+      routes.forEach(({ to }) => {
+        const dir = to.clone().normalize();
+        const angle = Math.atan2(dir.x, dir.z);
+        for (let i = 0; i < 8; i++) {
+          const d = 22 + i * 6.5;
+          const mat = new THREE.MeshBasicMaterial({
+            map: chevTex,
+            color: C.accent,
+            transparent: true,
+            opacity: 0.3,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          });
+          const chev = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), mat);
+          chev.position.set(dir.x * d, 0.08, dir.z * d);
+          chev.rotation.x = -Math.PI / 2;
+          chev.rotation.z = angle + Math.PI;
+          scene.add(chev);
+          pulses.push({ mat, base: 0.22, amp: 0.22, speed: 2.4, phase: -i * 0.55 });
+        }
+      });
+    }
+
     /* ── Player ship ── */
     const player = new THREE.Group();
-    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 1), glowMat(C.accent, 1.1));
+    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.85, 1), glowMat(C.accent, 1.3));
     player.add(core);
+    const shell = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(1.25, 0),
+      new THREE.MeshBasicMaterial({ color: C.accentSoft, wireframe: true, transparent: true, opacity: 0.4 }),
+    );
+    player.add(shell);
+    addSpinner(core, 1.4);
+    addSpinner(shell, -0.9);
     const halo = new THREE.Mesh(
-      new THREE.TorusGeometry(1.5, 0.08, 8, 48),
-      new THREE.MeshBasicMaterial({ color: C.accentSoft, transparent: true, opacity: 0.85 }),
+      new THREE.TorusGeometry(1.6, 0.07, 8, 48),
+      new THREE.MeshBasicMaterial({ color: C.accentSoft, transparent: true, opacity: 0.9 }),
     );
     halo.rotation.x = Math.PI / 2;
     player.add(halo);
-    const playerLight = new THREE.PointLight(C.accent, 60, 26);
+    addGlow(player, C.accent, 7, 0, 0.5);
+    const playerLight = new THREE.PointLight(C.accent, 70, 30);
     playerLight.position.y = 2;
     player.add(playerLight);
     player.position.set(0, 1.6, 14);
     scene.add(player);
 
-    // landing pad at spawn
-    const pad = new THREE.Mesh(
-      new THREE.RingGeometry(2.4, 3.4, 48),
-      new THREE.MeshBasicMaterial({
-        color: C.accent,
+    // engine trail — line strip fading to black (additive)
+    const TRAIL_N = 64;
+    const trailGeo = new THREE.BufferGeometry();
+    const trailPos = new Float32Array(TRAIL_N * 3);
+    for (let i = 0; i < TRAIL_N; i++) {
+      trailPos[i * 3] = player.position.x;
+      trailPos[i * 3 + 1] = player.position.y;
+      trailPos[i * 3 + 2] = player.position.z;
+    }
+    const trailCol = new Float32Array(TRAIL_N * 3);
+    for (let i = 0; i < TRAIL_N; i++) {
+      const f = Math.pow(i / (TRAIL_N - 1), 1.6); // head bright, tail dark
+      const col = new THREE.Color(C.accentSoft).multiplyScalar(f);
+      trailCol[i * 3] = col.r;
+      trailCol[i * 3 + 1] = col.g;
+      trailCol[i * 3 + 2] = col.b;
+    }
+    trailGeo.setAttribute("position", new THREE.BufferAttribute(trailPos, 3));
+    trailGeo.setAttribute("color", new THREE.BufferAttribute(trailCol, 3));
+    const trail = new THREE.Line(
+      trailGeo,
+      new THREE.LineBasicMaterial({
+        vertexColors: true,
         transparent: true,
-        opacity: 0.5,
-        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
       }),
     );
-    pad.rotation.x = -Math.PI / 2;
-    pad.position.set(0, 0.05, 14);
-    scene.add(pad);
+    trail.frustumCulled = false;
+    scene.add(trail);
+
+    // spawn pad
+    [
+      { r0: 2.4, r1: 3.4, op: 0.5 },
+      { r0: 4.2, r1: 4.5, op: 0.25 },
+    ].forEach(({ r0, r1, op }) => {
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: C.accent,
+        transparent: true,
+        opacity: op,
+        side: THREE.DoubleSide,
+      });
+      const ring = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 56), ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(0, 0.05, 14);
+      scene.add(ring);
+      addPulse(ringMat, op, op * 0.5, 1.6);
+    });
 
     /* ════════════ CENTER — hero / about ════════════ */
 
@@ -356,18 +697,29 @@ export default function PortfolioGame() {
     heroSub.position.set(0, 7.6, -16);
     scene.add(heroSub);
 
+    // slow rotating wireframe icosahedron backdrop
+    const heroDeco = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(9, 1),
+      new THREE.MeshBasicMaterial({ color: C.accent, wireframe: true, transparent: true, opacity: 0.14 }),
+    );
+    heroDeco.position.set(0, 18, -44);
+    scene.add(heroDeco);
+    addSpinner(heroDeco, 0.12);
+    addFloater(heroDeco, 1.2, 0.3);
+
     // About monolith
     {
       const g = new THREE.Group();
-      const slab = new THREE.Mesh(new THREE.BoxGeometry(4.5, 7, 0.8), glowMat(C.accent, 0.25));
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(4.5, 7, 0.8), glowMat(C.accent, 0.3));
       slab.position.y = 3.5;
       g.add(slab);
       const slabEdges = new THREE.LineSegments(
         new THREE.EdgesGeometry(slab.geometry),
-        new THREE.LineBasicMaterial({ color: C.accentSoft, transparent: true, opacity: 0.7 }),
+        new THREE.LineBasicMaterial({ color: C.accentSoft, transparent: true, opacity: 0.8 }),
       );
       slabEdges.position.copy(slab.position);
       g.add(slabEdges);
+      addGlow(g, C.accent, 10, 0.4, 0.4);
       const lbl = makeTextSprite("ABOUT ME", { size: 1.1, color: "#97A3FF", weight: 700, spacing: 5 });
       lbl.position.y = 8.6;
       g.add(lbl);
@@ -404,10 +756,10 @@ export default function PortfolioGame() {
       /* ignore */
     }
 
-    const crystalByProject = new Map<string, THREE.Mesh>();
+    const crystalByProject = new Map<string, { core: THREE.Mesh; shell: THREE.Mesh; glow: THREE.Sprite }>();
 
     {
-      const zoneLabel = makeTextSprite("PROJECTS", { size: 3.2, color: "#5F6470", weight: 900, spacing: 8 });
+      const zoneLabel = makeTextSprite("PROJECTS", { size: 3.2, color: "#6F7587", weight: 900, spacing: 8 });
       zoneLabel.position.set(0, 16, -92);
       scene.add(zoneLabel);
 
@@ -418,19 +770,17 @@ export default function PortfolioGame() {
         const cz = Math.sin(angle) * clusterR;
         const projects = GAME_PROJECTS.filter((p) => p.year === year);
 
-        // year ring + label
-        const ring = new THREE.Mesh(
-          new THREE.RingGeometry(9, 9.6, 48),
-          new THREE.MeshBasicMaterial({
-            color: C.accent,
-            transparent: true,
-            opacity: 0.25,
-            side: THREE.DoubleSide,
-          }),
-        );
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: C.accent,
+          transparent: true,
+          opacity: 0.3,
+          side: THREE.DoubleSide,
+        });
+        const ring = new THREE.Mesh(new THREE.RingGeometry(9, 9.5, 64), ringMat);
         ring.rotation.x = -Math.PI / 2;
         ring.position.set(cx, 0.06, cz);
         scene.add(ring);
+        addPulse(ringMat, 0.26, 0.12, 1.2);
 
         const yearLbl = makeTextSprite(String(year), { size: 2.6, color: "#A3A8B3", weight: 900 });
         yearLbl.position.set(cx, 9, cz);
@@ -444,13 +794,48 @@ export default function PortfolioGame() {
 
           const g = new THREE.Group();
           const collected = collectedSet.has(p.name);
+          const scale = p.featured ? 1.5 : 1.1;
+
+          const cg = new THREE.Group();
+          cg.position.y = 2.7;
           const crystal = new THREE.Mesh(
-            new THREE.OctahedronGeometry(p.featured ? 1.6 : 1.15),
-            glowMat(collected ? C.accentSoft : C.accent, collected ? 1.4 : 0.35),
+            new THREE.OctahedronGeometry(scale),
+            glowMat(collected ? C.accentSoft : C.accent, collected ? 1.6 : 0.4),
           );
-          crystal.position.y = 2.6;
-          g.add(crystal);
-          crystalByProject.set(p.name, crystal);
+          cg.add(crystal);
+          const cShell = new THREE.Mesh(
+            new THREE.OctahedronGeometry(scale * 1.45),
+            new THREE.MeshBasicMaterial({
+              color: collected ? C.accentSoft : C.accent,
+              wireframe: true,
+              transparent: true,
+              opacity: collected ? 0.5 : 0.25,
+            }),
+          );
+          cg.add(cShell);
+          addSpinner(crystal, 0.8);
+          addSpinner(cShell, -0.5);
+          g.add(cg);
+          addFloater(cg, 0.35, 1.3);
+
+          const glowSprite = addGlow(g, collected ? C.accentSoft : 0x2334a0, 6.5, 0.35, collected ? 0.65 : 0.4);
+          crystalByProject.set(p.name, { core: crystal, shell: cShell, glow: glowSprite });
+
+          if (p.featured) {
+            const beam = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.22, 0.34, 26, 8, 1, true),
+              new THREE.MeshBasicMaterial({
+                color: C.accent,
+                transparent: true,
+                opacity: 0.14,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                side: THREE.DoubleSide,
+              }),
+            );
+            beam.position.y = 13;
+            g.add(beam);
+          }
 
           const base = new THREE.Mesh(
             new THREE.CylinderGeometry(0.7, 1, 0.5, 6),
@@ -460,12 +845,11 @@ export default function PortfolioGame() {
           g.add(base);
 
           const nameLbl = makeTextSprite(p.name, { size: 0.85, color: "#F4F4EF", weight: 700 });
-          nameLbl.position.y = 4.6;
+          nameLbl.position.y = 4.9;
           g.add(nameLbl);
 
           g.position.set(px, 0, pz);
           scene.add(g);
-          addFloater(crystal, 0.35, 1.3, 0.8);
 
           const stat = p.users
             ? `${p.users} users`
@@ -498,19 +882,28 @@ export default function PortfolioGame() {
     /* ════════════ EAST — experience towers ════════════ */
 
     {
-      const zoneLabel = makeTextSprite("EXPERIENCE", { size: 3, color: "#5F6470", weight: 900, spacing: 8 });
+      const zoneLabel = makeTextSprite("EXPERIENCE", { size: 3, color: "#6F7587", weight: 900, spacing: 8 });
       zoneLabel.position.set(96, 18, 0);
       scene.add(zoneLabel);
 
       GAME_EXPERIENCE.forEach((exp, i) => {
-        const h = 6 + (GAME_EXPERIENCE.length - i) * 2.2;
+        const h = 7 + (GAME_EXPERIENCE.length - i) * 2.4;
         const x = 82;
         const z = (i - (GAME_EXPERIENCE.length - 1) / 2) * 16;
 
         const g = new THREE.Group();
+        const towerTex = makeTowerTexture(exp.current ? "#5d70ff" : "#39466e");
+        textures.push(towerTex);
         const tower = new THREE.Mesh(
           new THREE.BoxGeometry(5.5, h, 5.5),
-          glowMat(exp.current ? C.accent : 0x2a3354, exp.current ? 0.5 : 0.12),
+          new THREE.MeshStandardMaterial({
+            color: 0xbfc4d8,
+            map: towerTex,
+            emissive: 0xffffff,
+            emissiveMap: towerTex,
+            emissiveIntensity: exp.current ? 0.65 : 0.4,
+            roughness: 0.7,
+          }),
         );
         tower.position.y = h / 2;
         g.add(tower);
@@ -519,18 +912,36 @@ export default function PortfolioGame() {
           new THREE.LineBasicMaterial({
             color: exp.current ? C.accentSoft : 0x39415c,
             transparent: true,
-            opacity: 0.8,
+            opacity: 0.9,
           }),
         );
         edges.position.copy(tower.position);
         g.add(edges);
+
+        if (exp.current) {
+          // antenna with blinking beacon on the current employer's tower
+          const mast = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.06, 0.06, 3.2, 6),
+            new THREE.MeshBasicMaterial({ color: 0x39415c }),
+          );
+          mast.position.y = h + 1.6;
+          g.add(mast);
+          const tip = new THREE.Mesh(
+            new THREE.SphereGeometry(0.3, 12, 12),
+            new THREE.MeshBasicMaterial({ color: C.accentSoft, transparent: true, opacity: 1 }),
+          );
+          tip.position.y = h + 3.3;
+          g.add(tip);
+          addPulse(tip.material, 0.7, 0.5, 4);
+          addGlow(g, C.accent, 9, 0.4, 0.35);
+        }
 
         const lbl = makeTextSprite(`${exp.company}\n${exp.period}`, {
           size: 1,
           color: exp.current ? "#97A3FF" : "#A3A8B3",
           weight: 700,
         });
-        lbl.position.y = h + 2.4;
+        lbl.position.y = h + (exp.current ? 5.6 : 2.6);
         g.add(lbl);
         addFloater(lbl, 0.25, 1.1);
 
@@ -558,13 +969,13 @@ export default function PortfolioGame() {
     const statCounters: {
       draw: (v: number) => void;
       target: number;
-      started: number; // timestamp, 0 = not started
+      started: number;
       done: boolean;
       position: THREE.Vector3;
     }[] = [];
 
     {
-      const zoneLabel = makeTextSprite("STATS", { size: 3, color: "#5F6470", weight: 900, spacing: 8 });
+      const zoneLabel = makeTextSprite("STATS", { size: 3, color: "#6F7587", weight: 900, spacing: 8 });
       zoneLabel.position.set(0, 16, 96);
       scene.add(zoneLabel);
 
@@ -575,10 +986,17 @@ export default function PortfolioGame() {
 
         const pillar = new THREE.Mesh(
           new THREE.CylinderGeometry(2.2, 2.6, 4, 6),
-          glowMat(C.accent, 0.2),
+          glowMat(C.accent, 0.25),
         );
         pillar.position.y = 2;
         g.add(pillar);
+        const pillarEdges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(pillar.geometry),
+          new THREE.LineBasicMaterial({ color: C.accentSoft, transparent: true, opacity: 0.5 }),
+        );
+        pillarEdges.position.copy(pillar.position);
+        g.add(pillarEdges);
+        addGlow(g, C.accent, 8, 0.3, 0.3);
 
         const counter = makeCounterSprite(s.suffix, 3);
         counter.sprite.position.y = 6.6;
@@ -587,7 +1005,7 @@ export default function PortfolioGame() {
 
         const lbl = makeTextSprite(s.label.toUpperCase(), {
           size: 0.9,
-          color: "#5F6470",
+          color: "#6F7587",
           weight: 600,
           spacing: 4,
         });
@@ -621,7 +1039,7 @@ export default function PortfolioGame() {
       });
 
       // Tech garden — colored orbs on pedestals
-      const techLabel = makeTextSprite("TECH STACK", { size: 1.6, color: "#5F6470", weight: 900, spacing: 6 });
+      const techLabel = makeTextSprite("TECH STACK", { size: 1.6, color: "#6F7587", weight: 900, spacing: 6 });
       techLabel.position.set(-42, 9, 62);
       scene.add(techLabel);
 
@@ -629,19 +1047,21 @@ export default function PortfolioGame() {
         const a = (i / GAME_TECH_STACK.length) * Math.PI * 2;
         const x = -42 + Math.cos(a) * 7;
         const z = 62 + Math.sin(a) * 7;
+        const col = new THREE.Color(t.color);
         const g = new THREE.Group();
         const orb = new THREE.Mesh(
           new THREE.SphereGeometry(1, 24, 24),
           new THREE.MeshStandardMaterial({
-            color: new THREE.Color(t.color),
-            emissive: new THREE.Color(t.color),
-            emissiveIntensity: 0.5,
+            color: col,
+            emissive: col,
+            emissiveIntensity: 0.65,
             roughness: 0.4,
           }),
         );
         orb.position.y = 3;
         g.add(orb);
         addFloater(orb, 0.3, 1.2 + i * 0.1);
+        addGlow(g, col.getHex(), 4.5, 3, 0.45);
         const ped = new THREE.Mesh(
           new THREE.CylinderGeometry(0.5, 0.7, 1.6, 6),
           new THREE.MeshStandardMaterial({ color: C.card, roughness: 0.8 }),
@@ -674,7 +1094,7 @@ export default function PortfolioGame() {
     /* ════════════ WEST — portals (socials + links) ════════════ */
 
     {
-      const zoneLabel = makeTextSprite("PORTALS", { size: 3, color: "#5F6470", weight: 900, spacing: 8 });
+      const zoneLabel = makeTextSprite("PORTALS", { size: 3, color: "#6F7587", weight: 900, spacing: 8 });
       zoneLabel.position.set(-96, 18, 0);
       scene.add(zoneLabel);
 
@@ -692,33 +1112,60 @@ export default function PortfolioGame() {
         const g = new THREE.Group();
         const col = new THREE.Color(color);
         const torus = new THREE.Mesh(
-          new THREE.TorusGeometry(2.4, 0.18, 12, 48),
+          new THREE.TorusGeometry(2.4, 0.16, 12, 48),
           new THREE.MeshStandardMaterial({
             color: col,
             emissive: col,
-            emissiveIntensity: 0.7,
+            emissiveIntensity: 0.85,
             roughness: 0.3,
           }),
         );
         torus.position.y = 3.4;
         torus.rotation.y = Math.PI / 2;
         g.add(torus);
-        addFloater(torus, 0.25, 1, 0);
+        addFloater(torus, 0.25, 1);
 
-        const disc = new THREE.Mesh(
-          new THREE.CircleGeometry(2.2, 32),
-          new THREE.MeshBasicMaterial({
+        const discMat = new THREE.MeshBasicMaterial({
+          color: col,
+          transparent: true,
+          opacity: 0.16,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        });
+        const disc = new THREE.Mesh(new THREE.CircleGeometry(2.2, 32), discMat);
+        disc.position.y = 3.4;
+        disc.rotation.y = Math.PI / 2;
+        g.add(disc);
+        addPulse(discMat, 0.14, 0.08, 1.8);
+        addGlow(g, col.getHex(), 7, 3.4, 0.4);
+
+        // orbiting spark particles around the ring
+        const sparkN = 10;
+        const sparkGeo = new THREE.BufferGeometry();
+        sparkGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(sparkN * 3), 3));
+        const sparks = new THREE.Points(
+          sparkGeo,
+          new THREE.PointsMaterial({
             color: col,
+            size: 0.32,
             transparent: true,
-            opacity: 0.14,
-            side: THREE.DoubleSide,
+            opacity: 0.95,
             blending: THREE.AdditiveBlending,
             depthWrite: false,
           }),
         );
-        disc.position.y = 3.4;
-        disc.rotation.y = Math.PI / 2;
-        g.add(disc);
+        sparks.frustumCulled = false;
+        scene.add(sparks);
+        orbiters.push({
+          geo: sparkGeo,
+          center: new THREE.Vector3(x, 3.4, z),
+          radius: 2.4,
+          speed: 1.4,
+          phase: Math.random() * Math.PI * 2,
+          count: sparkN,
+          plane: "yz",
+        });
 
         const lbl = makeTextSprite(label, { size: 0.95, color: "#F4F4EF", weight: 700 });
         lbl.position.y = 6.8;
@@ -770,6 +1217,7 @@ export default function PortfolioGame() {
 
     /* ════════════ NE — contact beacon ════════════ */
 
+    let beaconRingsRef: { mesh: THREE.Mesh; offset: number }[] = [];
     {
       const g = new THREE.Group();
       const beam = new THREE.Mesh(
@@ -777,7 +1225,7 @@ export default function PortfolioGame() {
         new THREE.MeshBasicMaterial({
           color: C.accent,
           transparent: true,
-          opacity: 0.35,
+          opacity: 0.38,
           blending: THREE.AdditiveBlending,
           depthWrite: false,
           side: THREE.DoubleSide,
@@ -785,15 +1233,37 @@ export default function PortfolioGame() {
       );
       beam.position.y = 35;
       g.add(beam);
-      const baseCone = new THREE.Mesh(new THREE.ConeGeometry(3, 5, 6), glowMat(C.accent, 0.8));
+      const baseCone = new THREE.Mesh(new THREE.ConeGeometry(3, 5, 6), glowMat(C.accent, 0.9));
       baseCone.position.y = 2.5;
       g.add(baseCone);
+      addGlow(g, C.accent, 12, 0.5, 0.5);
       const lbl = makeTextSprite("CONTACT", { size: 1.4, color: "#97A3FF", weight: 900, spacing: 6 });
       lbl.position.y = 9.5;
       g.add(lbl);
       addFloater(lbl, 0.3, 1.2);
       g.position.set(58, 0, -52);
       scene.add(g);
+
+      // rising pulse rings around the beam
+      const beaconRings: { mesh: THREE.Mesh; offset: number }[] = [];
+      for (let i = 0; i < 3; i++) {
+        const ring = new THREE.Mesh(
+          new THREE.TorusGeometry(1.6, 0.07, 8, 32),
+          new THREE.MeshBasicMaterial({
+            color: C.accentSoft,
+            transparent: true,
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+          }),
+        );
+        ring.rotation.x = Math.PI / 2;
+        ring.position.set(58, 0, -52);
+        scene.add(ring);
+        beaconRings.push({ mesh: ring, offset: i / 3 });
+      }
+      // animated in the loop via closure
+      beaconRingsRef = beaconRings;
 
       registerInteractable({
         id: "contact",
@@ -821,7 +1291,7 @@ export default function PortfolioGame() {
       { t: "STATS + TECH", p: new THREE.Vector3(0, 2.2, 26) },
       { t: "PORTALS", p: new THREE.Vector3(-12, 2.2, 2) },
     ].forEach(({ t, p }) => {
-      const s = makeTextSprite(t, { size: 0.8, color: "#5F6470", weight: 600, spacing: 4, opacity: 0.9 });
+      const s = makeTextSprite(t, { size: 0.8, color: "#6F7587", weight: 600, spacing: 4, opacity: 0.9 });
       s.position.copy(p);
       scene.add(s);
     });
@@ -857,7 +1327,7 @@ export default function PortfolioGame() {
       if (!startedRef.current) return;
       const dt = performance.now() - downAt;
       const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
-      if (dt > 400 || moved > 12) return; // it was a drag, not a click
+      if (dt > 400 || moved > 12) return;
       const rect = renderer.domElement.getBoundingClientRect();
       ndc.set(
         ((e.clientX - rect.left) / rect.width) * 2 - 1,
@@ -920,12 +1390,10 @@ export default function PortfolioGame() {
       if (i) runFirstAction(i);
     };
 
-    setDiscovered(
-      GAME_PROJECTS.filter((p) => collectedSet.has(p.name)).length,
-    );
+    setDiscovered(GAME_PROJECTS.filter((p) => collectedSet.has(p.name)).length);
 
     const spawnBurst = (at: THREE.Vector3, color: number) => {
-      const n = 36;
+      const n = 42;
       const geo = new THREE.BufferGeometry();
       const pos = new Float32Array(n * 3);
       const velocities: THREE.Vector3[] = [];
@@ -945,7 +1413,7 @@ export default function PortfolioGame() {
         geo,
         new THREE.PointsMaterial({
           color,
-          size: 0.35,
+          size: 0.4,
           transparent: true,
           opacity: 1,
           blending: THREE.AdditiveBlending,
@@ -965,18 +1433,22 @@ export default function PortfolioGame() {
       } catch {
         /* ignore */
       }
-      const crystal = crystalByProject.get(name);
-      if (crystal) {
-        const m = crystal.material as THREE.MeshStandardMaterial;
+      const c = crystalByProject.get(name);
+      if (c) {
+        const m = c.core.material as THREE.MeshStandardMaterial;
         m.emissive = new THREE.Color(C.accentSoft);
-        m.emissiveIntensity = 1.4;
+        m.emissiveIntensity = 1.6;
+        (c.shell.material as THREE.MeshBasicMaterial).color = new THREE.Color(C.accentSoft);
+        (c.shell.material as THREE.MeshBasicMaterial).opacity = 0.5;
+        c.glow.material.color = new THREE.Color(C.accentSoft);
+        c.glow.material.opacity = 0.65;
       }
       spawnBurst(i.position.clone().setY(3), C.accentSoft);
       const count = GAME_PROJECTS.filter((p) => collectedSet.has(p.name)).length;
       setDiscovered(count);
       trackEvent("game_project_discovered", { project: name, progress: count });
       if (count === GAME_PROJECTS.length) {
-        setToast("🏆 ACHIEVEMENT — ALL 19 PROJECTS DISCOVERED!");
+        setToast(`🏆 ACHIEVEMENT — ALL ${GAME_PROJECTS.length} PROJECTS DISCOVERED!`);
         setTimeout(() => setToast(null), 6000);
         spawnBurst(player.position.clone().setY(3), C.ink);
         trackEvent("game_completed", {});
@@ -1025,10 +1497,9 @@ export default function PortfolioGame() {
         const boost = keys.has("shift") ? 1.8 : 1;
         vel.addScaledVector(dir, 130 * boost * dt);
       }
-      vel.multiplyScalar(Math.pow(0.0035, dt)); // exponential damping
+      vel.multiplyScalar(Math.pow(0.0035, dt));
       player.position.addScaledVector(vel, dt);
 
-      // keep inside world
       const flat = new THREE.Vector2(player.position.x, player.position.z);
       if (flat.length() > WORLD_RADIUS) {
         flat.setLength(WORLD_RADIUS);
@@ -1039,10 +1510,18 @@ export default function PortfolioGame() {
 
       /* player visuals */
       player.position.y = 1.6 + Math.sin(t * 2.2) * 0.18;
-      core.rotation.y += dt * 1.4;
       halo.rotation.z += dt * 0.8;
       player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, -vel.x * 0.012, 0.1);
       player.rotation.x = THREE.MathUtils.lerp(player.rotation.x, vel.z * 0.012, 0.1);
+
+      /* trail: shift ring buffer toward tail, head = player */
+      const tp = trailGeo.getAttribute("position") as THREE.BufferAttribute;
+      const arr = tp.array as Float32Array;
+      arr.copyWithin(0, 3);
+      arr[(TRAIL_N - 1) * 3] = player.position.x;
+      arr[(TRAIL_N - 1) * 3 + 1] = player.position.y - 0.2;
+      arr[(TRAIL_N - 1) * 3 + 2] = player.position.z;
+      tp.needsUpdate = true;
 
       /* camera follow */
       camTarget.set(
@@ -1053,10 +1532,47 @@ export default function PortfolioGame() {
       camera.position.lerp(camTarget, 1 - Math.pow(0.001, dt));
       camera.lookAt(player.position.x, player.position.y + 1.5, player.position.z);
 
-      /* floaters */
+      /* animation registries */
       for (const f of floaters) {
         f.obj.position.y = f.baseY + Math.sin(t * f.speed + f.phase) * f.amp;
-        if (f.spin) f.obj.rotation.y += f.spin * dt;
+      }
+      for (const s of spinners) {
+        s.obj.rotation[s.axis] += s.speed * dt;
+      }
+      for (const p of pulses) {
+        p.mat.opacity = p.base + Math.sin(t * p.speed + p.phase) * p.amp;
+      }
+      for (const o of orbiters) {
+        const pa = o.geo.getAttribute("position") as THREE.BufferAttribute;
+        for (let i = 0; i < o.count; i++) {
+          const a = o.phase + t * o.speed + (i / o.count) * Math.PI * 2;
+          if (o.plane === "yz") {
+            pa.setXYZ(i, o.center.x, o.center.y + Math.cos(a) * o.radius, o.center.z + Math.sin(a) * o.radius);
+          } else {
+            pa.setXYZ(i, o.center.x + Math.cos(a) * o.radius, o.center.y, o.center.z + Math.sin(a) * o.radius);
+          }
+        }
+        pa.needsUpdate = true;
+      }
+
+      /* beacon rings rise & fade */
+      for (const { mesh, offset } of beaconRingsRef) {
+        const prog = ((t * 0.25 + offset) % 1 + 1) % 1;
+        mesh.position.y = 2 + prog * 46;
+        const sc = 1 + prog * 1.6;
+        mesh.scale.set(sc, sc, sc);
+        (mesh.material as THREE.MeshBasicMaterial).opacity = 0.7 * (1 - prog);
+      }
+
+      /* dust drift */
+      {
+        const pa = dust.getAttribute("position") as THREE.BufferAttribute;
+        const a = pa.array as Float32Array;
+        for (let i = 0; i < a.length; i += 3) {
+          a[i + 1] += dt * 0.7;
+          if (a[i + 1] > 38) a[i + 1] = 0;
+        }
+        pa.needsUpdate = true;
       }
 
       /* nearest interactable */
@@ -1119,7 +1635,7 @@ export default function PortfolioGame() {
         (b.points.material as THREE.PointsMaterial).opacity = 1 - age / 1.1;
       }
 
-      renderer.render(scene, camera);
+      composer.render();
     };
     loop();
 
@@ -1130,6 +1646,8 @@ export default function PortfolioGame() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      composer.setSize(w, h);
+      bloom.setSize(w, h);
     };
     window.addEventListener("resize", onResize);
 
@@ -1145,11 +1663,12 @@ export default function PortfolioGame() {
       scene.traverse((o) => {
         const mesh = o as THREE.Mesh;
         if (mesh.geometry) mesh.geometry.dispose();
-        const mat = (mesh as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
+        const mat = mesh.material as THREE.Material | THREE.Material[] | undefined;
         if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
         else if (mat) mat.dispose();
       });
-      disposables.forEach((d) => d.dispose());
+      textures.forEach((tx) => tx.dispose());
+      composer.dispose();
       renderer.dispose();
       mount.removeChild(renderer.domElement);
     };
@@ -1174,6 +1693,18 @@ export default function PortfolioGame() {
       }}
     >
       <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />
+
+      {/* vignette */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background:
+            "radial-gradient(ellipse at center, transparent 52%, rgba(3,4,8,0.6) 100%)",
+        }}
+      />
 
       {/* Zone label */}
       {started && (
