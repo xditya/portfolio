@@ -18,6 +18,11 @@ export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [cmdKey, setCmdKey] = useState("⌘");
+
+  useEffect(() => {
+    if (!/Mac|iPhone|iPad/.test(navigator.platform ?? "")) setCmdKey("Ctrl+");
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -132,7 +137,38 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
+            <button
+              className="cmdk-trigger"
+              onClick={() => window.dispatchEvent(new CustomEvent("cmdk:open"))}
+              aria-label="Open command palette"
+            >
+              <SearchIcon />
+              <kbd style={{ fontFamily: "inherit" }}>{cmdKey}K</kbd>
+            </button>
           </div>
+
+          {/* Mobile: search + hamburger */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("cmdk:open"))}
+            aria-label="Search"
+            className="nav-burger"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "8px",
+              color: "var(--ink-dim)",
+              display: "none",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 102,
+              position: "relative",
+              marginLeft: "auto",
+              marginRight: "4px",
+            }}
+          >
+            <SearchIcon size={18} />
+          </button>
 
           {/* Hamburger */}
           <button
@@ -241,6 +277,24 @@ export default function Navbar() {
         }
       `}</style>
     </>
+  );
+}
+
+function SearchIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <line x1="21" y1="21" x2="16.5" y2="16.5" />
+    </svg>
   );
 }
 

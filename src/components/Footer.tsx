@@ -16,6 +16,7 @@ const PAGES = [
   { href: "/projects", label: "Projects" },
   { href: "/contact", label: "Contact" },
   { href: "/links", label: "Links" },
+  { href: "/game", label: "Game" },
   { href: "/terms", label: "Terms" },
 ];
 

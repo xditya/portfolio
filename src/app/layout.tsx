@@ -4,6 +4,8 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import CommandPalette from "@/components/CommandPalette";
+import PageAssist from "@/components/PageAssist";
 import { Archivo, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
 const archivo = Archivo({
@@ -78,11 +80,18 @@ export default function RootLayout({
     >
       <head />
       <body className="grid-bg">
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <GoogleAnalytics />
         <SmoothScroll />
         <Navbar />
-        <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
+        <main id="main" style={{ position: "relative", zIndex: 1 }}>
+          {children}
+        </main>
         <Footer />
+        <CommandPalette />
+        <PageAssist />
       </body>
     </html>
   );
