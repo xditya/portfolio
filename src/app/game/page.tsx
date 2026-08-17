@@ -4,7 +4,7 @@ import GameClient from "./GameClient";
 export const metadata: Metadata = {
   title: "Game",
   description:
-    "Explore my portfolio as an interactive 3D game — discover projects, experience, stats, and links inside a neon grid world.",
+    "My portfolio as a playable 3D game. Fly around a neon grid world and discover projects, experience, stats, and links.",
 };
 
 export default function GamePage() {

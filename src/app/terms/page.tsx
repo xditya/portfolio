@@ -19,7 +19,7 @@ export default function TermsPage() {
     <div style={{ paddingTop: "110px" }}>
       <div className="container-x" style={{ paddingBottom: "40px" }}>
         <p className="mono-label" style={{ marginBottom: "24px" }}>
-          Legal — Freelance &amp; bot services
+          Legal · Freelance &amp; bot services
         </p>
         <h1 className="display-lg" style={{ marginBottom: "28px" }}>
           Terms

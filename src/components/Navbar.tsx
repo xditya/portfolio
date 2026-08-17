@@ -89,7 +89,7 @@ export default function Navbar() {
                 source: "logo",
               })
             }
-            aria-label="xditya — home"
+            aria-label="xditya · home"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 900,
@@ -265,7 +265,7 @@ export default function Navbar() {
           className="mono-label"
           style={{ position: "absolute", bottom: "32px", left: "clamp(24px, 8vw, 80px)" }}
         >
-          © {new Date().getFullYear()} Aditya — Kerala, India
+          © {new Date().getFullYear()} Aditya · Kerala, India
         </div>
       </div>
 

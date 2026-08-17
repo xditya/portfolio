@@ -25,6 +25,12 @@
       "skillPath": "skills/find-animation-opportunities/SKILL.md",
       "computedHash": "15dc983ce2cd00489fcdc4a92e2752d47e1620f7619038b00eb84c2b97d50597"
     },
+    "humanizer": {
+      "source": "blader/humanizer",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "7f032c368d4355fb237e1980d73d7febe5bc1a03bad3de74a3d4a918e8940cd1"
+    },
     "improve-animations": {
       "source": "emilkowalski/skills",
       "sourceType": "github",

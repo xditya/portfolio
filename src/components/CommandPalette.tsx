@@ -18,7 +18,7 @@ type Item = {
  * ⌘K / Ctrl+K command palette.
  *
  * Opens with NO animation: the palette is a keyboard-initiated, high-frequency
- * surface, and animating those makes them feel slow (Emil Kowalski's rule —
+ * surface, and animating those makes them feel slow (Emil Kowalski's rule;
  * Raycast does the same).
  */
 export default function CommandPalette() {
@@ -210,7 +210,7 @@ export default function CommandPalette() {
         letterSpacing: "0.08em",
       }}
     >
-      ✓ Email copied — {GAME_ABOUT.email}
+      ✓ Copied {GAME_ABOUT.email}
     </div>
   ) : null;
 
@@ -260,7 +260,7 @@ export default function CommandPalette() {
         <div className="cmdk-list" ref={listRef} id="cmdk-list" role="listbox">
           {flat.length === 0 && (
             <div className="cmdk-empty">
-              Nothing found for “{query}” — try a project name or “contact”.
+              Nothing found for “{query}”. Try a project name, or “contact”.
             </div>
           )}
           {grouped.map(({ group, items: gi }) => (

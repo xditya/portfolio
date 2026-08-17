@@ -234,7 +234,7 @@ export default function ContactPage() {
       <div className="container-x" style={{ paddingBottom: "40px" }}>
         {/* Header */}
         <p className="mono-label" style={{ marginBottom: "24px" }}>
-          Contact — Usually replies within a day
+          Contact · Usually replies within a day
         </p>
         <h1 className="display-lg" style={{ marginBottom: "28px" }}>
           Say hi<span style={{ color: "var(--accent)" }}>.</span>
@@ -496,7 +496,7 @@ export default function ContactPage() {
               </button>
 
               <p className="mono-sm" style={{ color: "var(--muted)", margin: 0 }}>
-                Protected by hCaptcha —{" "}
+                Protected by hCaptcha ·{" "}
                 <a
                   href="https://www.hcaptcha.com/privacy"
                   target="_blank"

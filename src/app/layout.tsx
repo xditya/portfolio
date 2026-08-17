@@ -31,7 +31,7 @@ const jetmono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Aditya — Full-stack Developer",
+    default: "Aditya · Full-stack Developer",
     template: "%s · Aditya",
   },
   description:
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://xditya.me",
     siteName: "Aditya Portfolio",
-    title: "Aditya — Full-stack Developer",
+    title: "Aditya · Full-stack Developer",
     description:
       "Full-stack developer building web apps, Telegram bots, and open-source tools.",
   },

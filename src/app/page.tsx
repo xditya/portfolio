@@ -44,7 +44,7 @@ const FEATURED = [
     name: "Ultroid",
     tagline: "Pluggable Telegram userbot",
     description:
-      "Advanced, multi-featured Telegram UserBot with plugin support. 3k+ stars on GitHub.",
+      "A Telegram userbot you extend with plugins. 3k+ stars on GitHub.",
     year: 2021,
     tech: ["Python", "MongoDB", "Redis"],
     stat: "3K+ stars",
@@ -56,7 +56,7 @@ const FEATURED = [
     name: "ChannelActions",
     tagline: "Telegram bot to auto approve chat join requests",
     description:
-      "A bot built to automatically handle join requests for Telegram chats, with over 1M users.",
+      "Approves or declines join requests for Telegram chats. Serves over 1M users.",
     year: 2022,
     tech: ["Deno", "TypeScript", "MongoDB"],
     stat: "1M+ users",
@@ -68,7 +68,7 @@ const FEATURED = [
     name: "GroupManager",
     tagline: "Python based group managing bot",
     description:
-      "A comprehensive Telegram group management bot with moderation features.",
+      "A Telegram bot for moderating and managing groups.",
     year: 2020,
     tech: ["Python", "MongoDB"],
     stat: "256+ stars",
@@ -79,7 +79,7 @@ const FEATURED = [
     name: "GeminiBot",
     tagline: "AI-powered Telegram Bot",
     description:
-      "A Telegram bot powered by Google's Gemini AI for intelligent conversations and assistance.",
+      "A Telegram bot that chats using Google's Gemini API.",
     year: 2024,
     tech: ["TypeScript", "Deno"],
     stat: "Gemini AI",
@@ -197,7 +197,7 @@ export default function HomePage() {
           "-=0.2",
         );
 
-      // Statement word reveal — scrubbed by scroll
+      // Statement word reveal · scrubbed by scroll
       if (statementRef.current) {
         gsap.to(statementRef.current.querySelectorAll(".w-rv"), {
           opacity: 1,
@@ -276,7 +276,7 @@ export default function HomePage() {
               flexShrink: 0,
             }}
           />
-          Available for work — Kerala, India
+          Available for work · Kerala, India
         </Link>
 
         {/* Name */}
@@ -398,7 +398,7 @@ export default function HomePage() {
       {/* ═══════════ STATEMENT + STATS ═══════════ */}
       <section className="container-x section-pad">
         <p className="mono-label" style={{ marginBottom: "32px" }}>
-          01 — About
+          01 · About
         </p>
         <p
           ref={statementRef}
@@ -458,7 +458,7 @@ export default function HomePage() {
           }}
         >
           <p className="mono-label" style={{ margin: 0 }}>
-            02 — Selected Work
+            02 · Selected Work
           </p>
           <h2 className="display-md">Featured</h2>
         </div>
@@ -472,7 +472,7 @@ export default function HomePage() {
 
               <div>
                 <p className="mono-label" style={{ marginBottom: "18px" }}>
-                  {p.year} — {p.stat}
+                  {p.year} · {p.stat}
                 </p>
                 <h3
                   className="display-md"
@@ -547,7 +547,7 @@ export default function HomePage() {
               })
             }
           >
-            All 19 Projects
+            All 21 Projects
           </Link>
         </div>
       </section>

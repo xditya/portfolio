@@ -632,7 +632,7 @@ export default function PortfolioGame() {
     player.position.set(0, 1.6, 14);
     scene.add(player);
 
-    // engine trail — line strip fading to black (additive)
+    // engine trail · line strip fading to black (additive)
     const TRAIL_N = 64;
     const trailGeo = new THREE.BufferGeometry();
     const trailPos = new Float32Array(TRAIL_N * 3);
@@ -681,14 +681,14 @@ export default function PortfolioGame() {
       addPulse(ringMat, op, op * 0.5, 1.6);
     });
 
-    /* ════════════ CENTER — hero / about ════════════ */
+    /* ════════════ CENTER · hero / about ════════════ */
 
     const heroName = makeTextSprite("XDITYA.", { size: 9, color: "#F4F4EF", weight: 900 });
     heroName.position.set(0, 13, -16);
     scene.add(heroName);
     addFloater(heroName, 0.5, 0.6);
 
-    const heroSub = makeTextSprite("FULL-STACK DEV — OPEN SOURCE — BOT BUILDER", {
+    const heroSub = makeTextSprite("FULL-STACK DEV · OPEN SOURCE · BOT BUILDER", {
       size: 1.2,
       color: "#97A3FF",
       weight: 500,
@@ -746,7 +746,7 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ NORTH — projects archipelago ════════════ */
+    /* ════════════ NORTH · projects archipelago ════════════ */
 
     const collectedSet = new Set<string>();
     try {
@@ -865,7 +865,7 @@ export default function PortfolioGame() {
             object: g,
             panel: {
               title: p.name,
-              subtitle: `${p.year}${stat ? ` — ${stat}` : ""} · ${p.tagline}`,
+              subtitle: `${p.year}${stat ? ` · ${stat}` : ""} · ${p.tagline}`,
               body: p.description,
               chips: p.tech,
               actions: [
@@ -879,7 +879,7 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ EAST — experience towers ════════════ */
+    /* ════════════ EAST · experience towers ════════════ */
 
     {
       const zoneLabel = makeTextSprite("EXPERIENCE", { size: 3, color: "#6F7587", weight: 900, spacing: 8 });
@@ -964,7 +964,7 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ SOUTH — stats plaza + tech garden ════════════ */
+    /* ════════════ SOUTH · stats plaza + tech garden ════════════ */
 
     const statCounters: {
       draw: (v: number) => void;
@@ -1038,7 +1038,7 @@ export default function PortfolioGame() {
         },
       });
 
-      // Tech garden — colored orbs on pedestals
+      // Tech garden · colored orbs on pedestals
       const techLabel = makeTextSprite("TECH STACK", { size: 1.6, color: "#6F7587", weight: 900, spacing: 6 });
       techLabel.position.set(-42, 9, 62);
       scene.add(techLabel);
@@ -1091,7 +1091,7 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ WEST — portals (socials + links) ════════════ */
+    /* ════════════ WEST · portals (socials + links) ════════════ */
 
     {
       const zoneLabel = makeTextSprite("PORTALS", { size: 3, color: "#6F7587", weight: 900, spacing: 8 });
@@ -1215,7 +1215,7 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ NE — contact beacon ════════════ */
+    /* ════════════ NE · contact beacon ════════════ */
 
     let beaconRingsRef: { mesh: THREE.Mesh; offset: number }[] = [];
     {
@@ -1273,7 +1273,7 @@ export default function PortfolioGame() {
         object: g,
         panel: {
           title: "Get in touch",
-          subtitle: `${GAME_ABOUT.available} — ${GAME_ABOUT.location}`,
+          subtitle: `${GAME_ABOUT.available} · ${GAME_ABOUT.location}`,
           body: "Have a project in mind, or just want to say hi? Reach out via the contact form or email.",
           chips: [GAME_ABOUT.email],
           actions: [
@@ -1345,7 +1345,7 @@ export default function PortfolioGame() {
       if (dist <= target.radius * 1.6) {
         runFirstAction(target);
       } else {
-        setToast(`TOO FAR — FLY CLOSER TO ${target.panel.title.toUpperCase()}`);
+        setToast(`FLY CLOSER TO ${target.panel.title.toUpperCase()} TO OPEN IT`);
         setTimeout(() => setToast(null), 1800);
       }
     };
@@ -1448,12 +1448,12 @@ export default function PortfolioGame() {
       setDiscovered(count);
       trackEvent("game_project_discovered", { project: name, progress: count });
       if (count === GAME_PROJECTS.length) {
-        setToast(`🏆 ACHIEVEMENT — ALL ${GAME_PROJECTS.length} PROJECTS DISCOVERED!`);
+        setToast(`🏆 ALL ${GAME_PROJECTS.length} PROJECTS DISCOVERED!`);
         setTimeout(() => setToast(null), 6000);
         spawnBurst(player.position.clone().setY(3), C.ink);
         trackEvent("game_completed", {});
       } else {
-        setToast(`DISCOVERED — ${name} (${count}/${GAME_PROJECTS.length})`);
+        setToast(`DISCOVERED ${name.toUpperCase()} (${count}/${GAME_PROJECTS.length})`);
         setTimeout(() => setToast(null), 2600);
       }
     };
@@ -1466,7 +1466,7 @@ export default function PortfolioGame() {
         { name: "TECH GARDEN", c: new THREE.Vector3(-42, 0, 62), r: 18 },
         { name: "PORTAL FIELD", c: new THREE.Vector3(-88, 0, 0), r: 42 },
         { name: "CONTACT BEACON", c: new THREE.Vector3(58, 0, -52), r: 20 },
-        { name: "SPAWN — HOME", c: new THREE.Vector3(0, 0, 0), r: 30 },
+        { name: "SPAWN · HOME", c: new THREE.Vector3(0, 0, 0), r: 30 },
       ];
       for (const z of zones) if (p.distanceTo(z.c) < z.r) return z.name;
       return "THE GRID";
@@ -1941,7 +1941,7 @@ export default function PortfolioGame() {
         >
           <div style={{ maxWidth: "520px", textAlign: "center" }}>
             <p className="mono-label" style={{ color: "var(--accent-soft)", marginBottom: "18px" }}>
-              PORTFOLIO — PLAYABLE EDITION
+              PORTFOLIO · PLAYABLE EDITION
             </p>
             <h1
               style={{
