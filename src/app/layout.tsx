@@ -4,6 +4,8 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import CommandPalette from "@/components/CommandPalette";
+import PageAssist from "@/components/PageAssist";
 import { Archivo, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
 const archivo = Archivo({
@@ -29,7 +31,7 @@ const jetmono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Aditya — Full-stack Developer",
+    default: "Aditya · Full-stack Developer",
     template: "%s · Aditya",
   },
   description:
@@ -52,7 +54,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://xditya.me",
     siteName: "Aditya Portfolio",
-    title: "Aditya — Full-stack Developer",
+    title: "Aditya · Full-stack Developer",
     description:
       "Full-stack developer building web apps, Telegram bots, and open-source tools.",
   },
@@ -78,11 +80,18 @@ export default function RootLayout({
     >
       <head />
       <body className="grid-bg">
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <GoogleAnalytics />
         <SmoothScroll />
         <Navbar />
-        <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
+        <main id="main" style={{ position: "relative", zIndex: 1 }}>
+          {children}
+        </main>
         <Footer />
+        <CommandPalette />
+        <PageAssist />
       </body>
     </html>
   );

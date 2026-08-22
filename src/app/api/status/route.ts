@@ -93,7 +93,7 @@ function splitRowsByDate(rows: string[]): SplitData {
 
   for (const row of rows) {
     const [dateTimeStr, resultStr] = row.split(",", 2);
-    // Use a more robust date parsing approach or ensure the input format is consistent
+    // Parse the date strictly so odd input formats fail loudly
     // This assumes 'YYYY-MM-DD HH:mm:ss Z' or similar parseable format
     const dateTime = new Date(dateTimeStr + " GMT"); // Append GMT to treat as UTC
     const dateStr = dateTime.toDateString();

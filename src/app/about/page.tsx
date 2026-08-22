@@ -20,7 +20,7 @@ const EXPERIENCE = [
     title: "Product Engineer",
     company: "UST",
     period: "2025 – Present",
-    description: "Working on product development and engineering solutions.",
+    description: "Working on product development.",
     current: true,
   },
   {
@@ -174,7 +174,7 @@ export default function AboutPage() {
       {/* ── Header ── */}
       <div className="container-x" style={{ paddingBottom: "clamp(40px, 6vw, 72px)" }}>
         <p className="mono-label" style={{ marginBottom: "24px" }}>
-          01 — About me
+          01 · About me
         </p>
         <h1 className="display-lg" style={{ marginBottom: "28px", maxWidth: "12ch" }}>
           Building things for the web &amp; Telegram
@@ -303,7 +303,7 @@ export default function AboutPage() {
             {
               title: "How I Work",
               content:
-                "Simple and automated. I focus on solving real problems efficiently and building scalable solutions.",
+                "Simple and automated. Solve the real problem, keep the code small, automate the boring parts.",
               tags: ["Efficiency", "Automation", "Open Source"],
             },
           ].map(({ title, content, tags }) => (
@@ -335,7 +335,7 @@ export default function AboutPage() {
       {/* ── Tech Stack ── */}
       <div className="container-x reveal-on-scroll" style={{ marginTop: "clamp(48px, 7vw, 96px)" }}>
         <p className="mono-label" style={{ marginBottom: "24px" }}>
-          02 — Tech Stack
+          02 · Tech Stack
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
           {TECH_STACK.map(({ name, color }) => (
@@ -362,7 +362,7 @@ export default function AboutPage() {
       {/* ── Experience ── */}
       <div className="container-x" style={{ marginTop: "clamp(48px, 7vw, 96px)" }}>
         <p className="mono-label reveal-on-scroll" style={{ marginBottom: "32px" }}>
-          03 — Experience
+          03 · Experience
         </p>
 
         <div>

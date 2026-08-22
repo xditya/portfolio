@@ -40,7 +40,7 @@ export default function NotFound() {
       }}
     >
       <p className="mono-label" style={{ marginBottom: "24px" }}>
-        Error — Page not found
+        Error · Page not found
       </p>
       <h1
         ref={titleRef}

@@ -67,6 +67,39 @@ const SOCIAL_PLATFORMS = [
   },
 ];
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const [swap, setSwap] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      return;
+    }
+    trackEvent("contact_email_copy", { source: "contact_info" });
+    // brief blur masks the label crossfade
+    setSwap(true);
+    setTimeout(() => {
+      setCopied(true);
+      setSwap(false);
+    }, 120);
+    setTimeout(() => {
+      setSwap(true);
+      setTimeout(() => {
+        setCopied(false);
+        setSwap(false);
+      }, 120);
+    }, 2000);
+  };
+
+  return (
+    <button className="copy-btn" data-copied={copied} data-swap={swap} onClick={copy} aria-live="polite">
+      <span className="copy-btn-label">{copied ? "✓ Copied" : "Copy"}</span>
+    </button>
+  );
+}
+
 function Field({
   label,
   id,
@@ -201,7 +234,7 @@ export default function ContactPage() {
       <div className="container-x" style={{ paddingBottom: "40px" }}>
         {/* Header */}
         <p className="mono-label" style={{ marginBottom: "24px" }}>
-          Contact — Usually replies within a day
+          Contact · Usually replies within a day
         </p>
         <h1 className="display-lg" style={{ marginBottom: "28px" }}>
           Say hi<span style={{ color: "var(--accent)" }}>.</span>
@@ -246,28 +279,31 @@ export default function ContactPage() {
                   <p className="mono-label" style={{ marginBottom: "6px" }}>
                     {label}
                   </p>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="link-u"
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 700,
-                      fontSize: "clamp(16px, 1.8vw, 22px)",
-                      letterSpacing: "-0.01em",
-                      color: "var(--ink)",
-                    }}
-                    onClick={() =>
-                      trackEvent("contact_direct_link_click", {
-                        link_label: label,
-                        link_url: href,
-                        source: "contact_info",
-                      })
-                    }
-                  >
-                    {value}
-                  </a>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="link-u"
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontWeight: 700,
+                        fontSize: "clamp(16px, 1.8vw, 22px)",
+                        letterSpacing: "-0.01em",
+                        color: "var(--ink)",
+                      }}
+                      onClick={() =>
+                        trackEvent("contact_direct_link_click", {
+                          link_label: label,
+                          link_url: href,
+                          source: "contact_info",
+                        })
+                      }
+                    >
+                      {value}
+                    </a>
+                    {label === "Email" && <CopyButton text={value} />}
+                  </span>
                 </div>
               ))}
             </div>
@@ -460,7 +496,7 @@ export default function ContactPage() {
               </button>
 
               <p className="mono-sm" style={{ color: "var(--muted)", margin: 0 }}>
-                Protected by hCaptcha —{" "}
+                Protected by hCaptcha ·{" "}
                 <a
                   href="https://www.hcaptcha.com/privacy"
                   target="_blank"

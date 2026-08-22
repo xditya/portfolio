@@ -132,7 +132,7 @@ export default function StatusPage() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "16px" }}>
           <div>
-            <p className="mono-label" style={{ marginBottom: "24px" }}>Monitoring — Live uptime</p>
+            <p className="mono-label" style={{ marginBottom: "24px" }}>Monitoring · Live uptime</p>
             <h1 className="display-md" style={{ marginBottom: "20px" }}>Website Status</h1>
             {!loading && statusData.length > 0 && (
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
