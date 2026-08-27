@@ -16,6 +16,7 @@ export type GameProject = {
 
 export const GAME_PROJECTS: GameProject[] = [
   // 2026
+  { name: "engram", tagline: "Remember everything. Own everything.", description: "A local-first place for links, reels, articles, images and notes. Share from any app, tags land on their own, and search reads the whole page. Sync goes through your own Drive, iCloud or WebDAV, encrypted before it leaves the phone. Intelligence runs on your own key or a model on the device.", github: "https://github.com/xditya/engram", url: "https://engram.xditya.me", tech: ["TypeScript", "React Native", "Expo", "SQLite"], year: 2026, featured: true },
   { name: "Splitty", tagline: "Scan a bill, tap who had what, settle over UPI", description: "Splits restaurant bills with no backend state. Photograph the bill, tap to assign items, and settle with a UPI QR per person. Reads bills with Gemini or on-device tesseract.js.", github: "https://github.com/xditya/Splitty", url: "https://splitty.xditya.me", tech: ["TypeScript", "React", "Vite"], year: 2026, featured: true },
   { name: "Alamara", tagline: "Local-first document vault for your phone", description: "A phone vault for IDs, tickets, and certificates. Documents are scanned, encrypted, and searchable on-device, and never uploaded. Built with Expo and React Native.", github: "https://github.com/xditya/alamara", tech: ["TypeScript", "React Native", "Expo"], year: 2026 },
   // 2024

@@ -41,6 +41,18 @@ const STATS = [
 const FEATURED = [
   {
     num: "01",
+    name: "engram",
+    tagline: "Remember everything. Own everything.",
+    description:
+      "A local-first library for links, reels, articles and notes. Share from any app, search the whole page, sync through your own Drive with end-to-end encryption.",
+    year: 2026,
+    tech: ["TypeScript", "React Native", "Expo"],
+    stat: "Local-first",
+    github: "https://github.com/xditya/engram",
+    url: "https://engram.xditya.me",
+  },
+  {
+    num: "02",
     name: "Ultroid",
     tagline: "Pluggable Telegram userbot",
     description:
@@ -52,7 +64,7 @@ const FEATURED = [
     url: "https://t.me/TeamUltroid",
   },
   {
-    num: "02",
+    num: "03",
     name: "ChannelActions",
     tagline: "Telegram bot to auto approve chat join requests",
     description:
@@ -64,7 +76,7 @@ const FEATURED = [
     url: "https://channelactions.xditya.me",
   },
   {
-    num: "03",
+    num: "04",
     name: "GroupManager",
     tagline: "Python based group managing bot",
     description:
@@ -73,17 +85,6 @@ const FEATURED = [
     tech: ["Python", "MongoDB"],
     stat: "256+ stars",
     github: "https://github.com/xditya/GroupManager",
-  },
-  {
-    num: "04",
-    name: "GeminiBot",
-    tagline: "AI-powered Telegram Bot",
-    description:
-      "A Telegram bot that chats using Google's Gemini API.",
-    year: 2024,
-    tech: ["TypeScript", "Deno"],
-    stat: "Gemini AI",
-    github: "https://github.com/xditya/GeminiBot",
   },
 ];
 
