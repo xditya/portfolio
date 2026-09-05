@@ -41,6 +41,18 @@ const STATS = [
 const FEATURED = [
   {
     num: "01",
+    name: "pastr",
+    tagline: "Paste text, get a link, decide when it disappears.",
+    description:
+      "A pastebin with exact expiry, burn-after-read and end-to-end encryption where the server never sees the text. Syntax highlighting, markdown, a zero-dependency CLI.",
+    year: 2026,
+    tech: ["TypeScript", "Next.js", "Redis"],
+    stat: "Zero-knowledge",
+    github: "https://github.com/xditya/pastr",
+    url: "https://pastr.xditya.me",
+  },
+  {
+    num: "02",
     name: "engram",
     tagline: "Remember everything. Own everything.",
     description:
@@ -52,7 +64,7 @@ const FEATURED = [
     url: "https://engram.xditya.me",
   },
   {
-    num: "02",
+    num: "03",
     name: "Ultroid",
     tagline: "Pluggable Telegram userbot",
     description:
@@ -64,7 +76,7 @@ const FEATURED = [
     url: "https://t.me/TeamUltroid",
   },
   {
-    num: "03",
+    num: "04",
     name: "ChannelActions",
     tagline: "Telegram bot to auto approve chat join requests",
     description:
@@ -74,17 +86,6 @@ const FEATURED = [
     stat: "1M+ users",
     github: "https://github.com/xditya/ChannelActionsBot",
     url: "https://channelactions.xditya.me",
-  },
-  {
-    num: "04",
-    name: "GroupManager",
-    tagline: "Python based group managing bot",
-    description:
-      "A Telegram bot for moderating and managing groups.",
-    year: 2020,
-    tech: ["Python", "MongoDB"],
-    stat: "256+ stars",
-    github: "https://github.com/xditya/GroupManager",
   },
 ];
 
