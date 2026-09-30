@@ -36,6 +36,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(profile.siteUrl),
   title: {
     default: profile.meta.title,
     template: profile.meta.titleTemplate,
