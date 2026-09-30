@@ -13,7 +13,7 @@
 /* ── Sign-off ── */
 
 .signoff {
-  padding-block: clamp(64px, 10vw, 160px);
+  padding-block: clamp(64px, 10vw, 160px) 0;
 }
 
 .eyebrow {
@@ -29,13 +29,19 @@
   color: var(--accent-2);
 }
 
-/* The big link. Hover follows the external-link rule: the arrow nudges
-   up and to the right and the text turns pale. No fill. */
+/* The big link spans the row: words on the left gutter, arrow on the right
+   one, and the line rests on the hairline of the bottom row. Hover follows
+   the external-link rule: the arrow nudges up and to the right and the text
+   turns pale. No fill. */
 .cta {
-  display: inline-block;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  padding-bottom: clamp(20px, 3vw, 40px);
   color: var(--text);
   text-decoration: none;
-  transform-origin: left center;
+  transform-origin: center;
   transition:
     color 300ms var(--ease-out),
     transform 160ms var(--ease-out);
@@ -67,7 +73,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   column-gap: 40px;
-  row-gap: 20px;
+  row-gap: 24px;
   padding-block: 28px;
 }
 
@@ -91,7 +97,7 @@
   flex-wrap: wrap;
   align-items: center;
   column-gap: 20px;
-  row-gap: 10px;
+  row-gap: 24px;
 }
 
 .socials {
@@ -107,6 +113,15 @@
   color: var(--text-2);
   text-decoration: none;
   transition: color 200ms var(--ease-out);
+}
+
+/* A 44px tall hit area around the 20px line of text. The 24px row gaps
+   keep stacked areas from overlapping. */
+.link::before,
+.social::before {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
 }
 
 /* Page links go bone on hover, external links go pale. */
@@ -150,10 +165,6 @@
     grid-template-columns: repeat(3, auto);
     justify-content: start;
     column-gap: 28px;
-    row-gap: 12px;
-  }
-  .socials {
-    row-gap: 12px;
   }
 }
 
