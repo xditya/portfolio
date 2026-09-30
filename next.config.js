@@ -12,6 +12,8 @@ const redirectLinks = {
 };
 
 const nextConfig = {
+  // Stop `next dev` from appending its agent-rules block to CLAUDE.md.
+  agentRules: false,
   async redirects() {
     return Object.entries(redirectLinks).map(([key, value]) => ({
       source: `/${key}`,

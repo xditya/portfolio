@@ -10,7 +10,6 @@ This site is built to showcase my projects, skills, and provide a way for visito
 - **About Me:** Information about my background, skills, and interests.
 - **Contact Form:** Easy way for visitors to send me a message.
 - **Responsive Design:** Optimized for various devices and screen sizes.
-- **Theme Toggle:** Allows users to switch between light and dark modes.
 
 ## Technologies Used
 
@@ -19,16 +18,20 @@ This site is built to showcase my projects, skills, and provide a way for visito
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [GSAP](https://gsap.com/) (for animations)
-- [React Icons](https://react-icons.github.io/react-icons/)
+
+## Development
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+The dev server runs at http://localhost:3000. Fill in `.env.local` as needed: the contact form needs the hCaptcha and Telegram values, and analytics stays off while the measurement id is empty. Each variable is described in `.env.example`.
 
 ## Analytics Setup
 
-Google Analytics (GA4) is integrated through an environment variable.
-
-1. Create a local env file:
-   - Copy `.env.example` to `.env.local`
-2. Ensure this variable is set:
-   - `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-xxxxxxxxxxx`
+Google Analytics (GA4) is integrated through an environment variable. Set `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-xxxxxxxxxxx` in `.env.local` to turn it on.
 
 Tracked interactions include page views, navbar clicks, primary home CTA clicks, social link clicks, and contact form submit outcomes.
 
