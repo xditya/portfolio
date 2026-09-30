@@ -134,7 +134,7 @@ export default function Hero() {
           }
         >
           <span className={s.ok} aria-hidden="true" />
-          {profile.available}
+          {profile.availability}
         </Link>
 
         <h1
