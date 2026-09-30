@@ -228,7 +228,7 @@ export const projects: Project[] = [
     github: "https://github.com/TeamUltroid/Ultroid",
     url: "https://t.me/TeamUltroid",
     stars: 3000,
-    image: "/images/ultroid.jpg",
+    image: "/images/ultroid-blue.jpg",
     featured: true,
     highlight: "3K+ stars",
     featuredOrder: 2,
