@@ -1,0 +1,12 @@
+/* The tint behind the active or hovered item, shared by the desktop pill
+   and the phone dock so the two cannot drift apart. */
+
+.marker {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px solid rgba(77, 98, 255, 0.45);
+  border-radius: var(--radius-pill, 999px);
+  background: rgba(77, 98, 255, 0.28);
+  pointer-events: none;
+}

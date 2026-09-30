@@ -24,10 +24,12 @@ export function isActivePath(pathname: string, href: string): boolean {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
+// Critically damped (40 = 2 x sqrt(400)): the marker follows hover, focus
+// and route changes, none of which carries momentum to overshoot with.
 export const MARKER_SPRING = {
   type: "spring",
   stiffness: 400,
-  damping: 32,
+  damping: 40,
 } as const;
 
 export const INSTANT = { duration: 0 } as const;

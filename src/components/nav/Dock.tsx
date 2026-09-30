@@ -74,13 +74,7 @@ export default function Dock() {
                     })
                   }
                 >
-                  {active && (
-                    <Marker
-                      id="nav-dock-marker"
-                      className={s.marker}
-                      reduce={reduce}
-                    />
-                  )}
+                  {active && <Marker id="nav-dock-marker" reduce={reduce} />}
                   <span className={s.label}>{item.label}</span>
                 </Link>
               </li>
@@ -92,17 +86,12 @@ export default function Dock() {
               type="button"
               className={s.item}
               aria-expanded={open}
+              data-active={moreActive || undefined}
               aria-haspopup="dialog"
               aria-controls={open ? "nav-more-sheet" : undefined}
               onClick={toggleSheet}
             >
-              {moreActive && (
-                <Marker
-                  id="nav-dock-marker"
-                  className={s.marker}
-                  reduce={reduce}
-                />
-              )}
+              {moreActive && <Marker id="nav-dock-marker" reduce={reduce} />}
               <span className={s.label}>More</span>
             </button>
           </li>

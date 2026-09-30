@@ -121,11 +121,7 @@ export default function Navbar() {
                       }
                     >
                       {markedHref === item.href && (
-                        <Marker
-                          id="nav-pill-marker"
-                          className={s.marker}
-                          reduce={reduce}
-                        />
+                        <Marker id="nav-pill-marker" reduce={reduce} />
                       )}
                       {item.label}
                     </Link>

@@ -1,6 +1,5 @@
 /* Shell top bar: wordmark, desktop glass pill, phone search button.
-   Colour and easing tokens come from globals.css; the fallbacks keep the
-   bar legible until the token pass lands. */
+   Colour, glass and easing tokens come from globals.css (:root). */
 
 /* 21px tall so it leaves the viewport once the page is scrolled past 20px. */
 .sentinel {
@@ -20,21 +19,41 @@
   left: 0;
   z-index: 102;
   height: 64px;
-  border-bottom: 1px solid transparent;
-  background: rgba(7, 10, 18, 0);
   /* Empty bar space lets the pointer reach the ink layer beneath. */
   pointer-events: none;
-  transition:
-    background-color 300ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
-    border-color 300ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+/* The bar material sits on a layer behind the content, so tint and blur
+   fade in together and the header itself never becomes the backdrop the
+   pill samples. It runs 24px past the bar and fades out over its last 32px
+   instead of ending on a hairline. */
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -24px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--glass-bar);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
 }
 
 .header[data-scrolled] {
-  background: rgba(7, 10, 18, 0.82);
-  border-bottom-color: var(--line, rgba(238, 237, 230, 0.09));
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
   pointer-events: auto;
+}
+
+.header[data-scrolled]::before {
+  opacity: 1;
+}
+
+/* Over the tinted bar a second blur on the pill is a pass for nothing. */
+.header[data-scrolled] .pill {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .inner {
@@ -80,12 +99,12 @@
   gap: 2px;
   height: 44px;
   padding: 4px;
-  border: 1px solid var(--line-strong, rgba(238, 237, 230, 0.18));
+  border: 1px solid var(--glass-line);
   border-radius: var(--radius-pill, 999px);
-  background: rgba(12, 17, 32, 0.62);
+  background: var(--glass-chip);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
 }
 
 .list {
@@ -122,19 +141,8 @@
   inset: -5px 0;
 }
 
-.link:hover,
 .link[aria-current="page"] {
   color: var(--text, #eeede6);
-}
-
-.marker {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border: 1px solid rgba(77, 98, 255, 0.45);
-  border-radius: var(--radius-pill, 999px);
-  background: rgba(77, 98, 255, 0.28);
-  pointer-events: none;
 }
 
 /* Command palette trigger, last item in the pill. The label is "⌘K" until
@@ -154,7 +162,7 @@
   border: 0;
   border-radius: var(--radius-pill, 999px);
   background: transparent;
-  color: var(--text-3, #7d8497);
+  color: var(--text-2, #a6abb8);
   font-family: var(--font-mono);
   font-size: 11.5px;
   letter-spacing: 0.02em;
@@ -176,13 +184,20 @@
   font: inherit;
 }
 
-.trigger:hover {
-  color: var(--text, #eeede6);
-  background: rgba(238, 237, 230, 0.06);
+.trigger:active {
+  transform: scale(0.97);
 }
 
-.trigger:active {
-  transform: scale(0.96);
+/* Hover only where a pointer hovers; on a touch tablet it would stick. */
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    color: var(--text, #eeede6);
+  }
+
+  .trigger:hover {
+    color: var(--text, #eeede6);
+    background: rgba(238, 237, 230, 0.06);
+  }
 }
 
 /* Phone search button, top right */
@@ -196,17 +211,14 @@
   border: 0;
   border-radius: var(--radius-pill, 999px);
   background: transparent;
-  color: var(--text-2, #a6abb8);
+  color: var(--text, #eeede6);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    color 200ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
-    transform 160ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+  transition: transform 160ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
 }
 
 .search:active {
-  color: var(--text, #eeede6);
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 /* Focus */
@@ -235,8 +247,18 @@
   }
 }
 
+/* Solid bar with a real edge when transparency is reduced or contrast raised */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  .header::before {
+    inset: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+    border-bottom: 1px solid var(--glass-line);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .header,
+  .header::before,
   .link,
   .trigger,
   .search {

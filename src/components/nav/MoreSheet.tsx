@@ -39,6 +39,13 @@ export default function MoreSheet({ open, onClose, returnFocus }: Props) {
         onClose();
         return;
       }
+      // The palette shortcut closes the sheet first, so the two scroll locks
+      // never overlap: this cleanup puts the overflow back before the
+      // palette records it.
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        onClose();
+        return;
+      }
       if (e.key !== "Tab" || !sheet) return;
       const focusable = Array.from(sheet.querySelectorAll<HTMLElement>(FOCUSABLE));
       if (focusable.length === 0) return;
@@ -53,7 +60,11 @@ export default function MoreSheet({ open, onClose, returnFocus }: Props) {
         first.focus();
       }
     };
-    window.addEventListener("keydown", onKey);
+    // Capture phase: this runs ahead of the palette's own window listener.
+    // React commits each listener's update before the next listener fires,
+    // so in the bubble phase the palette would open (and record the locked
+    // overflow) while the sheet was still holding it.
+    window.addEventListener("keydown", onKey, true);
 
     // Lock page scroll. Both elements are set because html carries
     // overflow-x: clip, which stops body's overflow propagating to the viewport.
@@ -65,7 +76,7 @@ export default function MoreSheet({ open, onClose, returnFocus }: Props) {
     body.style.overflow = "hidden";
 
     return () => {
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", onKey, true);
       html.style.overflow = previousHtml;
       body.style.overflow = previousBody;
       trigger?.focus({ preventScroll: true });
@@ -73,82 +84,93 @@ export default function MoreSheet({ open, onClose, returnFocus }: Props) {
   }, [open, onClose, returnFocus]);
 
   const transition = reduce ? INSTANT : { duration: 0.24, ease: EASE_OUT };
+  // Leaving is quicker than arriving.
+  const exitTransition = reduce ? INSTANT : { duration: 0.16, ease: EASE_OUT };
 
+  // The wrapper sits outside AnimatePresence, so it always carries the live
+  // `open` value and the stylesheet can take pointer events off the layers
+  // while they animate out. Its children are fixed; it takes no space.
+  // data-lenis-prevent keeps wheel events over the open sheet out of Lenis,
+  // which scrolls the page in script and ignores the overflow lock.
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          key="backdrop"
-          className={s.backdrop}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={transition}
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
-      {open && (
-        <motion.div
-          key="sheet"
-          ref={sheetRef}
-          id="nav-more-sheet"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="nav-more-title"
-          tabIndex={-1}
-          className={s.sheet}
-          initial={{ y: "115%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "115%" }}
-          transition={transition}
-        >
-          <div className={s.head}>
-            <h2 id="nav-more-title" className={s.title}>
-              More
-            </h2>
-            <button type="button" className={s.close} onClick={onClose}>
-              Close
-            </button>
-          </div>
-          <ul className={s.list}>
-            {moreItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={s.row}
-                  aria-current={
-                    isActivePath(pathname, item.href) ? "page" : undefined
-                  }
+    <div className={s.layer} data-open={open}>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="backdrop"
+            className={s.backdrop}
+            data-lenis-prevent=""
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: exitTransition }}
+            transition={transition}
+            onClick={onClose}
+            aria-hidden="true"
+          />
+        )}
+        {open && (
+          <motion.div
+            key="sheet"
+            ref={sheetRef}
+            id="nav-more-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="nav-more-title"
+            tabIndex={-1}
+            className={s.sheet}
+            data-lenis-prevent=""
+            initial={{ y: "115%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "115%", transition: exitTransition }}
+            transition={transition}
+          >
+            <div className={s.head}>
+              <h2 id="nav-more-title" className={s.title}>
+                More
+              </h2>
+              <button type="button" className={s.close} onClick={onClose}>
+                Close
+              </button>
+            </div>
+            <ul className={s.list}>
+              {moreItems.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={s.row}
+                    aria-current={
+                      isActivePath(pathname, item.href) ? "page" : undefined
+                    }
+                    onClick={() => {
+                      trackEvent("nav_click", {
+                        link_label: item.label,
+                        link_url: item.href,
+                        source: "dock_more",
+                      });
+                      onClose();
+                    }}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li className={s.searchCell}>
+                <button
+                  type="button"
+                  className={`${s.row} ${s.search}`}
                   onClick={() => {
-                    trackEvent("nav_click", {
-                      link_label: item.label,
-                      link_url: item.href,
-                      source: "dock_more",
-                    });
                     onClose();
+                    openPalette();
                   }}
                 >
-                  {item.label}
-                </Link>
+                  <SearchIcon size={18} />
+                  Search
+                </button>
               </li>
-            ))}
-            <li className={s.searchCell}>
-              <button
-                type="button"
-                className={`${s.row} ${s.search}`}
-                onClick={() => {
-                  onClose();
-                  openPalette();
-                }}
-              >
-                <SearchIcon size={18} />
-                Search
-              </button>
-            </li>
-          </ul>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

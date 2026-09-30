@@ -9,16 +9,16 @@
   z-index: 100;
   display: none;
   padding: 3px;
-  border: 1px solid var(--line-strong, rgba(238, 237, 230, 0.18));
+  border: 1px solid var(--glass-line);
   border-radius: var(--radius-pill, 999px);
-  /* Same glass as the desktop pill, a touch more opaque because page text
-     scrolls under it the whole time. */
-  background: rgba(12, 17, 32, 0.7);
+  /* The shared glass from globals.css, in its more opaque floating weight
+     because page text scrolls under the dock the whole time. */
+  background: var(--glass-float);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 12px 32px rgba(0, 0, 0, 0.35);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
 }
 
 .list {
@@ -61,6 +61,7 @@
 }
 
 .item[aria-current="page"],
+.item[data-active],
 .item[aria-expanded="true"] {
   color: var(--text, #eeede6);
 }
@@ -77,16 +78,6 @@
 .label {
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.marker {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border: 1px solid rgba(77, 98, 255, 0.45);
-  border-radius: var(--radius-pill, 999px);
-  background: rgba(77, 98, 255, 0.28);
-  pointer-events: none;
 }
 
 @media (max-width: 760px) {
