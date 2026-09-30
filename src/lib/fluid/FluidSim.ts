@@ -107,7 +107,6 @@ export class FluidSim {
   private readonly gl: GL;
   private readonly canvas: HTMLCanvasElement;
   private readonly opts: FluidOptions;
-  private readonly loseExt: WEBGL_lose_context | null;
 
   private velFmt: TexFormat;
   private dyeFmt: TexFormat;
@@ -153,7 +152,6 @@ export class FluidSim {
     this.canvas = canvas;
     this.opts = opts;
     this.webgl2 = isWebGL2(gl);
-    this.loseExt = gl.getExtension("WEBGL_lose_context");
 
     /* Pick the texture formats. Half float first, bytes as the fallback. */
     const force = opts.force || {};
@@ -539,7 +537,11 @@ export class FluidSim {
     gl.readPixels(px, py, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, out);
   }
 
-  /* Free every GL object and release the context. */
+  /* Free every GL object. The context itself stays alive: a canvas hands
+     back the same context on every getContext call, so losing it here would
+     leave a remount on the same canvas (React runs effects twice in
+     development) with a dead context and no ink. The browser reclaims the
+     context with the canvas. */
   dispose(): void {
     const gl = this.gl;
     const lost = gl.isContextLost();
@@ -564,7 +566,6 @@ export class FluidSim {
     this.vertex = null;
     this.buffer = null;
     this.broken = true;
-    if (!lost && this.loseExt) this.loseExt.loseContext();
   }
 
   private bind(unit: number, tex: WebGLTexture): void {
