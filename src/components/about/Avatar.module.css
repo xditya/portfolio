@@ -15,6 +15,9 @@
 
 .avatar::before {
   content: attr(data-initial);
+  /* Decoration behind the picture: empty alt text keeps screen readers from
+     announcing the letter. The line above is for browsers without it. */
+  content: attr(data-initial) / "";
   position: absolute;
   inset: 0;
   display: grid;

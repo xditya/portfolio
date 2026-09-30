@@ -1,9 +1,10 @@
 "use client";
 
-import { useSyncExternalStore, type ReactNode } from "react";
-import { motion } from "motion/react";
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { animate, inView } from "motion/react";
 
 const REDUCED = "(prefers-reduced-motion: reduce)";
+const MAX_STAGGER = 3; // rows that arrive together follow each other, up to here
 
 function subscribe(onChange: () => void) {
   const query = window.matchMedia(REDUCED);
@@ -15,9 +16,9 @@ const onServer = () => false;
 
 /**
  * One row of the experience list. The server sends a plain, visible <li>,
- * and reduced motion keeps it. With motion allowed the row is swapped after
- * hydration for one that fades up the first time it scrolls into view; rows
- * that arrive together follow each other by their place in the list.
+ * and reduced motion keeps it. With motion allowed, a row that is still
+ * below the fold after hydration is hidden and fades up the first time it
+ * scrolls into view; a row already on screen is left as it is.
  */
 export default function TimelineEntry({
   index,
@@ -28,24 +29,35 @@ export default function TimelineEntry({
   className?: string;
   children: ReactNode;
 }) {
+  const ref = useRef<HTMLLIElement>(null);
   const animated = useSyncExternalStore(subscribe, motionAllowed, onServer);
 
-  if (!animated) return <li className={className}>{children}</li>;
+  useEffect(() => {
+    const row = ref.current;
+    if (!animated || !row || row.getBoundingClientRect().top < window.innerHeight) return;
+    row.style.opacity = "0";
+    // the callback returns nothing, so the row is watched for one entry only
+    const stop = inView(
+      row,
+      () => {
+        animate(
+          row,
+          { opacity: [0, 1], y: [16, 0] },
+          { type: "spring", duration: 0.6, bounce: 0, delay: Math.min(index, MAX_STAGGER) * 0.05 },
+        );
+      },
+      { amount: 0.3 },
+    );
+    return () => {
+      stop();
+      row.style.opacity = "";
+      row.style.transform = "";
+    };
+  }, [animated, index]);
 
   return (
-    <motion.li
-      className={className}
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{
-        type: "spring",
-        duration: 0.6,
-        bounce: 0,
-        delay: index * 0.05,
-      }}
-    >
+    <li ref={ref} className={className}>
       {children}
-    </motion.li>
+    </li>
   );
 }

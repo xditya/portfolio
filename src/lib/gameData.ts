@@ -21,7 +21,8 @@ export const GAME_STATS = stats;
 
 export const GAME_EXPERIENCE = experience;
 
-export const GAME_TECH_STACK = techStack;
+// The tech garden is a ring laid out for six orbs; /about shows the full list.
+export const GAME_TECH_STACK = techStack.slice(0, 6);
 
 export const GAME_SOCIALS = socials;
 

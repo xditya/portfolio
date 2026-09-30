@@ -34,7 +34,9 @@ export default async function AboutPage() {
             <div className={s.id}>
               <h2 className={s.name}>{profile.name}</h2>
               <p className={`mono-sm ${s.role}`}>
-                {`${profile.role} · ${profile.location} · ${profile.age}y old`}
+                {/* A no-break space after each dot: a line can end before a
+                    separator, never on one. */}
+                {`${profile.role} \u00B7\u00A0${profile.location} \u00B7\u00A0${profile.age}y old`}
               </p>
               <span className={`badge badge-accent ${s.open}`}>Open Source</span>
             </div>

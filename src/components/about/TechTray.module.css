@@ -1,12 +1,17 @@
-/* Tech stack · a plain wrapped list of six chips. Where motion is allowed the
-   list becomes a tray: a panel one shade above the ground that the chips
-   rest in (and, once the physics is running, fall into). Without script the
-   chips sit along the tray floor, which is where they would settle anyway. */
+/* Tech stack · a wrapped list of chips. Where motion is allowed the list
+   becomes a tray: a panel one shade above the ground with the chips wrapped
+   along its floor and clear space above them. The tray has no height of its
+   own: it is as tall as the wrapped chips plus that clearance, so it grows
+   with the number of chips and shrinks with the width. That is an estimate
+   of the room the loose pile needs; once the physics runs, the script pins
+   the tray to the pile's own need (worked out from the chips' area) and the
+   chips pour into it. */
 
 .tray {
+  --gap: 10px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--gap);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -15,15 +20,15 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  height: 52px;
-  padding: 0 22px 0 18px;
+  gap: 9px;
+  height: 48px;
+  padding: 0 20px 0 16px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-pill);
   background: var(--surface-2);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
@@ -35,38 +40,60 @@
 /* Simple Icons are one colour: the file is the mask, the tint is the box. */
 .logo {
   flex: none;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   background: var(--c);
   -webkit-mask: var(--logo) center / contain no-repeat;
   mask: var(--logo) center / contain no-repeat;
 }
 
+/* Phones get a smaller chip, and the narrowest a smaller one again, so the
+   tray stays near one screen tall. */
 @media (max-width: 760px) {
+  .tray {
+    --gap: 8px;
+  }
   .chip {
-    height: 48px;
-    padding: 0 18px 0 15px;
-    font-size: 15px;
+    gap: 8px;
+    height: 40px;
+    padding: 0 15px 0 12px;
+    font-size: 14px;
   }
   .logo {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 400px) {
+  .tray {
+    --gap: 6px;
+  }
+  .chip {
+    gap: 7px;
+    height: 36px;
+    padding: 0 13px 0 10px;
+    font-size: 13px;
+  }
+  .logo {
+    width: 16px;
+    height: 16px;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .tray {
     position: relative;
-    align-content: flex-end;
-    height: clamp(280px, 24vw, 340px);
-    /* same inset as the physics walls, so the resting row does not shift
-       when the bodies take over */
-    padding: 10px;
+    /* 10px is the inset of the physics walls, so the wrapped rows do not
+       shift when the bodies take over. The rest of the top padding is the
+       clearance the pile keeps under the top edge: leaning chips make the
+       loose pile a row or two taller than the wrapped rows. */
+    padding: calc(10px + var(--clear, 120px)) 10px 10px;
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--radius-panel);
     background: var(--surface-1);
-    /* a finger on empty tray space still scrolls the page */
+    /* a finger moving up or down scrolls the page, on a chip or off it */
     touch-action: pan-y;
   }
 
@@ -76,7 +103,6 @@
     left: 0;
     width: max-content;
     will-change: transform;
-    touch-action: none;
   }
 
   .tray[data-dragging] {
@@ -86,7 +112,7 @@
 
   .tray[data-live] .chip[data-held] {
     border-color: var(--accent);
-    background: #1a2340;
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -94,7 +120,7 @@
       cursor: grab;
     }
     .tray[data-live] .chip:hover {
-      border-color: rgba(238, 237, 230, 0.34);
+      border-color: color-mix(in srgb, var(--text) 34%, transparent);
     }
     .tray[data-live] .chip[data-held] {
       border-color: var(--accent);
@@ -102,9 +128,12 @@
     }
   }
 
+  /* Two or three chips to a row leave the wrapped rows ragged, and the pile
+     packs well below them: the narrowest phone needs no extra clearance,
+     and the need grows with the width until the rows fill out. */
   @media (max-width: 760px) {
     .tray {
-      height: 300px;
+      --clear: clamp(0px, (100vw - 320px) * 0.5, 60px);
     }
   }
 }
