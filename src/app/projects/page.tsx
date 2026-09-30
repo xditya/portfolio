@@ -45,51 +45,50 @@ export default function ProjectsPage() {
 
   return (
     <div className={s.page}>
-      <header className={s.header}>
-        <h1 className={s.ghost}>Projects</h1>
-
-        <div className={`container-x ${s.tool}`}>
+      <header className={`container-x ${s.tool}`}>
+        <div className={s.title}>
+          <h1 className="display-lg">Projects</h1>
           <p className={`body-lg ${s.lede}`}>
             {projects.length} projects across {years.length} years, from
             Telegram bots to mobile apps.
           </p>
-
-          <input
-            ref={searchRef}
-            type="search"
-            className={`field-u ${s.search}`}
-            placeholder="Search projects (try “telegram” or “2022”)"
-            aria-label="Search projects"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-
-          <div className={s.chips} role="group" aria-label="Filter by tech">
-            {techFilters.map(([t, n]) => (
-              <button
-                key={t}
-                type="button"
-                className={`chip ${s.filter}`}
-                data-on={tech === t}
-                aria-pressed={tech === t}
-                onClick={() => {
-                  const next = tech === t ? null : t;
-                  setTech(next);
-                  if (next) trackEvent("projects_filter", { tech: next });
-                }}
-              >
-                {t}
-                <span className={s.filterCount}>{n}</span>
-              </button>
-            ))}
-          </div>
-
-          <p className={`mono-sm ${s.count}`} aria-live="polite">
-            {isFiltering
-              ? `${filtered.length} of ${projects.length}`
-              : `${projects.length} projects`}
-          </p>
         </div>
+
+        <input
+          ref={searchRef}
+          type="search"
+          className={`field-u ${s.search}`}
+          placeholder="Search projects (try “telegram” or “2022”)"
+          aria-label="Search projects"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+
+        <div className={s.chips} role="group" aria-label="Filter by tech">
+          {techFilters.map(([t, n]) => (
+            <button
+              key={t}
+              type="button"
+              className={`chip ${s.filter}`}
+              data-on={tech === t}
+              aria-pressed={tech === t}
+              onClick={() => {
+                const next = tech === t ? null : t;
+                setTech(next);
+                if (next) trackEvent("projects_filter", { tech: next });
+              }}
+            >
+              {t}
+              <span className={s.filterCount}>{n}</span>
+            </button>
+          ))}
+        </div>
+
+        <p className={`mono-sm ${s.count}`} aria-live="polite">
+          {isFiltering
+            ? `${filtered.length} of ${projects.length}`
+            : `${projects.length} projects`}
+        </p>
       </header>
 
       <RowGroup className={`container-x ${s.index}`}>

@@ -1,10 +1,10 @@
 /* Projects index · page.tsx.
-   The title is a ghost: one word as wide as the window, with the search
-   field and the filter chips sitting over its lower half, so the title
-   belongs to the tool. Below it the page is two columns: a narrow one for
-   counts and year numerals, a wide one for the tool and the rows. The year
-   numeral is sticky while its group scrolls. Under 900px the columns stack;
-   under 760px the chips become one strip that scrolls sideways. */
+   Two columns: a narrow one for counts and year numerals, a wide one for
+   the tool and the rows. The title stands on the search field, on the same
+   left edge, and shares its baseline with the sentence at the right edge,
+   so the header is one line of type resting on the tool. The year numeral
+   is sticky while its group scrolls. Under 900px the columns stack; under
+   760px the chips become one strip that scrolls sideways. */
 
 .page {
   --year-col: clamp(120px, 14vw, 200px);
@@ -14,46 +14,34 @@
 
 /* ── Header ── */
 
-/* The word is sized in vw and must never widen the page, whatever font
-   ends up rendering it. */
-.header {
-  overflow-x: clip;
-}
-
-.ghost {
-  margin: 0 0 -0.47em;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: max(72px, 29.4vw);
-  line-height: 0.8;
-  letter-spacing: -0.02em;
-  font-variation-settings: "wdth" 90, "opsz" 96;
-  text-align: center;
-  white-space: nowrap;
-  /* A variable font's glyphs are built from overlapping shapes and a stroke
-     would trace every one of them. An opaque fill painted over a 2px stroke
-     hides the inner lines and leaves a 1px edge around each letter. */
-  color: color-mix(in srgb, var(--text) 5%, var(--surface-0));
-  -webkit-text-stroke: 2px var(--line-strong);
-  paint-order: stroke fill;
-  pointer-events: none;
-}
-
-/* Positioned so it paints over the title it overlaps. */
 .tool {
-  position: relative;
   display: grid;
   grid-template-columns: var(--year-col) minmax(0, 1fr);
   grid-template-areas:
-    ". lede"
+    ". title"
     "count search"
     ". chips";
   column-gap: var(--col-gap);
+  padding-top: clamp(28px, 5vw, 72px);
+}
+
+.title {
+  grid-area: title;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 40px;
+  margin-bottom: 4px;
+}
+.title h1 {
+  margin: 0;
 }
 
 .lede {
-  grid-area: lede;
-  margin: 0 0 12px;
+  max-width: 30ch;
+  margin: 0;
+  text-align: right;
   text-wrap: balance;
 }
 
@@ -195,8 +183,14 @@
     padding-top: 84px;
   }
 
-  .ghost {
-    margin-bottom: -0.3em;
+  .title {
+    display: block;
+    margin-bottom: 8px;
+  }
+  .lede {
+    max-width: none;
+    margin-top: 12px;
+    text-align: left;
   }
 
   /* Bleeds to both screen edges so a chip cut by the edge says there is

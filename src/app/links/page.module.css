@@ -1,60 +1,44 @@
 /* Links · page.tsx.
-   The title is one ghost word set as wide as the list, so its edges are the
-   list's edges, and its baseline is the list's top hairline: the word stands
-   on the list. The sentence sits over the foot of the word, on the column
-   the row titles start on. Nothing here moves; the rows bring their own
-   motion. The footer supplies the space under the list. */
+   The title starts on the column the row titles start on and shares its
+   baseline with the sentence at the right edge, so the header is one line
+   of type resting on the list's top hairline. Nothing here moves; the rows
+   bring their own motion. The footer supplies the space under the list. */
 
 .page {
   padding-top: 88px;
 }
 
-/* A size container, so the title can be sized from the list's width. The
-   clip trims the few pixels by which the round s dips under the baseline. */
+/* Side padding follows the row grid in components/index/Row.module.css:
+   row padding + index column + column gap on the left, row padding on the
+   right. */
 .head {
-  position: relative;
-  container-type: inline-size;
-  overflow-y: clip;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 40px;
+  padding-block: clamp(28px, 5vw, 72px) clamp(20px, 2.4vw, 32px);
+  padding-inline: calc(clamp(8px, 1.5vw, 20px) + 56px + 24px) clamp(8px, 1.5vw, 20px);
 }
-
-/* Same ghost as the projects title: an opaque fill a shade off the page
-   over a 2px stroke, which leaves a 1px edge and hides the inner contours a
-   variable font's glyphs are built from.
-   The inked part of "Links" at this weight, width and tracking is 1.95em
-   wide, so 100cqw / 1.95 makes the word span the container; the left margin
-   takes out the side bearing of the L. The vw line is for browsers without
-   container units. The baseline is 0.73em under the top of the 0.8em line
-   box, so the bottom margin ends the header on the baseline. */
-.title {
-  margin: 0 0 -0.07em -0.03em;
-  font-size: 40vw;
-  font-size: calc(100cqw / 1.95);
-  font-weight: 800;
-  line-height: 0.8;
-  letter-spacing: -0.02em;
-  font-variation-settings: "wdth" 90, "opsz" 96;
-  white-space: nowrap;
-  color: color-mix(in srgb, var(--text) 5%, var(--surface-0));
-  -webkit-text-stroke: 2px var(--line-strong);
-  paint-order: stroke fill;
-  pointer-events: none;
-}
-
-/* Left edge on the row titles: row padding + index column + column gap.
-   These follow the row grid in components/index/Row.module.css. */
-.lede {
-  position: absolute;
-  left: calc(clamp(8px, 1.5vw, 20px) + 56px + 24px);
-  right: 0;
-  bottom: clamp(18px, 2.6vw, 36px);
+.head h1 {
   margin: 0;
+}
+
+.lede {
+  margin: 0;
+  text-align: right;
 }
 
 @media (max-width: 760px) {
   .page {
     padding-top: 84px;
   }
+  .head {
+    display: block;
+    padding-inline: calc(8px + 28px + 12px) 8px;
+  }
   .lede {
-    left: calc(8px + 28px + 12px);
+    margin-top: 12px;
+    text-align: left;
   }
 }
