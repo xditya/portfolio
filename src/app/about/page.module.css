@@ -1,0 +1,344 @@
+/* About · page.tsx.
+   One twelve-column grid runs down the page, with the same gap as the four
+   stats, so edges repeat: the profile block and the experience descriptions
+   start on column nine, the second half of "What I Do / How I Work" starts
+   where the third stat does. The title and the bio share their top and
+   bottom edges with the profile block, and the pair rests on the hairlines
+   of the stats. Under 1200px the avatar moves beside the name; under 900px
+   the header stacks; under 760px everything is one column. */
+
+.page {
+  --gap: clamp(20px, 3vw, 48px);
+  --section: clamp(64px, 9vw, 128px);
+  padding-top: 88px;
+}
+
+/* ── Header ── */
+
+.head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+  padding-top: clamp(28px, 5vw, 72px);
+}
+
+/* Title at the top, bio at the bottom: whichever column is shorter spreads
+   to the height of the other, so both end on the same line. */
+.intro {
+  grid-column: 1 / span 8;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bio {
+  max-width: 34em;
+  margin: clamp(20px, 2.4vw, 32px) 0 0;
+}
+
+/* Who at the top, on the title's first line; what to do next at the bottom,
+   on the bio's last line. */
+.profile {
+  grid-column: 9 / -1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  /* Drops the avatar to the cap height of the title beside it */
+  padding-top: 0.5vw;
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* Name and badge on one line, the role under both. The badge comes last in
+   the markup so the block still reads name, role, badge. */
+.id {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+}
+
+.name {
+  grid-area: 1 / 1;
+  font-size: clamp(24px, 2.4vw, 32px);
+  line-height: 1.1;
+  font-variation-settings: "wdth" 90, "opsz" 96;
+}
+
+.open {
+  grid-area: 1 / 2;
+  justify-self: start;
+}
+
+.role {
+  grid-area: 2 / 1 / auto / -1;
+  margin: 8px 0 0;
+  color: var(--text-2);
+  line-height: 1.6;
+  /* When the line has to break, it breaks near the middle */
+  text-wrap: balance;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 44px tall so each link is a full touch target */
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--accent-2);
+  transition: color 200ms var(--ease-out);
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 350ms var(--ease-spring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    color: var(--text);
+  }
+  .link:hover .arrow {
+    transform: translate(0.12em, -0.12em);
+  }
+}
+
+.link:focus-visible .arrow {
+  transform: translate(0.12em, -0.12em);
+}
+
+/* ── Stats · the home grid, resting right under the header ── */
+
+.stats {
+  margin-top: clamp(32px, 4vw, 56px);
+}
+.stats > div {
+  margin-top: 0;
+}
+
+/* ── What I Do / How I Work · one hairline between the halves ── */
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--section);
+}
+
+.half {
+  padding-right: calc(var(--gap) / 2);
+}
+.half + .half {
+  padding-right: 0;
+  padding-left: calc(var(--gap) / 2);
+  border-left: 1px solid var(--line);
+}
+
+.halfText {
+  max-width: 30em;
+  margin: 16px 0 0;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A label, not a control: no pointer, no hover */
+.tag {
+  padding: 6px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+/* ── Tech stack, Experience ── */
+
+.section {
+  margin-top: var(--section);
+}
+
+.heading {
+  margin-bottom: clamp(20px, 2.4vw, 32px);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+  align-items: baseline;
+  padding-block: clamp(24px, 3vw, 36px);
+  border-bottom: 1px solid var(--line);
+}
+
+.when {
+  grid-column: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.period {
+  margin: 0;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.job {
+  grid-column: 3 / span 6;
+}
+
+.jobTitle {
+  font-size: clamp(19px, 2.2vw, 28px);
+  line-height: 1.15;
+  font-variation-settings: "wdth" 90, "opsz" 96;
+}
+
+.company {
+  margin: 8px 0 0;
+  color: var(--accent-2);
+}
+
+.what {
+  grid-column: 9 / -1;
+  margin: 0;
+  color: var(--text-2);
+}
+
+/* ── Mid widths · a smaller avatar at the left, name and role beside it, so
+   the profile stays about as tall as the two-line title and its bio ── */
+
+@media (max-width: 1199px) {
+  .who {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+  .id {
+    flex: 1;
+    min-width: 0;
+  }
+  .role {
+    margin-top: 6px;
+  }
+}
+
+/* ── Narrow windows · the header stacks, descriptions move under titles ── */
+
+@media (max-width: 899px) {
+  .head {
+    display: block;
+  }
+
+  .profile {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 40px;
+    margin-top: clamp(28px, 5vw, 40px);
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .who {
+    flex: 1 1 300px;
+  }
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 28px;
+  }
+
+  .when {
+    grid-column: 1 / span 3;
+  }
+  .job,
+  .what {
+    grid-column: 4 / -1;
+  }
+  .what {
+    margin-top: 12px;
+  }
+}
+
+/* ── Phones · one column ── */
+
+@media (max-width: 760px) {
+  .page {
+    padding-top: 84px;
+  }
+
+  .pair {
+    display: block;
+  }
+  .half,
+  .half + .half {
+    padding-inline: 0;
+    border-left: 0;
+  }
+  .half + .half {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid var(--line);
+  }
+
+  .entry {
+    display: block;
+  }
+  .when {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link,
+  .arrow {
+    transition: none;
+  }
+  .link:hover .arrow,
+  .link:focus-visible .arrow {
+    transform: none;
+  }
+}
