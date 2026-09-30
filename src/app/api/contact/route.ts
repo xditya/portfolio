@@ -12,6 +12,16 @@ const contactSchema = z.object({
   hcaptchaToken: z.string().min(1, "Captcha token is required"),
 });
 
+// The Telegram message is sent as HTML, so a "<" or "&" typed into the form
+// has to become an entity or Telegram rejects the whole call.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function getClientIP(headersList: Headers): string {
   // Try different headers in order of preference
   const headersToCheck = [
@@ -120,25 +130,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid captcha" }, { status: 400 });
     }
 
-    // Format message with HTML
+    // Format message with HTML. Everything interpolated came from the
+    // request or a third party, so all of it is escaped.
+    const e = escapeHtml;
     const telegramMessage = `
 <b>📨 New Contact Form Submission</b>
 
 <b>👤 From:</b>
-• Name: <code>${validatedData.name}</code>
-• Email: <code>${validatedData.email}</code>
-• Phone: <code>${validatedData.phone || "Not provided"}</code>
-• Social: <code>${validatedData.socialHandle || "Not provided"}</code>
+• Name: <code>${e(validatedData.name)}</code>
+• Email: <code>${e(validatedData.email)}</code>
+• Phone: <code>${e(validatedData.phone || "Not provided")}</code>
+• Social: <code>${e(validatedData.socialHandle || "Not provided")}</code>
 
 <b>📝 Message:</b>
-<code>${validatedData.message}</code>
+<code>${e(validatedData.message)}</code>
 
 <b>🌍 Location Info:</b>
-• IP: <code>${ip}</code>
-• Location: <code>${locationInfo.city}, ${locationInfo.region}, ${
-      locationInfo.country
-    }</code>
-• ISP: <code>${locationInfo.isp}</code>`;
+• IP: <code>${e(ip)}</code>
+• Location: <code>${e(`${locationInfo.city}, ${locationInfo.region}, ${locationInfo.country}`)}</code>
+• ISP: <code>${e(locationInfo.isp)}</code>`;
 
     const telegramResponse = await fetch(
       `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,

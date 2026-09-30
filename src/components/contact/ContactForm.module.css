@@ -1,0 +1,270 @@
+/* Contact form · ContactForm.tsx. Five underline fields (.field-u from
+   globals.css) in the same order as the API, a label above each and its
+   error below. Focus draws a 2px ink line along the field's hairline from
+   the side the pointer came in on (--o, set on the field wrapper; keyboard
+   focus has none and draws from the left). The submit is an InkButton; the
+   result modal sits fixed over the page. Tokens come from globals.css. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Two fields side by side while each can be 260px or wider (the social
+   handle keeps room to type beside its icons), one under the other below
+   that. */
+.pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px clamp(24px, 3vw, 40px);
+}
+
+/* ── Field ── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.required {
+  color: var(--accent-2);
+}
+
+.control {
+  position: relative;
+}
+
+/* The hairline is the field's own border; the ink line lies on it. The
+   class's focus colour change is left off inside this form so the line
+   is the only thing that moves on focus. */
+.control .line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: var(--o, left);
+  transition: transform 350ms var(--ease-out);
+  pointer-events: none;
+}
+.control:focus-within .line {
+  transform: scaleX(1);
+}
+.field :global(.field-u):focus {
+  border-bottom-color: var(--line-strong);
+}
+
+/* Invalid: the hairline and the line turn red; the message sits under. */
+.field[data-invalid] :global(.field-u) {
+  border-bottom-color: var(--bad);
+}
+.field[data-invalid] .line {
+  background: var(--bad);
+}
+
+.error {
+  margin: 4px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--bad);
+}
+
+.textarea {
+  /* Block, so the control ends at the textarea's border and the ink line
+     lies on it (inline-block leaves a descender gap below). */
+  display: block;
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* ── Social handle · the four prefill icons at the right end ──
+   Each button is 36px wide with 8px between, and its target grows to 44px
+   through the pseudo-element, so the targets touch and never overlap. */
+
+.withIcons {
+  position: relative;
+}
+
+.socialInput {
+  padding-right: 176px;
+  /* A placeholder longer than the room beside the icons ends in an ellipsis */
+  text-overflow: ellipsis;
+}
+
+.icons {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  display: flex;
+  gap: 8px;
+  transform: translateY(-50%);
+}
+
+.icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 200ms var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+.icon::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+.icon:active {
+  transform: scale(0.94);
+}
+.icon[aria-pressed="true"] {
+  color: var(--accent-2);
+}
+.icon:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .icon:hover {
+    color: var(--text);
+  }
+}
+
+/* ── Submit row ── */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  padding-top: 4px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+}
+
+.footnote {
+  margin: 0;
+  color: var(--text-3);
+}
+.footLink {
+  color: var(--text-2);
+}
+
+/* ── Result modal ── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 10, 18, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 420px;
+  padding: clamp(32px, 5vw, 48px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface-1);
+  text-align: center;
+}
+
+.dialogTag {
+  margin: 0 0 16px;
+  color: var(--accent-2);
+}
+.dialogTag[data-type="error"] {
+  color: var(--bad);
+}
+
+.dialogTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variation-settings: "wdth" 90, "opsz" 96;
+}
+
+.dialogText {
+  margin: 0 0 28px;
+}
+
+.dialogButton {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Phones · one column ── */
+
+@media (max-width: 540px) {
+  /* The icons move under the input so the field keeps its full width. */
+  .socialInput {
+    padding-right: 2px;
+  }
+  .icons {
+    position: static;
+    margin-top: 6px;
+    transform: none;
+  }
+}
+
+/* ── Reduced motion · the line and icons change state without moving ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .control .line,
+  .icon {
+    transition: none;
+  }
+  .icon:active {
+    transform: none;
+  }
+  .overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .overlay {
+    background: rgba(7, 10, 18, 0.92);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

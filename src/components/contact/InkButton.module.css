@@ -1,0 +1,17 @@
+/* Ink button · InkButton.tsx. Everything the button is comes from
+   .btn-fill in globals.css; this only puts the displacement filter over
+   the class's fill layer while the script says so (--ink-filter is set on
+   the button during the arrive and dissolve animations and removed after). */
+
+.ink::before {
+  filter: var(--ink-filter, none);
+}
+
+/* Present but sizeless: a display: none SVG would break the url() reference. */
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
