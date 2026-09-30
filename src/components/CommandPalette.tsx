@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { event as trackEvent } from "@/lib/gtag";
-import { GAME_PROJECTS, GAME_SOCIALS, GAME_LINKS, GAME_ABOUT } from "@/lib/gameData";
+import { profile, projects, socials, links, palettePages } from "@/content";
 
 type Item = {
   id: string;
@@ -42,24 +42,24 @@ export default function CommandPalette() {
     const external = (href: string) =>
       window.open(href, "_blank", "noopener,noreferrer");
 
-    const pages: Item[] = [
-      { id: "p-home", label: "Home", hint: "/", keywords: "home index start", group: "Pages", run: () => goto("/") },
-      { id: "p-about", label: "About", hint: "/about", keywords: "about me bio experience stats", group: "Pages", run: () => goto("/about") },
-      { id: "p-projects", label: "Projects", hint: "/projects", keywords: "projects work index repos", group: "Pages", run: () => goto("/projects") },
-      { id: "p-contact", label: "Contact", hint: "/contact", keywords: "contact hire form email message", group: "Pages", run: () => goto("/contact") },
-      { id: "p-links", label: "Links", hint: "/links", keywords: "links tools services", group: "Pages", run: () => goto("/links") },
-      { id: "p-game", label: "Play the Game", hint: "/game", keywords: "game 3d play grid explore fun three", group: "Pages", run: () => goto("/game") },
-    ];
+    const pages: Item[] = palettePages.map((p) => ({
+      id: `p-${p.id}`,
+      label: p.label,
+      hint: p.href,
+      keywords: p.keywords,
+      group: "Pages",
+      run: () => goto(p.href),
+    }));
 
     const actions: Item[] = [
       {
         id: "a-email",
         label: "Copy email address",
-        hint: GAME_ABOUT.email,
+        hint: profile.email,
         keywords: "copy email clipboard contact mail",
         group: "Actions",
         run: () => {
-          navigator.clipboard?.writeText(GAME_ABOUT.email).catch(() => {});
+          navigator.clipboard?.writeText(profile.email).catch(() => {});
           setCopied(true);
           window.setTimeout(() => setCopied(false), 2000);
         },
@@ -70,11 +70,11 @@ export default function CommandPalette() {
         hint: "PDF",
         keywords: "resume cv download pdf",
         group: "Actions",
-        run: () => external(GAME_ABOUT.resume),
+        run: () => external(profile.resume),
       },
     ];
 
-    const projects: Item[] = GAME_PROJECTS.map((p) => ({
+    const projectItems: Item[] = projects.map((p) => ({
       id: `pr-${p.name}`,
       label: p.name,
       hint: `${p.year} · GitHub ↗`,
@@ -83,7 +83,7 @@ export default function CommandPalette() {
       run: () => external(p.github),
     }));
 
-    const socials: Item[] = GAME_SOCIALS.map((s) => ({
+    const socialItems: Item[] = socials.map((s) => ({
       id: `s-${s.label}`,
       label: s.label,
       hint: "Social ↗",
@@ -92,7 +92,7 @@ export default function CommandPalette() {
       run: () => external(s.href),
     }));
 
-    const tools: Item[] = GAME_LINKS.map((l) => ({
+    const toolItems: Item[] = links.map((l) => ({
       id: `t-${l.name}`,
       label: l.name,
       hint: l.external ? "Tool ↗" : l.href,
@@ -101,7 +101,7 @@ export default function CommandPalette() {
       run: () => (l.external ? external(l.href) : goto(l.href)),
     }));
 
-    return [...pages, ...actions, ...projects, ...socials, ...tools];
+    return [...pages, ...actions, ...projectItems, ...socialItems, ...toolItems];
   }, [goto]);
 
   const results = useMemo(() => {
@@ -210,7 +210,7 @@ export default function CommandPalette() {
         letterSpacing: "0.08em",
       }}
     >
-      ✓ Copied {GAME_ABOUT.email}
+      ✓ Copied {profile.email}
     </div>
   ) : null;
 

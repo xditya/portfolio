@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { event as trackEvent } from "@/lib/gtag";
+import { profile, social, bareUrl } from "@/content";
 
 const SOCIAL_PLATFORMS = [
   {
@@ -65,6 +66,15 @@ const SOCIAL_PLATFORMS = [
       </svg>
     ),
   },
+];
+
+const telegram = social("Telegram");
+const github = social("GitHub");
+
+const directLinks = [
+  { label: "Email", value: profile.email, href: `mailto:${profile.email}` },
+  { label: "Telegram", value: bareUrl(telegram.href), href: telegram.href },
+  { label: "GitHub", value: bareUrl(github.href), href: github.href },
 ];
 
 function CopyButton({ text }: { text: string }) {
@@ -258,23 +268,7 @@ export default function ContactPage() {
           {/* ── Left: direct contact ── */}
           <div>
             <div className="hairline-t" style={{ paddingTop: "28px" }}>
-              {[
-                {
-                  label: "Email",
-                  value: "contact@xditya.me",
-                  href: "mailto:contact@xditya.me",
-                },
-                {
-                  label: "Telegram",
-                  value: "t.me/xditya",
-                  href: "https://t.me/xditya",
-                },
-                {
-                  label: "GitHub",
-                  value: "github.com/xditya",
-                  href: "https://github.com/xditya",
-                },
-              ].map(({ label, value, href }) => (
+              {directLinks.map(({ label, value, href }) => (
                 <div key={label} style={{ marginBottom: "28px" }}>
                   <p className="mono-label" style={{ marginBottom: "6px" }}>
                     {label}

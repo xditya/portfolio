@@ -6,100 +6,11 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { event as trackEvent } from "@/lib/gtag";
+import { profile, ticker, stats, socials, projects, featuredProjects } from "@/content";
 
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
-const SOCIAL_LINKS = [
-  { label: "GitHub", href: "https://github.com/xditya" },
-  { label: "X / Twitter", href: "https://twitter.com/xditya" },
-  { label: "LinkedIn", href: "https://linkedin.com/in/xditya" },
-  { label: "Telegram", href: "https://t.me/xditya" },
-  { label: "YouTube", href: "https://youtube.com/@xditya" },
-];
-
-const TICKER = [
-  "Python",
-  "TypeScript",
-  "Telegram Bots",
-  "Open Source",
-  "Next.js",
-  "Deno",
-  "Automation",
-  "MongoDB",
-];
-
-const STATEMENT =
-  "Full-stack developer interested in Python, TypeScript, and automation. I build Telegram bots, web apps, and open-source tools.";
-
-const STATS = [
-  { label: "Repos", value: 20, suffix: "+" },
-  { label: "GitHub Stars", value: 1770, suffix: "+" },
-  { label: "Followers", value: 576, suffix: "+" },
-  { label: "Years Coding", value: new Date().getFullYear() - 2020, suffix: "+" },
-];
-
-const FEATURED = [
-  {
-    num: "01",
-    name: "engram",
-    tagline: "Remember everything. Own everything.",
-    description:
-      "A local-first library for links, reels, articles and notes. Share from any app, search the whole page, sync through your own Drive with end-to-end encryption.",
-    year: 2026,
-    tech: ["TypeScript", "React Native", "Expo"],
-    stat: "Local-first",
-    github: "https://github.com/xditya/engram",
-    url: "https://engram.xditya.me",
-  },
-  {
-    num: "02",
-    name: "Ultroid",
-    tagline: "Pluggable Telegram userbot",
-    description:
-      "A Telegram userbot you extend with plugins. 3k+ stars on GitHub.",
-    year: 2021,
-    tech: ["Python", "MongoDB", "Redis"],
-    stat: "3K+ stars",
-    github: "https://github.com/TeamUltroid/Ultroid",
-    url: "https://t.me/TeamUltroid",
-  },
-  {
-    num: "03",
-    name: "ChannelActions",
-    tagline: "Telegram bot to auto approve chat join requests",
-    description:
-      "Approves or declines join requests for Telegram chats. Serves over 1M users.",
-    year: 2022,
-    tech: ["Deno", "TypeScript", "MongoDB"],
-    stat: "1M+ users",
-    github: "https://github.com/xditya/ChannelActionsBot",
-    url: "https://channelactions.xditya.me",
-  },
-  {
-    num: "04",
-    name: "Splitty",
-    tagline: "Scan a bill, tap who had what, settle over UPI",
-    description:
-      "Splits restaurant bills with no backend state. Photograph the bill, tap to assign items, settle with a UPI QR per person.",
-    year: 2026,
-    tech: ["TypeScript", "React", "Vite"],
-    stat: "No backend",
-    github: "https://github.com/xditya/Splitty",
-    url: "https://splitty.xditya.me",
-  },
-  {
-    num: "05",
-    name: "pastr",
-    tagline: "Paste text, get a link, decide when it disappears.",
-    description:
-      "A pastebin with exact expiry, burn-after-read and end-to-end encryption where the server never sees the text. Syntax highlighting, markdown, a zero-dependency CLI.",
-    year: 2026,
-    tech: ["TypeScript", "Next.js", "Redis"],
-    stat: "Zero-knowledge",
-    github: "https://github.com/xditya/pastr",
-    url: "https://pastr.xditya.me",
-  },
-];
+const featured = featuredProjects();
 
 function useCountUp(target: number, duration = 1.5, start = false) {
   const [count, setCount] = useState(0);
@@ -290,7 +201,7 @@ export default function HomePage() {
               flexShrink: 0,
             }}
           />
-          Available for work · Kerala, India
+          {profile.availability}
         </Link>
 
         {/* Name */}
@@ -318,11 +229,11 @@ export default function HomePage() {
             className="body-lg"
             style={{ maxWidth: "440px", margin: 0 }}
           >
-            Full-stack dev.{" "}
+            {profile.tagline.lead}{" "}
             <span style={{ color: "var(--ink)", fontWeight: 600 }}>
-              Open-source contributor.
+              {profile.tagline.emphasis}
             </span>{" "}
-            Bot builder.
+            {profile.tagline.trail}
           </p>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
@@ -365,7 +276,7 @@ export default function HomePage() {
             }}
           >
             <div style={{ display: "flex", flexWrap: "wrap", gap: "18px" }}>
-              {SOCIAL_LINKS.map(({ label, href }) => (
+              {socials.map(({ label, href }) => (
                 <a
                   key={label}
                   href={href}
@@ -395,7 +306,7 @@ export default function HomePage() {
         <div className="marquee-track">
           {[0, 1].map((dup) => (
             <div className="marquee-chunk" key={dup}>
-              {TICKER.map((item) => (
+              {ticker.map((item) => (
                 <span
                   key={item}
                   style={{ display: "inline-flex", alignItems: "center" }}
@@ -419,7 +330,7 @@ export default function HomePage() {
           className="statement"
           style={{ maxWidth: "1080px", margin: 0 }}
         >
-          {STATEMENT.split(" ").map((word, i) => (
+          {profile.statement.split(" ").map((word, i) => (
             <span key={i} className="w-rv">
               {word}&nbsp;
             </span>
@@ -453,7 +364,7 @@ export default function HomePage() {
             marginTop: "clamp(56px, 8vw, 110px)",
           }}
         >
-          {STATS.map((s) => (
+          {stats.map((s) => (
             <Stat key={s.label} {...s} animate={statsVisible} />
           ))}
         </div>
@@ -478,21 +389,21 @@ export default function HomePage() {
         </div>
 
         <div className="stack-wrap">
-          {FEATURED.map((p) => (
+          {featured.map((p, i) => (
             <article key={p.name} className="stack-card">
               <span className="stack-num" aria-hidden="true">
-                {p.num}
+                {String(i + 1).padStart(2, "0")}
               </span>
 
               <div>
                 <p className="mono-label" style={{ marginBottom: "18px" }}>
-                  {p.year} · {p.stat}
+                  {p.year} · {p.highlight}
                 </p>
                 <h3
                   className="display-md"
                   style={{ marginBottom: "14px", maxWidth: "14ch" }}
                 >
-                  {p.name}
+                  {p.shortName ?? p.name}
                 </h3>
                 <p
                   className="mono-sm"
@@ -501,7 +412,7 @@ export default function HomePage() {
                   {p.tagline}
                 </p>
                 <p className="body-lg" style={{ maxWidth: "520px", margin: 0 }}>
-                  {p.description}
+                  {p.summary ?? p.description}
                 </p>
               </div>
 
@@ -516,7 +427,7 @@ export default function HomePage() {
                 }}
               >
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                  {p.tech.map((t) => (
+                  {(p.featuredTech ?? p.tech).map((t) => (
                     <span key={t} className="chip">
                       {t}
                     </span>
@@ -561,7 +472,7 @@ export default function HomePage() {
               })
             }
           >
-            All 21 Projects
+            {`All ${projects.length} Projects`}
           </Link>
         </div>
       </section>

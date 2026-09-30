@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { services } from "@/content/services";
 
 const maxDays = 30;
 
@@ -135,37 +136,6 @@ function getDayAverage(val: number[] | undefined): number | null {
 
 export async function GET() {
   try {
-    const services = [
-      {
-        key: "website",
-        url: "https://xditya.me",
-      },
-      {
-        key: "apis",
-        url: "https://apis.xditya.me",
-      },
-      {
-        key: "pastebin",
-        url: "https://paste.xditya.me",
-      },
-      {
-        key: "shortener",
-        url: "https://short.xditya.me",
-      },
-      {
-        key: "ultroid_docs",
-        url: "https://ultroid.tech",
-      },
-      {
-        key: "ultroid_bans",
-        url: "https://bans.ultroid.tech",
-      },
-      {
-        key: "ultroid_shortener",
-        url: "https://tiny.ultroid.tech",
-      },
-    ];
-
     const statusData = await Promise.all(
       services.map(async (service) => {
         const data = await fetchStatusLog(service.key);

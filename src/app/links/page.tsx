@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-
-const LINKS = [
-  { name: "Website Status", description: "Check the uptime of my services", href: "/status", external: false },
-  { name: "Link Shortener", description: "Shorten your links easily", href: "https://short.xditya.me", external: true },
-  { name: "PasteBin", description: "Paste and share code snippets", href: "https://paste.xditya.me", external: true },
-  { name: "REST APIs", description: "A collection of REST APIs for various purposes", href: "https://apis.xditya.me", external: true },
-  { name: "Terms & Conditions", description: "Legal terms for freelance clients", href: "/terms", external: false },
-];
+import { links } from "@/content";
 
 export default function LinksPage() {
   return (
@@ -27,7 +20,7 @@ export default function LinksPage() {
 
       <div className="container-x" style={{ paddingTop: "32px" }}>
         <div>
-          {LINKS.map(({ name, description, href, external }, i) => {
+          {links.map(({ name, description, href, external }, i) => {
             const inner = (
               <>
                 <span className="idx-dim mono-sm">

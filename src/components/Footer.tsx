@@ -2,23 +2,7 @@
 
 import Link from "next/link";
 import { event as trackEvent } from "@/lib/gtag";
-
-const SOCIAL = [
-  { label: "GitHub", href: "https://github.com/xditya" },
-  { label: "Telegram", href: "https://t.me/xditya" },
-  { label: "X / Twitter", href: "https://twitter.com/xditya" },
-  { label: "LinkedIn", href: "https://linkedin.com/in/xditya" },
-  { label: "YouTube", href: "https://youtube.com/@xditya" },
-];
-
-const PAGES = [
-  { href: "/about", label: "About" },
-  { href: "/projects", label: "Projects" },
-  { href: "/contact", label: "Contact" },
-  { href: "/links", label: "Links" },
-  { href: "/game", label: "Game" },
-  { href: "/terms", label: "Terms" },
-];
+import { profile, socials, footerLinks } from "@/content";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -31,7 +15,7 @@ export default function Footer() {
       {/* Big CTA */}
       <div className="container-x" style={{ paddingBlock: "clamp(64px, 10vw, 140px)" }}>
         <p className="mono-label" style={{ marginBottom: "24px" }}>
-          Have an idea? <span style={{ color: "var(--accent-soft)" }}>Available for work</span>
+          Have an idea? <span style={{ color: "var(--accent-soft)" }}>{profile.available}</span>
         </p>
         <Link
           href="/contact"
@@ -76,7 +60,7 @@ export default function Footer() {
           </span>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-            {PAGES.map(({ href, label }) => (
+            {footerLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
@@ -89,7 +73,7 @@ export default function Footer() {
           </div>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-            {SOCIAL.map(({ label, href }) => (
+            {socials.map(({ label, href }) => (
               <a
                 key={label}
                 href={href}

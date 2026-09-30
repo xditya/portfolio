@@ -4,66 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { event as trackEvent } from "@/lib/gtag";
+import { projects, projectYears, techCounts, formatStat } from "@/content";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type Project = {
-  name: string;
-  tagline: string;
-  description: string;
-  github: string;
-  url?: string;
-  tech: string[];
-  year: number;
-  stars?: number;
-  users?: string;
-  image?: string;
-  featured?: boolean;
-};
-
-const PROJECTS: Project[] = [
-  // 2026
-  { name: "pastr", tagline: "Paste text, get a link, decide when it disappears.", description: "A pastebin that gets out of the way: paste text, get a link, decide when it disappears. Expiry is exact (Redis TTL), burn-after-read is atomic and cannot be triggered by link previews, and encrypted pastes keep the key in the URL fragment so the server never sees the text or the title. Syntax highlighting for 60+ languages, markdown, line links, edit tokens instead of accounts, a hastebin-compatible API and a zero-dependency CLI with an interactive paste browser.", github: "https://github.com/xditya/pastr", url: "https://pastr.xditya.me", tech: ["TypeScript", "Next.js", "React", "Redis"], year: 2026, image: "/images/pastr.png", featured: true },
-  { name: "engram", tagline: "Remember everything. Own everything.", description: "A local-first place for links, reels, articles, images and notes. Share from any app, tags land on their own, and search reads the whole page. Sync goes through your own Drive, iCloud or WebDAV, encrypted before it leaves the phone. Intelligence runs on your own key or a model on the device.", github: "https://github.com/xditya/engram", url: "https://engram.xditya.me", tech: ["TypeScript", "React Native", "Expo", "SQLite"], year: 2026, image: "/images/engram.png", featured: true },
-  { name: "Splitty", tagline: "Scan a bill, tap who had what, settle over UPI", description: "Splits restaurant bills with no backend state. Photograph the bill, tap to assign items, and settle with a UPI QR per person. Reads bills with Gemini or on-device tesseract.js.", github: "https://github.com/xditya/Splitty", url: "https://splitty.xditya.me", tech: ["TypeScript", "React", "Vite"], year: 2026, image: "/images/splitty.png", featured: true },
-  { name: "Alamara", tagline: "Local-first document vault for your phone", description: "A phone vault for IDs, tickets, and certificates. Documents are scanned, encrypted, and searchable on-device, and never uploaded. Built with Expo and React Native.", github: "https://github.com/xditya/alamara", tech: ["TypeScript", "React Native", "Expo"], year: 2026 },
-  // 2024
-  { name: "Campus Services", tagline: "College services management app", description: "One Android app for campus services: digital wallet, printing, vehicle passes, ID cards, lab access, and vending.", github: "https://github.com/xditya/CampusServicesManagementSystem", tech: ["Kotlin", "Android", "MongoDB"], year: 2024 },
-  { name: "GeminiBot", tagline: "AI-powered Telegram Bot", description: "A Telegram bot that chats using Google's Gemini API.", github: "https://github.com/xditya/GeminiBot", tech: ["TypeScript", "Deno"], year: 2024, image: "/images/geminibot.jpg" },
-  { name: "TGdetailsBot", tagline: "Telegram Bot to fetch message details", description: "Gets message details (as JSON) and chat IDs. Runs live on Telegram.", github: "https://github.com/xditya/TGdetailsBot", url: "https://t.me/TGdetailsBot", tech: ["TypeScript"], year: 2024, image: "/images/tgdetails.png" },
-  { name: "WhatsApp Utilities", tagline: "WhatsApp Bot", description: "A WhatsApp Bot using whatsapp-web.js to convert images into stickers.", github: "https://github.com/xditya/WhatsAppUtilitiesBot", tech: ["JavaScript"], year: 2024, image: "/images/whatsapputilities.png" },
-  // 2023
-  { name: "GetRestrictedMessages", tagline: "Copy messages from restricted chats", description: "A tool to copy messages from Telegram chats with forward restrictions enabled.", github: "https://github.com/xditya/GetRestrictedMessages", tech: ["Python"], year: 2023, stars: 83 },
-  { name: "VehicleDetection", tagline: "Real-time Traffic Management System", description: "Detects vehicles in video feeds and adjusts traffic lights to match, built with YOLO and PyQt5.", github: "https://github.com/xditya/VehicleDetection", tech: ["Python", "OpenCV", "PyQt5"], year: 2023, image: "/images/vehicledetection.png" },
-  { name: "AyuVritt", tagline: "Ayurveda, with an AI assist", description: "A web platform that applies AI to ayurvedic healing.", github: "https://github.com/xditya/AyuVritt", url: "https://camel-case.vercel.app/", tech: ["Python", "Flask", "Next.js"], year: 2023, image: "/images/ayuvritt.png" },
-  { name: "WebShortener", tagline: "Lightweight Link Shortener", description: "A small link shortener web app.", github: "https://github.com/xditya/WebShortener", tech: ["JavaScript"], year: 2023 },
-  { name: "Lyrics Searcher", tagline: "Song lyrics searching app", description: "Android app that finds song lyrics by title.", github: "https://github.com/xditya/LyricsSearcher/", url: "https://github.com/xditya/LyricsSearcher/releases/tag/v0.1", tech: ["Kotlin", "Jetpack Compose"], year: 2023 },
-  // 2022
-  { name: "ChannelActionsBot", tagline: "Telegram bot to auto approve chat join requests", description: "Approves or declines join requests for Telegram chats. Serves over 1M users.", github: "https://github.com/xditya/ChannelActionsBot", url: "https://channelactions.xditya.me", tech: ["Deno", "TypeScript", "MongoDB"], year: 2022, stars: 122, users: "1M+", image: "/images/channelactions.png", featured: true },
-  { name: "ChannelAutoPost", tagline: "Telegram bot to auto post messages", description: "Automatically posts messages from one channel to another without the forwarded tag.", github: "https://github.com/xditya/ChannelAutoPost", tech: ["Python"], year: 2022, stars: 224, image: "/images/channelautopost.png" },
-  { name: "captchaBot", tagline: "Telegram Captcha Bot", description: "A Telegram bot that runs captcha checks on new group members to stop spam.", github: "https://github.com/xditya/captchaBot", tech: ["Python"], year: 2022 },
-  // 2021
-  { name: "YouTubeFeeds", tagline: "YouTube video notifications on Telegram", description: "Get new YouTube video notifications from multiple channels on multiple Telegram chats.", github: "https://github.com/xditya/YouTubeFeeds", tech: ["TypeScript"], year: 2021, stars: 60 },
-  { name: "Ultroid", tagline: "Pluggable Telegram userbot", description: "A Telegram userbot you extend with plugins. 3k+ stars on GitHub.", github: "https://github.com/TeamUltroid/Ultroid", url: "https://t.me/TeamUltroid", tech: ["Python", "MongoDB", "Redis"], year: 2021, stars: 3000, image: "/images/ultroid.png", featured: true },
-  { name: "ForceSub", tagline: "Force Subscribe Bot", description: "A Telegram bot that forces users to subscribe to a channel before they can interact.", github: "https://github.com/xditya/ForceSub", tech: ["Python"], year: 2021, stars: 63 },
-  { name: "Telethon Bot", tagline: "Telegram bot boilerplate", description: "Telegram Bot/UserBot boilerplate built with the Telethon library.", github: "https://github.com/xditya/TelethonBot", tech: ["Python"], year: 2021, stars: 54, image: "/images/telethonbot.png" },
-  { name: "BotStatus", tagline: "Bot status updater for Telegram", description: "Update your Telegram Bot's status on your channel periodically.", github: "https://github.com/xditya/BotStatus", tech: ["Python"], year: 2021, stars: 53 },
-  { name: "VCBot", tagline: "Voice chat music bot", description: "Minimal Telegram voice chat music bot built with Pyrogram.", github: "https://github.com/xditya/VCBot", tech: ["Python"], year: 2021, stars: 38 },
-  // 2020
-  { name: "GroupManager", tagline: "Python based group managing bot", description: "A Telegram bot for moderating and managing groups.", github: "https://github.com/xditya/GroupManager", tech: ["Python", "MongoDB"], year: 2020, stars: 256, featured: true },
-];
-
-const YEARS = [2026, 2024, 2023, 2022, 2021, 2020];
-
-function formatStat(p: Project) {
-  if (p.users) return `${p.users} users`;
-  if (p.stars) {
-    return p.stars >= 1000
-      ? `★ ${(p.stars / 1000).toFixed(0)}K+`
-      : `★ ${p.stars}+`;
-  }
-  return null;
-}
+const years = projectYears();
 
 /** Cursor-following image preview for rows that have screenshots. */
 function useHoverPreview() {
@@ -136,17 +81,11 @@ export default function ProjectsPage() {
   }, []);
 
   // Techs that appear on 2+ projects, ordered by frequency
-  const techFilters = useMemo(() => {
-    const counts = new Map<string, number>();
-    PROJECTS.forEach((p) => p.tech.forEach((t) => counts.set(t, (counts.get(t) ?? 0) + 1)));
-    return [...counts.entries()]
-      .filter(([, n]) => n >= 2)
-      .sort((a, b) => b[1] - a[1]);
-  }, []);
+  const techFilters = useMemo(() => techCounts().filter(([, n]) => n >= 2), []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return PROJECTS.filter((p) => {
+    return projects.filter((p) => {
       if (tech && !p.tech.includes(tech)) return false;
       if (!q) return true;
       const hay = `${p.name} ${p.tagline} ${p.description} ${p.tech.join(" ")} ${p.year}`.toLowerCase();
@@ -154,10 +93,10 @@ export default function ProjectsPage() {
     });
   }, [query, tech]);
 
-  const projectsByYear = YEARS.map((year) => ({
+  const projectsByYear = years.map((year) => ({
     year,
-    projects: filtered.filter((p) => p.year === year),
-  })).filter(({ projects }) => projects.length > 0);
+    items: filtered.filter((p) => p.year === year),
+  })).filter(({ items }) => items.length > 0);
 
   const isFiltering = query.trim() !== "" || tech !== null;
   let runningIndex = 0;
@@ -167,13 +106,13 @@ export default function ProjectsPage() {
       <div className="container-x" style={{ paddingBottom: "40px" }}>
         {/* Header */}
         <p className="mono-label" style={{ marginBottom: "24px" }}>
-          Index · {PROJECTS.length} projects / {YEARS.length} years
+          Index · {projects.length} projects / {years.length} years
         </p>
         <h1 className="display-lg" style={{ marginBottom: "28px" }}>
           Projects
         </h1>
         <p className="body-lg" style={{ maxWidth: "560px", margin: 0 }}>
-          {PROJECTS.length} projects across {YEARS.length} years, from
+          {projects.length} projects across {years.length} years, from
           Telegram bots to mobile apps.
         </p>
       </div>
@@ -216,7 +155,7 @@ export default function ProjectsPage() {
               </button>
             ))}
             <span className="mono-sm" style={{ color: "var(--muted)", marginLeft: "auto" }} aria-live="polite">
-              {isFiltering ? `${filtered.length} of ${PROJECTS.length}` : `${PROJECTS.length} projects`}
+              {isFiltering ? `${filtered.length} of ${projects.length}` : `${projects.length} projects`}
             </span>
           </div>
         </div>
@@ -243,7 +182,7 @@ export default function ProjectsPage() {
 
       {/* Year groups */}
       <div className="container-x" style={{ paddingTop: "32px" }}>
-        {projectsByYear.map(({ year, projects }) => (
+        {projectsByYear.map(({ year, items }) => (
           <section key={year} style={{ marginBottom: "clamp(48px, 7vw, 88px)" }}>
             <div
               style={{
@@ -266,12 +205,12 @@ export default function ProjectsPage() {
                 {year}
               </h2>
               <span className="mono-label">
-                {projects.length} project{projects.length > 1 ? "s" : ""}
+                {items.length} project{items.length > 1 ? "s" : ""}
               </span>
             </div>
 
             <div>
-              {projects.map((project) => {
+              {items.map((project) => {
                 runningIndex += 1;
                 const stat = formatStat(project);
                 return (

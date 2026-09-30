@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { serviceName } from "@/content";
 
 interface StatusData {
   key: string;
@@ -34,14 +35,14 @@ function ServiceCard({ service }: { service: StatusData }) {
   const statusKey = getStatusColor(today);
   const meta = STATUS_META[statusKey];
   const uptime = service.data?.upTime;
-  const serviceName = service.key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const title = serviceName(service.key);
 
   return (
     <div className="card" style={{ padding: "24px" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", marginBottom: "20px", flexWrap: "wrap" }}>
         <div>
-          <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "4px" }}>{serviceName}</h2>
+          <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "4px" }}>{title}</h2>
           <a href={service.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "var(--font-mono), 'JetBrains Mono', monospace", cursor: "pointer", transition: "color 200ms ease" }}
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--accent)")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}>

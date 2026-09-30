@@ -3,58 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { profile, techStack, experience, fallbackStats, yearsCoding, social } from "@/content";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const TECH_STACK = [
-  { name: "Python", color: "#3776AB" },
-  { name: "TypeScript", color: "#3178C6" },
-  { name: "Next.js", color: "#F0F6FC" },
-  { name: "Deno", color: "#70FFAF" },
-  { name: "MongoDB", color: "#47A248" },
-  { name: "Kotlin", color: "#7F52FF" },
-];
-
-const EXPERIENCE = [
-  {
-    title: "Product Engineer",
-    company: "UST",
-    period: "2025 – Present",
-    description: "Working on product development.",
-    current: true,
-  },
-  {
-    title: "Lead Developer",
-    company: "TeamUltroid",
-    period: "2021 – Present",
-    description:
-      "Built the core architecture and key modules of the project. Handle GitHub repos, code reviews, and work with contributors from around the world.",
-    current: false,
-  },
-  {
-    title: "Tech Intern",
-    company: "BreadcrumbsAI",
-    period: "2024",
-    description:
-      "Developed web scraping scripts in Python using Playwright and BeautifulSoup. Implemented error handling and logging for reliable data collection.",
-    current: false,
-  },
-  {
-    title: "Project Lead & Backend Developer",
-    company: "GDSC MBCET",
-    period: "2022 – 2024",
-    description:
-      "Coordinated club activities. Developed automation scripts for events and the backend of the GDSC MBCET website.",
-    current: false,
-  },
-  {
-    title: "Campus Lead",
-    company: "GTECH μLearn, MBCET",
-    period: "2023 – 2024",
-    description:
-      "Managed campus-wide learning and skill development initiatives. Achieved 1 Million karma points in the campus.",
-    current: false,
-  },
+const profileLinks = [
+  { label: "GitHub", href: social("GitHub").href },
+  { label: "Telegram", href: social("Telegram").href },
+  { label: "Email", href: `mailto:${profile.email}` },
 ];
 
 function useCountUp(target: number, duration = 1.5, start = false) {
@@ -110,11 +66,7 @@ function Stat({
 export default function AboutPage() {
   const statsRef = useRef<HTMLDivElement>(null);
   const [statsVisible, setStatsVisible] = useState(false);
-  const [githubStats, setGithubStats] = useState({
-    repos: 20,
-    stars: 1770,
-    followers: 576,
-  });
+  const [githubStats, setGithubStats] = useState({ ...fallbackStats });
 
   useEffect(() => {
     fetch("https://api.github.com/users/xditya")
@@ -166,9 +118,6 @@ export default function AboutPage() {
     return () => ctx.revert();
   }, []);
 
-  const yearsOfCoding = new Date().getFullYear() - 2020;
-  const age = new Date().getFullYear() - 2003;
-
   return (
     <div style={{ paddingTop: "110px" }}>
       {/* ── Header ── */}
@@ -180,8 +129,7 @@ export default function AboutPage() {
           Building things for the web &amp; Telegram
         </h1>
         <p className="body-lg" style={{ maxWidth: "560px", margin: 0 }}>
-          Full-stack developer interested in Python, TypeScript, and
-          automation. I build Telegram bots, web apps, and open-source tools.
+          {profile.statement}
         </p>
       </div>
 
@@ -214,7 +162,7 @@ export default function AboutPage() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
-              alt="Aditya"
+              alt={profile.name}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).style.display = "none";
@@ -232,20 +180,17 @@ export default function AboutPage() {
                 marginBottom: "4px",
               }}
             >
-              Aditya
+              {profile.name}
             </h2>
             <p className="mono-sm" style={{ color: "var(--ink-dim)", margin: 0 }}>
-              Full-stack Developer · Kerala, India · {age}y old
+              {`${profile.role} · ${profile.location} · `}
+              {profile.age}y old
             </p>
           </div>
 
           <div style={{ display: "flex", gap: "18px", flexWrap: "wrap", alignItems: "center" }}>
             <span className="badge badge-accent">Open Source</span>
-            {[
-              { label: "GitHub", href: "https://github.com/xditya" },
-              { label: "Telegram", href: "https://t.me/xditya" },
-              { label: "Email", href: "mailto:contact@xditya.me" },
-            ].map(({ label, href }) => (
+            {profileLinks.map(({ label, href }) => (
               <a
                 key={label}
                 href={href}
@@ -259,7 +204,7 @@ export default function AboutPage() {
             ))}
           </div>
 
-          <a href="/resume.pdf" download className="btn-line" style={{ padding: "12px 24px" }}>
+          <a href={profile.resume} download className="btn-line" style={{ padding: "12px 24px" }}>
             Resume ↓
           </a>
         </div>
@@ -279,7 +224,7 @@ export default function AboutPage() {
           <Stat label="Repos" value={githubStats.repos} suffix="+" animate={statsVisible} />
           <Stat label="Stars" value={githubStats.stars} suffix="+" animate={statsVisible} />
           <Stat label="Followers" value={githubStats.followers} suffix="+" animate={statsVisible} />
-          <Stat label="Years Coding" value={yearsOfCoding} suffix="+" animate={statsVisible} />
+          <Stat label="Years Coding" value={yearsCoding} suffix="+" animate={statsVisible} />
         </div>
       </div>
 
@@ -293,20 +238,7 @@ export default function AboutPage() {
             gap: "clamp(24px, 4vw, 64px)",
           }}
         >
-          {[
-            {
-              title: "What I Do",
-              content:
-                "Build Telegram bots, web applications, and automation tools using Python and TypeScript.",
-              tags: ["Python", "TypeScript", "Telegram"],
-            },
-            {
-              title: "How I Work",
-              content:
-                "Simple and automated. Solve the real problem, keep the code small, automate the boring parts.",
-              tags: ["Efficiency", "Automation", "Open Source"],
-            },
-          ].map(({ title, content, tags }) => (
+          {[profile.whatIDo, profile.howIWork].map(({ title, text, chips }) => (
             <div key={title} className="hairline-t" style={{ paddingTop: "24px" }}>
               <h3
                 style={{
@@ -318,10 +250,10 @@ export default function AboutPage() {
                 {title}
               </h3>
               <p className="body-lg" style={{ marginTop: 0, marginBottom: "20px" }}>
-                {content}
+                {text}
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                {tags.map((t) => (
+                {chips.map((t) => (
                   <span key={t} className="chip">
                     {t}
                   </span>
@@ -338,7 +270,7 @@ export default function AboutPage() {
           02 · Tech Stack
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-          {TECH_STACK.map(({ name, color }) => (
+          {techStack.map(({ name, color }) => (
             <span
               key={name}
               className="chip"
@@ -366,7 +298,7 @@ export default function AboutPage() {
         </p>
 
         <div>
-          {EXPERIENCE.map((exp) => (
+          {experience.map((exp) => (
             <div
               key={`${exp.title}-${exp.company}`}
               className="reveal-on-scroll exp-row hairline-t"

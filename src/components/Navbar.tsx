@@ -4,15 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { event as trackEvent } from "@/lib/gtag";
-
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/projects", label: "Projects" },
-  { href: "/contact", label: "Contact" },
-  { href: "/links", label: "Links" },
-  { href: "/game", label: "Game" },
-];
+import { profile, navItems } from "@/content";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -111,7 +103,7 @@ export default function Navbar() {
             className="nav-desktop"
             style={{ display: "flex", alignItems: "center", gap: "32px" }}
           >
-            {NAV_LINKS.map(({ href, label }, i) => (
+            {navItems.map(({ href, label }, i) => (
               <Link
                 key={href}
                 href={href}
@@ -217,7 +209,7 @@ export default function Navbar() {
           transition: "opacity 350ms ease",
         }}
       >
-        {NAV_LINKS.map(({ href, label }, i) => (
+        {navItems.map(({ href, label }, i) => (
           <Link
             key={href}
             href={href}
@@ -265,7 +257,7 @@ export default function Navbar() {
           className="mono-label"
           style={{ position: "absolute", bottom: "32px", left: "clamp(24px, 8vw, 80px)" }}
         >
-          © {new Date().getFullYear()} Aditya · Kerala, India
+          © {new Date().getFullYear()} {`${profile.name} · ${profile.location}`}
         </div>
       </div>
 

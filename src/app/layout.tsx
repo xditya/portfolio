@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CommandPalette from "@/components/CommandPalette";
 import PageAssist from "@/components/PageAssist";
+import { profile } from "@/content";
 import { Archivo, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
 const archivo = Archivo({
@@ -31,36 +32,24 @@ const jetmono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Aditya · Full-stack Developer",
-    template: "%s · Aditya",
+    default: profile.meta.title,
+    template: profile.meta.titleTemplate,
   },
-  description:
-    "Full-stack developer building web apps, Telegram bots, and open-source tools. Based in Kerala, India.",
-  keywords: [
-    "Aditya",
-    "xditya",
-    "full-stack developer",
-    "open source",
-    "Telegram bot",
-    "Python",
-    "TypeScript",
-    "Next.js",
-    "portfolio",
-  ],
-  authors: [{ name: "Aditya", url: "https://xditya.me" }],
-  creator: "Aditya",
+  description: profile.meta.description,
+  keywords: profile.meta.keywords,
+  authors: [{ name: profile.name, url: profile.siteUrl }],
+  creator: profile.name,
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://xditya.me",
-    siteName: "Aditya Portfolio",
-    title: "Aditya · Full-stack Developer",
-    description:
-      "Full-stack developer building web apps, Telegram bots, and open-source tools.",
+    url: profile.siteUrl,
+    siteName: profile.meta.siteName,
+    title: profile.meta.title,
+    description: profile.meta.ogDescription,
   },
   twitter: {
     card: "summary_large_image",
-    creator: "@xditya",
+    creator: profile.meta.twitterCreator,
   },
   robots: {
     index: true,
