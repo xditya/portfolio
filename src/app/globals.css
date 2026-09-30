@@ -2,7 +2,7 @@
 
 
 /* ═══════════════════════════════════════════════
-   TOKENS — "SIGNAL" system
+   TOKENS · "SIGNAL" system
    Near-black canvas · bone ink · electric blue
 ═══════════════════════════════════════════════ */
 :root {
@@ -16,7 +16,7 @@
   --ink-dim:  #A3A8B3;
   --muted:    #5F6470;
 
-  /* Accent — electric blue */
+  /* Accent · electric blue */
   --accent:      #4D62FF;
   --accent-soft: #97A3FF;
   --accent-ink:  #05060A;
@@ -30,7 +30,7 @@
   --font-body:       var(--font-space), 'Space Grotesk', system-ui, sans-serif;
   --font-mono-stack: var(--font-mono), 'JetBrains Mono', monospace;
 
-  /* Motion — strong custom curves (built-in CSS easings are too weak) */
+  /* Motion · strong custom curves (built-in CSS easings are too weak) */
   --ease-out-strong:    cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 
@@ -112,7 +112,7 @@ a { color: inherit; text-decoration: none; }
 .font-mono    { font-family: var(--font-mono-stack); }
 
 /* ═══════════════════════════════════════════════
-   CANVAS TEXTURE — film grain + vignette
+   CANVAS TEXTURE · film grain + vignette
    (applied to <body> via the long-standing
    `grid-bg` hook in layout.tsx)
 ═══════════════════════════════════════════════ */
@@ -341,7 +341,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   PROJECT INDEX ROWS — hover inverts to accent
+   PROJECT INDEX ROWS · hover inverts to accent
 ═══════════════════════════════════════════════ */
 .idx-row {
   display: grid;
@@ -356,7 +356,7 @@ a { color: inherit; text-decoration: none; }
 }
 .idx-row:first-of-type { border-top: 1px solid var(--line); }
 .idx-row { cursor: pointer; }
-/* Stretched link — the title anchor covers the whole row */
+/* Stretched link · the title anchor covers the whole row */
 .idx-stretch::after { content: ''; position: absolute; inset: 0; }
 .idx-row:active { background: var(--bg-hover); }
 @media (hover: hover) and (pointer: fine) {
@@ -469,7 +469,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   FORM — editorial underline fields
+   FORM · editorial underline fields
 ═══════════════════════════════════════════════ */
 .field-u {
   width: 100%;
@@ -560,7 +560,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   PAGE TRANSITION — enter only, transform+opacity
+   PAGE TRANSITION · enter only, transform+opacity
 ═══════════════════════════════════════════════ */
 @keyframes page-in {
   from { opacity: 0; transform: translateY(8px); }
@@ -617,7 +617,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   COMMAND PALETTE — no open animation (keyboard-
+   COMMAND PALETTE · no open animation (keyboard-
    initiated actions must feel instant)
 ═══════════════════════════════════════════════ */
 .cmdk-overlay {
@@ -737,7 +737,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   COPY BUTTON — morphs to confirmation via blur
+   COPY BUTTON · morphs to confirmation via blur
 ═══════════════════════════════════════════════ */
 .copy-btn {
   display: inline-flex;
@@ -769,7 +769,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   PROJECTS INDEX — search, filters, hover preview
+   PROJECTS INDEX · search, filters, hover preview
 ═══════════════════════════════════════════════ */
 .chip[data-on="true"] {
   border-color: var(--accent);
