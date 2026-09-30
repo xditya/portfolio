@@ -1,0 +1,272 @@
+/* Featured work · FeaturedStack.tsx.
+   Desktop: five full-viewport panels, each sticky at the top and pinned by
+   ScrollTrigger, so the next one slides over the last while .inner recedes
+   (scale and opacity, driven by the next panel's scroll).
+   Phones: a scroll-snap strip, screenshot on top, nothing hidden.
+   Reduced motion on desktop: a plain vertical list.
+   Tokens come from globals.css. */
+
+.section {
+  padding-top: clamp(64px, 10vw, 160px);
+}
+
+.heading {
+  margin: 0 0 clamp(32px, 5vw, 64px);
+}
+
+.stack {
+  position: relative;
+}
+
+/* ── Panel · one viewport tall, opaque so it covers the one beneath ── */
+
+.panel {
+  position: sticky;
+  top: 0;
+  display: grid;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--surface-0);
+}
+
+/* A hairline rides in on the top edge of each arriving panel. */
+.panel + .panel {
+  border-top: 1px solid var(--line);
+}
+
+/* FeaturedStack.tsx sets this for the length of every ScrollTrigger
+   measurement: sticky would report a stuck panel at the viewport top
+   instead of its place in the flow. */
+.stack[data-measuring] .panel {
+  position: relative;
+}
+
+/* The part that recedes. The top padding clears the fixed nav pill. */
+.inner {
+  width: 100%;
+  padding-top: 88px;
+  padding-bottom: 48px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  align-items: center;
+  gap: clamp(32px, 4.5vw, 80px);
+}
+
+/* ── Copy ── */
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.meta {
+  margin: 0 0 18px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--text-3);
+}
+
+.name {
+  margin: 0 0 14px;
+  max-width: 14ch;
+}
+
+.tagline {
+  margin: 0 0 20px;
+  font-family: var(--font-body);
+  font-size: clamp(15px, 1.2vw, 17px);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--accent-2);
+}
+
+.summary {
+  margin: 0 0 28px;
+  max-width: 52ch;
+}
+
+.tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+}
+
+/* Display only: the global .chip is dressed for filters that can be pressed. */
+.chip {
+  cursor: default;
+}
+.chip:active {
+  transform: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover {
+    border-color: var(--line);
+    color: var(--text-2);
+  }
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+
+.link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.live {
+  color: var(--accent-2);
+}
+
+/* External-link rule: the arrow nudges up and to the right. */
+.arrow {
+  display: inline-block;
+  transition: transform 350ms var(--ease-spring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    color: var(--text);
+  }
+  .link:hover .arrow {
+    transform: translate(0.12em, -0.12em);
+  }
+}
+
+.link:focus-visible .arrow {
+  transform: translate(0.12em, -0.12em);
+}
+
+/* ── Screenshot ── */
+
+.shot {
+  min-width: 0;
+}
+
+/* 16:10. Capped through the width so a short viewport keeps the ratio
+   instead of the full column. */
+.frame {
+  position: relative;
+  width: min(100%, 104vh);
+  aspect-ratio: 16 / 10;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface-1);
+}
+
+.img {
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* ── Phone · a scroll-snap strip, no pinning ── */
+
+@media (max-width: 760px) {
+  .heading {
+    margin-bottom: 28px;
+  }
+
+  /* Its own scroll container, so the page itself never scrolls sideways.
+     The scrollbar is hidden; the strip still scrolls. */
+  .stack {
+    display: flex;
+    gap: 12px;
+    padding: 4px clamp(20px, 3.5vw, 48px) 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: clamp(20px, 3.5vw, 48px);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .stack::-webkit-scrollbar {
+    display: none;
+  }
+
+  .panel {
+    position: relative;
+    display: block;
+    flex: 0 0 86vw;
+    min-height: 0;
+    scroll-snap-align: start;
+    background: transparent;
+  }
+  .panel + .panel {
+    border-top: 0;
+  }
+
+  .inner {
+    padding: 0;
+  }
+
+  .stack .grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  .shot {
+    order: -1;
+  }
+  .frame {
+    width: 100%;
+  }
+
+  .meta {
+    margin-bottom: 14px;
+  }
+  .name {
+    margin-bottom: 10px;
+  }
+  .tagline {
+    margin-bottom: 14px;
+  }
+  .summary {
+    margin-bottom: 20px;
+  }
+  .tech {
+    margin-bottom: 20px;
+  }
+}
+
+/* ── Reduced motion · desktop becomes a plain list, nothing moves ── */
+
+@media (prefers-reduced-motion: reduce) and (min-width: 761px) {
+  .panel {
+    position: relative;
+    min-height: 0;
+    padding-block: clamp(48px, 7vw, 96px);
+  }
+  .inner {
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow {
+    transition: none;
+  }
+  .link:hover .arrow,
+  .link:focus-visible .arrow {
+    transform: none;
+  }
+}

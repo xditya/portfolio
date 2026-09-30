@@ -1,0 +1,22 @@
+/* Ink reveal · InkReveal.tsx. The wrapper holds an SVG filter (fractal
+   noise into a displacement map) and the content it reveals. With motion
+   allowed the script hides .content on mount and lets it settle through
+   the filter on desktop, or crossfades it on phones. Without JS, and under
+   reduced motion, nothing here is hidden. */
+
+.reveal {
+  position: relative;
+}
+
+/* Present but sizeless: a display: none SVG would break the url() reference. */
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+}
