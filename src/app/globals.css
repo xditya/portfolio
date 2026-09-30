@@ -147,7 +147,6 @@ h1, h2, h3, h4, h5, h6 {
 
 a { color: inherit; text-decoration: none; }
 
-.font-heading { font-family: var(--font-display); }
 .font-body    { font-family: var(--font-body); }
 .font-mono    { font-family: var(--font-mono); }
 
@@ -648,7 +647,6 @@ a { color: inherit; text-decoration: none; }
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.anim-fade-up { animation: fade-in-up 0.7s var(--ease-out) forwards; opacity: 0; }
 
 /* Scroll-cue line */
 @keyframes scroll-cue {
@@ -691,15 +689,6 @@ a { color: inherit; text-decoration: none; }
   opacity: 1;
   pointer-events: auto;
 }
-
-/* ═══════════════════════════════════════════════
-   PAGE TRANSITION · enter only, transform+opacity
-═══════════════════════════════════════════════ */
-@keyframes page-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.page-enter { animation: page-in 250ms var(--ease-out) both; }
 
 /* ═══════════════════════════════════════════════
    SCROLL PROGRESS + BACK TO TOP
@@ -856,30 +845,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-2);
 }
 
-/* Navbar ⌘K trigger */
-.cmdk-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text-3);
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition:
-    border-color 200ms var(--ease-out),
-    color 200ms var(--ease-out),
-    transform 160ms var(--ease-out);
-}
-.cmdk-trigger:active { transform: scale(0.96); }
-@media (hover: hover) and (pointer: fine) {
-  .cmdk-trigger:hover { border-color: var(--line-strong); color: var(--text); }
-}
-
 /* ═══════════════════════════════════════════════
    COPY BUTTON · morphs to confirmation via blur
 ═══════════════════════════════════════════════ */
@@ -972,14 +937,12 @@ a { color: inherit; text-decoration: none; }
   html { scroll-behavior: auto; }
   .marquee-track { animation: none; }
   .w-rv { opacity: 1; }
-  .anim-fade-up { animation: none; opacity: 1; }
-  .page-enter { animation: none; }
   .scroll-cue { animation: none; }
   .btn-fill, .btn-line, .btn-down, .btn-up,
   .btn-fill::before, .btn-line::before, .btn-down::before, .btn-up::before,
   .btn-down .btn-arrow, .btn-down .arr, .btn-up .btn-arrow, .btn-up .arr,
   .link-u, .link-u::after, .chip, .card, .field-u, .copy-btn, .copy-btn .copy-btn-label,
-  .cmdk-trigger, .to-top, .idx-row, .idx-row .idx-dim, .idx-row .idx-title, .idx-arrow, .idx-preview {
+  .to-top, .idx-row, .idx-row .idx-dim, .idx-row .idx-title, .idx-arrow, .idx-preview {
     transition: none;
   }
 }

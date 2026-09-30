@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import Navbar from "@/components/Navbar";
@@ -60,6 +60,15 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+};
+
+// viewport-fit: cover is what makes env(safe-area-inset-bottom) non-zero on
+// iOS, so the phone dock can sit above the home indicator.
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: "#070A12",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

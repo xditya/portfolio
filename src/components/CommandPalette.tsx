@@ -31,6 +31,16 @@ export default function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // A route change closes the palette. The last seen path is kept in state
+  // and reconciled during render (React's "adjust state when a prop changes"
+  // pattern), so no effect runs and the new route never paints with the
+  // palette still open.
+  const [seenPath, setSeenPath] = useState(pathname);
+  if (seenPath !== pathname) {
+    setSeenPath(pathname);
+    if (open) setOpen(false);
+  }
+
   const goto = useCallback(
     (href: string) => {
       router.push(href);
@@ -59,9 +69,17 @@ export default function CommandPalette() {
         keywords: "copy email clipboard contact mail",
         group: "Actions",
         run: () => {
-          navigator.clipboard?.writeText(profile.email).catch(() => {});
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 2000);
+          // The toast confirms a write that happened, so it waits for the
+          // promise; a failed or unavailable clipboard shows nothing.
+          const clipboard = navigator.clipboard;
+          if (!clipboard) return;
+          clipboard
+            .writeText(profile.email)
+            .then(() => {
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 2000);
+            })
+            .catch(() => {});
         },
       },
       {
@@ -165,20 +183,22 @@ export default function CommandPalette() {
     return () => window.removeEventListener("cmdk:open", onOpen);
   }, [openPalette]);
 
-  /* Close on route change, focus input on open, lock scroll */
+  /* Focus the input on open and lock page scroll while open. Both html and
+     body are set: globals.css gives html overflow-x: clip, which stops a
+     body-only overflow from reaching the viewport. Both are restored to
+     what they were on close. */
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (open) {
-      inputRef.current?.focus();
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!open) return;
+    inputRef.current?.focus();
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtml = html.style.overflow;
+    const previousBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      html.style.overflow = previousHtml;
+      body.style.overflow = previousBody;
     };
   }, [open]);
 
@@ -187,10 +207,6 @@ export default function CommandPalette() {
     const el = listRef.current?.querySelector<HTMLElement>(`[data-idx="${active}"]`);
     el?.scrollIntoView({ block: "nearest" });
   }, [active]);
-
-  useEffect(() => {
-    setActive(0);
-  }, [query]);
 
   const copiedToast = copied ? (
     <div
@@ -236,6 +252,10 @@ export default function CommandPalette() {
   return (
     <div
       className="cmdk-overlay"
+      // Lenis scrolls the page programmatically on wheel, which an overflow
+      // lock cannot stop; this keeps wheel events over the palette out of
+      // Lenis, so the page stays put and the result list scrolls natively.
+      data-lenis-prevent=""
       onPointerDown={(e) => {
         if (e.target === e.currentTarget) setOpen(false);
       }}
@@ -249,7 +269,11 @@ export default function CommandPalette() {
           className="cmdk-input"
           placeholder="Search pages, projects, socials…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            // A new query starts from the first result.
+            setQuery(e.target.value);
+            setActive(0);
+          }}
           onKeyDown={onInputKey}
           role="combobox"
           aria-expanded="true"

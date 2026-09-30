@@ -102,15 +102,6 @@
   color: var(--accent-2, #b9c4ff);
 }
 
-.row[aria-current="page"]::after {
-  content: "";
-  flex: none;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent, #4d62ff);
-}
-
 .searchCell {
   margin-top: 6px;
   padding-top: 6px;

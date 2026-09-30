@@ -1,10 +1,13 @@
 /* Page transition · ink bloom on enter.
    The new route is revealed through a circle that grows from where the
-   pointer last went down (--tx / --ty / --tr on <html>, written by
-   PageTransition.tsx), with a short opacity fade underneath. Only
-   clip-path and opacity animate. The animation leaves nothing behind
-   once it ends (no forwards fill), so a tall page is never clipped and
-   the wrapper stops being a stacking context. */
+   pointer last went down, with a short opacity fade underneath. The
+   centre (--bx / --by) and the covering radius (--br) are inline on the
+   wrapper, written by PageBloom.tsx in page-box pixels before the first
+   paint; the fallbacks place the origin a fifth of the way down the first
+   screen for the moment before hydration on a fresh load. Only clip-path
+   and opacity animate. The animation leaves nothing behind once it ends
+   (no forwards fill), so a tall page is never clipped and the wrapper
+   stops being a stacking context. */
 
 .page {
   animation:
@@ -14,10 +17,10 @@
 
 @keyframes bloom {
   from {
-    clip-path: circle(0px at var(--tx, 50%) var(--ty, 20%));
+    clip-path: circle(0px at var(--bx, 50%) var(--by, 20vh));
   }
   to {
-    clip-path: circle(var(--tr, 100vmax) at var(--tx, 50%) var(--ty, 20%));
+    clip-path: circle(var(--br, 100vmax) at var(--bx, 50%) var(--by, 20vh));
   }
 }
 

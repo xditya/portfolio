@@ -95,6 +95,15 @@
   }
 }
 
+/* Narrow phones: a 320px screen leaves each cell 56px, and "Projects" at
+   13px with 4px padding a side needs more than that. */
+@media (max-width: 340px) {
+  .item {
+    padding: 0 2px;
+    font-size: 12px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .item {
     transition: none;

@@ -137,12 +137,18 @@
   pointer-events: none;
 }
 
-/* Command palette trigger, last item in the pill */
+/* Command palette trigger, last item in the pill. The label is "⌘K" until
+   hydration and "Ctrl+K" on other platforms, so the box reserves the width
+   of the wider label (six monospace characters, their letter-spacing, the
+   padding and a pixel of slack for rounding) and the pill never shifts
+   when the hint swaps. */
 .trigger {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 34px;
+  min-inline-size: calc(6ch + 0.12em + 24px);
   margin-left: 2px;
   padding: 0 11px;
   border: 0;
@@ -157,6 +163,13 @@
     color 200ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
     background-color 200ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
     transform 160ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+/* Same 44px hit area as the links */
+.trigger::before {
+  content: "";
+  position: absolute;
+  inset: -5px 0;
 }
 
 .trigger kbd {
