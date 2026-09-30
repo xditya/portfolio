@@ -16,13 +16,16 @@ export default function PageAssist() {
 
 // Motion's useScroll owns the window scroll subscription. The bar reads
 // scrollYProgress straight into its transform (no React render per frame);
-// the button only re-renders when the scroll crosses 600px.
+// the button only re-renders when the scroll crosses 600px or reaches the
+// last 120px of the page, where it would sit on the footer's bottom row.
 function ReadingAids() {
   const { scrollY, scrollYProgress } = useScroll();
   const [showTop, setShowTop] = useState(false);
 
   useMotionValueEvent(scrollY, "change", (y) => {
-    setShowTop(y > 600);
+    const p = scrollYProgress.get();
+    const left = p > 0 ? (y * (1 - p)) / p : Infinity;
+    setShowTop(y > 600 && left > 120);
   });
 
   return (
@@ -36,7 +39,17 @@ function ReadingAids() {
         className="to-top"
         data-show={showTop}
         aria-label="Back to top"
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        // Invisible until the page is scrolled, so it must not take focus.
+        inert={!showTop}
+        onClick={() =>
+          window.scrollTo({
+            top: 0,
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+              .matches
+              ? "auto"
+              : "smooth",
+          })
+        }
       >
         ↑
       </button>

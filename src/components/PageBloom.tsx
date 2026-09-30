@@ -16,7 +16,7 @@ type Props = {
 // which starts at the top of the page. After Back or Forward the browser
 // restores a scroll position, so the same viewport point sits further down
 // the page and a page-box origin taken from viewport pixels landed above
-// the viewport: the circle took most of its 550ms to reach anything
+// the viewport: the circle took most of its 500ms to reach anything
 // visible. The origin is converted here, before the first paint of the new
 // page, and the radius is measured from the current viewport so it always
 // just covers it.

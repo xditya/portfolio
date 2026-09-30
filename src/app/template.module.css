@@ -11,7 +11,7 @@
 
 .page {
   animation:
-    bloom 550ms var(--ease-out) backwards,
+    bloom 500ms var(--ease-out) backwards,
     fade 220ms var(--ease-out) backwards;
 }
 
