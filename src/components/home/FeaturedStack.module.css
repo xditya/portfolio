@@ -227,8 +227,14 @@
   .shot {
     order: -1;
   }
+  /* FeaturedStack.tsx sets --tilt-x and --tilt-y from the gyroscope, so
+     the card leans with the phone. The transition smooths the readings;
+     without JS or a sensor both stay 0 and nothing moves. */
   .frame {
     width: 100%;
+    transform: perspective(900px) rotateX(var(--tilt-x, 0deg))
+      rotateY(var(--tilt-y, 0deg));
+    transition: transform 200ms var(--ease-out);
   }
 
   .meta {
