@@ -64,9 +64,19 @@
 /* ── Availability pill · glass, one green dot ──
    The pill sits on the pool itself, above the band, so its own glass has
    to carry the label: a 74% ground and the label in --text hold AA even
-   over the pale core a pointer trail can leave under it. */
+   over the pale core a pointer trail can leave under it. The location is a
+   second, quieter chip so it reads as its own fact, not as where the work
+   is available. */
 
-.status {
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.status,
+.place {
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -89,6 +99,12 @@
     background-color 200ms var(--ease-out),
     border-color 200ms var(--ease-out),
     transform 160ms var(--ease-out);
+}
+
+.place {
+  padding-inline: 14px;
+  font-weight: 400;
+  color: var(--text-2);
 }
 
 .status:active {

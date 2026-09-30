@@ -122,20 +122,23 @@ export default function Hero() {
       <div className={s.vignette} aria-hidden="true" />
 
       <div className={`container-x ${s.inner}`}>
-        <Link
-          href="/contact"
-          className={s.status}
-          onClick={() =>
-            trackEvent("cta_click", {
-              cta_label: "Available for Work",
-              link_url: "/contact",
-              source: "home_hero_status",
-            })
-          }
-        >
-          <span className={s.ok} aria-hidden="true" />
-          {profile.availability}
-        </Link>
+        <div className={s.meta}>
+          <Link
+            href="/contact"
+            className={s.status}
+            onClick={() =>
+              trackEvent("cta_click", {
+                cta_label: "Available for Work",
+                link_url: "/contact",
+                source: "home_hero_status",
+              })
+            }
+          >
+            <span className={s.ok} aria-hidden="true" />
+            {profile.available}
+          </Link>
+          <span className={s.place}>{profile.basedIn}</span>
+        </div>
 
         <h1
           ref={headingRef}

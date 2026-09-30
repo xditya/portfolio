@@ -21,8 +21,8 @@ export const profile = {
   resume: "/resume.pdf",
   siteUrl: "https://xditya.me",
   available,
-  /** Hero status line. */
-  availability: `${available} · ${location}`,
+  /** Sits beside the availability pill in the hero, as its own fact. */
+  basedIn: `Based in ${location}`,
   /** Hero tagline; the middle part is set in bold ink. */
   tagline: {
     lead: "Full-stack dev.",
