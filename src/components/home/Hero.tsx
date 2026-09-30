@@ -38,25 +38,26 @@ export default function Hero() {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const nameRef = useRef<HTMLSpanElement>(null);
   const dotRef = useRef<HTMLSpanElement>(null);
-  const taglineRef = useRef<HTMLParagraphElement>(null);
-  const ctasRef = useRef<HTMLDivElement>(null);
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   // The server renders the resting state ("Aditya.", tagline and buttons
   // visible) so the page reads correctly without JS and under reduced
   // motion. With motion allowed, the name starts as the handle and
-  // scrambles into place, then the tagline and buttons fade up. A layout
+  // scrambles into place, then the bottom row fades up piece by piece. A layout
   // effect so the swap happens before the first client paint.
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const heading = headingRef.current;
     const name = nameRef.current;
     const dot = dotRef.current;
-    const tagline = taglineRef.current;
-    const ctas = ctasRef.current;
-    if (!section || !heading || !name || !dot || !tagline || !ctas) return;
+    const about = aboutRef.current;
+    const actions = actionsRef.current;
+    if (!section || !heading || !name || !dot || !about || !actions) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const bits = [tagline, ...Array.from(ctas.children)];
+    // Tagline, location, the two buttons, then the availability line.
+    const bits = [...Array.from(about.children), ...Array.from(actions.querySelectorAll("a"))];
     const width = { w: WIDTH_REST };
 
     const ctx = gsap.context(() => {
@@ -122,24 +123,6 @@ export default function Hero() {
       <div className={s.vignette} aria-hidden="true" />
 
       <div className={`container-x ${s.inner}`}>
-        <div className={s.meta}>
-          <Link
-            href="/contact"
-            className={s.status}
-            onClick={() =>
-              trackEvent("cta_click", {
-                cta_label: "Available for Work",
-                link_url: "/contact",
-                source: "home_hero_status",
-              })
-            }
-          >
-            <span className={s.ok} aria-hidden="true" />
-            {profile.available}
-          </Link>
-          <span className={s.place}>{profile.basedIn}</span>
-        </div>
-
         <h1
           ref={headingRef}
           className={`display-hero ${s.name}`}
@@ -152,41 +135,60 @@ export default function Hero() {
         </h1>
 
         <div className={s.row}>
-          <p ref={taglineRef} className={s.tagline}>
-            {profile.tagline.lead} <b>{profile.tagline.emphasis}</b>{" "}
-            {profile.tagline.trail}
-          </p>
+          <div ref={aboutRef} className={s.about}>
+            <p className={s.tagline}>
+              {profile.tagline.lead} <b>{profile.tagline.emphasis}</b>{" "}
+              {profile.tagline.trail}
+            </p>
+            <p className={s.place}>{profile.basedIn}</p>
+          </div>
 
-          <div ref={ctasRef} className={s.ctas}>
-            <Link
-              href="/projects"
-              className="btn-fill"
-              onPointerEnter={setFillOrigin}
-              onPointerLeave={setFillOrigin}
-              onClick={() =>
-                trackEvent("cta_click", {
-                  cta_label: "View Projects",
-                  link_url: "/projects",
-                  source: "home_hero",
-                })
-              }
-            >
-              View projects
-            </Link>
+          <div ref={actionsRef} className={s.actions}>
+            <div className={s.ctas}>
+              <Link
+                href="/projects"
+                className="btn-fill"
+                onPointerEnter={setFillOrigin}
+                onPointerLeave={setFillOrigin}
+                onClick={() =>
+                  trackEvent("cta_click", {
+                    cta_label: "View Projects",
+                    link_url: "/projects",
+                    source: "home_hero",
+                  })
+                }
+              >
+                View projects
+              </Link>
+              <Link
+                href="/contact"
+                className="btn-line"
+                onPointerEnter={setFillOrigin}
+                onPointerLeave={setFillOrigin}
+                onClick={() =>
+                  trackEvent("cta_click", {
+                    cta_label: "Get In Touch",
+                    link_url: "/contact",
+                    source: "home_hero",
+                  })
+                }
+              >
+                Get in touch
+              </Link>
+            </div>
             <Link
               href="/contact"
-              className="btn-line"
-              onPointerEnter={setFillOrigin}
-              onPointerLeave={setFillOrigin}
+              className={s.status}
               onClick={() =>
                 trackEvent("cta_click", {
-                  cta_label: "Get In Touch",
+                  cta_label: "Available for Work",
                   link_url: "/contact",
-                  source: "home_hero",
+                  source: "home_hero_status",
                 })
               }
             >
-              Get in touch
+              <span className={s.ok} aria-hidden="true" />
+              {profile.available}
             </Link>
           </div>
         </div>
