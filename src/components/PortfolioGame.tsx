@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
@@ -19,10 +20,18 @@ import {
   GAME_ABOUT,
   GAME_STATEMENT,
 } from "@/lib/gameData";
+import styles from "./PortfolioGame.module.css";
 
 /* ───────────────────────── Types ───────────────────────── */
 
 type Action = { label: string; href: string; internal?: boolean };
+
+/** In-app routes push, mailto hands off to the mail client, the rest open a tab. */
+function followAction(router: { push: (href: string) => void }, a: Action) {
+  if (a.internal) router.push(a.href);
+  else if (a.href.startsWith("mailto:")) window.location.href = a.href;
+  else window.open(a.href, "_blank", "noopener,noreferrer");
+}
 
 type HudPanel = {
   id: string;
@@ -93,6 +102,98 @@ const C = {
 const WORLD_RADIUS = 132;
 const STORAGE_KEY = "xditya-game-discovered";
 
+/** Project names the player has already found, from localStorage. */
+function readCollected(): Set<string> {
+  const set = new Set<string>();
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) (JSON.parse(raw) as string[]).forEach((n) => set.add(n));
+  } catch {
+    /* ignore */
+  }
+  return set;
+}
+
+function countCollected(): number {
+  if (typeof window === "undefined") return 0;
+  const set = readCollected();
+  return GAME_PROJECTS.filter((p) => set.has(p.name)).length;
+}
+
+/* ──────────── Things the scene needs before it can build ────────────
+   Read through useSyncExternalStore so nothing sets state inside an
+   effect. All three are module level: they describe the browser, not
+   one mount, and a remount (strict mode, navigating back) reuses them. */
+
+const subscribeNever = () => () => {};
+const isTouchNow = () => "ontouchstart" in window;
+const getFalse = () => false;
+const getTrue = () => true;
+
+/* Canvas labels draw in the display face. A canvas cannot read a CSS
+   variable, so the real family name comes from the --font-bricolage
+   variable next/font sets on <html>, and the face must be loaded before
+   the first draw or the browser paints the fallback into the texture. */
+const FALLBACK_FAMILY = "'Arial Black', sans-serif";
+let labelFamily = FALLBACK_FAMILY;
+let labelFontReady = false;
+let labelFontLoading: Promise<void> | null = null;
+const labelFontListeners = new Set<() => void>();
+
+function loadLabelFont() {
+  if (labelFontLoading) return;
+  const declared = getComputedStyle(document.documentElement)
+    .getPropertyValue("--font-bricolage")
+    .trim();
+  const family = declared ? `${declared}, ${FALLBACK_FAMILY}` : FALLBACK_FAMILY;
+  const load =
+    "fonts" in document ? document.fonts.load(`800 90px ${family}`) : Promise.resolve([]);
+  labelFontLoading = load
+    .catch(() => [])
+    .then(() => {
+      labelFamily = family;
+      labelFontReady = true;
+      labelFontListeners.forEach((l) => l());
+    });
+}
+
+function subscribeLabelFont(listener: () => void) {
+  labelFontListeners.add(listener);
+  if (!labelFontReady) loadLabelFont();
+  return () => {
+    labelFontListeners.delete(listener);
+  };
+}
+const getLabelFontReady = () => labelFontReady;
+
+/* WebGL support, probed once on a throwaway canvas. The renderer can still
+   fail after a good probe (a lost context, a driver limit); markWebglBroken
+   flips the same flag so the fallback line shows instead of an exception. */
+let webglState: boolean | null = null;
+const webglListeners = new Set<() => void>();
+
+function getWebgl() {
+  if (webglState === null) {
+    const probe = document.createElement("canvas");
+    const gl = probe.getContext("webgl2") || probe.getContext("webgl");
+    webglState = gl !== null;
+    (gl as WebGLRenderingContext | null)?.getExtension("WEBGL_lose_context")?.loseContext();
+  }
+  return webglState;
+}
+
+function markWebglBroken() {
+  webglState = false;
+  webglListeners.forEach((l) => l());
+}
+
+function subscribeWebgl(listener: () => void) {
+  webglListeners.add(listener);
+  return () => {
+    webglListeners.delete(listener);
+  };
+}
+
 /* ─────────────────── Canvas text sprites ─────────────────── */
 
 function makeTextSprite(
@@ -110,7 +211,7 @@ function makeTextSprite(
     size = 2,
     color = "#F4F4EF",
     weight = 800,
-    family = "'Archivo', 'Arial Black', sans-serif",
+    family = labelFamily,
     spacing = 0,
     opacity = 1,
   } = opts;
@@ -175,7 +276,7 @@ function makeCounterSprite(suffix: string, size: number) {
   sprite.scale.set(size * (560 / 200), size, 1);
   const draw = (value: number) => {
     ctx.clearRect(0, 0, 560, 200);
-    ctx.font = "900 120px 'Archivo', 'Arial Black', sans-serif";
+    ctx.font = `800 120px ${labelFamily}`;
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
     const label = `${value}`;
@@ -289,9 +390,11 @@ export default function PortfolioGame() {
   const [showHelp, setShowHelp] = useState(false);
   const [panel, setPanel] = useState<HudPanel | null>(null);
   const [zone, setZone] = useState("THE GRID");
-  const [discovered, setDiscovered] = useState(0);
+  const [discovered, setDiscovered] = useState(countCollected);
   const [toast, setToast] = useState<string | null>(null);
-  const [isTouch, setIsTouch] = useState(false);
+  const isTouch = useSyncExternalStore(subscribeNever, isTouchNow, getFalse);
+  const hasWebgl = useSyncExternalStore(subscribeWebgl, getWebgl, getTrue);
+  const fontReady = useSyncExternalStore(subscribeLabelFont, getLabelFontReady, getFalse);
 
   const totalProjects = GAME_PROJECTS.length;
 
@@ -300,16 +403,18 @@ export default function PortfolioGame() {
   }, [started]);
 
   useEffect(() => {
-    setIsTouch(typeof window !== "undefined" && "ontouchstart" in window);
-  }, []);
-
-  useEffect(() => {
     const mount = mountRef.current;
-    if (!mount) return;
+    if (!mount || !hasWebgl || !fontReady) return;
     const touchDevice = "ontouchstart" in window;
 
     /* ── Renderer / scene / camera / bloom ── */
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    } catch {
+      markWebglBroken();
+      return;
+    }
     const pixelRatio = Math.min(window.devicePixelRatio, touchDevice ? 1.4 : 2);
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(mount.clientWidth, mount.clientHeight);
@@ -748,13 +853,7 @@ export default function PortfolioGame() {
 
     /* ════════════ NORTH · projects archipelago ════════════ */
 
-    const collectedSet = new Set<string>();
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) (JSON.parse(raw) as string[]).forEach((n) => collectedSet.add(n));
-    } catch {
-      /* ignore */
-    }
+    const collectedSet = readCollected();
 
     const crystalByProject = new Map<string, { core: THREE.Mesh; shell: THREE.Mesh; glow: THREE.Sprite }>();
 
@@ -1380,8 +1479,7 @@ export default function PortfolioGame() {
       const a = i.panel.actions[0];
       if (!a) return;
       trackEvent("game_interact", { target: i.id, link_url: a.href });
-      if (a.internal) router.push(a.href);
-      else window.open(a.href, "_blank", "noopener,noreferrer");
+      followAction(router, a);
     };
 
     interactRef.current = () => {
@@ -1389,8 +1487,6 @@ export default function PortfolioGame() {
       const i = interactables.find((x) => x.id === activeId);
       if (i) runFirstAction(i);
     };
-
-    setDiscovered(GAME_PROJECTS.filter((p) => collectedSet.has(p.name)).length);
 
     const spawnBurst = (at: THREE.Vector3, color: number) => {
       const n = 42;
@@ -1478,11 +1574,15 @@ export default function PortfolioGame() {
     const camTarget = new THREE.Vector3();
     const clock = new THREE.Clock();
     let raf = 0;
+    // Game time is summed from clamped deltas, so a hidden tab or a stalled
+    // frame never jumps the world forward.
+    let elapsed = 0;
 
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const dt = Math.min(clock.getDelta(), 0.05);
-      const t = clock.elapsedTime;
+      elapsed += dt;
+      const t = elapsed;
 
       /* movement */
       if (startedRef.current) {
@@ -1639,6 +1739,18 @@ export default function PortfolioGame() {
     };
     loop();
 
+    /* ── Pause while the tab is hidden ── */
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else if (!raf) {
+        clock.getDelta(); // drop the time spent hidden
+        loop();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     /* ── Resize ── */
     const onResize = () => {
       const w = mount.clientWidth;
@@ -1654,6 +1766,7 @@ export default function PortfolioGame() {
     /* ── Cleanup ── */
     return () => {
       cancelAnimationFrame(raf);
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("resize", onResize);
@@ -1670,9 +1783,12 @@ export default function PortfolioGame() {
       textures.forEach((tx) => tx.dispose());
       composer.dispose();
       renderer.dispose();
+      // Each mount makes its own canvas, so losing this context frees the
+      // GPU now and cannot touch the context a remount creates.
+      renderer.forceContextLoss();
       mount.removeChild(renderer.domElement);
     };
-  }, [router]);
+  }, [router, hasWebgl, fontReady]);
 
   const startGame = () => {
     setStarted(true);
@@ -1682,213 +1798,87 @@ export default function PortfolioGame() {
 
   /* ─────────────────────── HUD / overlays ─────────────────────── */
 
-  return (
-    <div
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100svh",
-        overflow: "hidden",
-        background: "var(--bg)",
-      }}
-    >
-      <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />
+  if (!hasWebgl) {
+    return (
+      <div className={styles.fallback}>
+        <p className="body-lg">
+          This game needs WebGL, which this browser or device does not provide.
+        </p>
+        <Link href="/" className="btn-line">
+          Back to home
+        </Link>
+      </div>
+    );
+  }
 
-      {/* vignette */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background:
-            "radial-gradient(ellipse at center, transparent 52%, rgba(3,4,8,0.6) 100%)",
-        }}
-      />
+  return (
+    <div className={styles.root}>
+      <div ref={mountRef} className={styles.mount} />
+
+      <div aria-hidden="true" className={styles.vignette} />
 
       {/* Zone label */}
-      {started && (
-        <div
-          className="mono-label"
-          style={{
-            position: "absolute",
-            top: "84px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            color: "var(--muted)",
-            letterSpacing: "0.2em",
-            pointerEvents: "none",
-            textAlign: "center",
-          }}
-        >
-          {zone}
-        </div>
-      )}
+      {started && <div className={`mono-label ${styles.zone}`}>{zone}</div>}
 
       {/* Progress */}
       {started && (
-        <div
-          style={{
-            position: "absolute",
-            top: "84px",
-            right: "clamp(16px, 4vw, 40px)",
-            textAlign: "right",
-            pointerEvents: "none",
-          }}
-        >
-          <div className="mono-label" style={{ color: "var(--ink-dim)" }}>
+        <div className={styles.progress}>
+          <div className="mono-label" style={{ color: "inherit" }}>
             PROJECTS {discovered}/{totalProjects}
           </div>
-          <div
-            style={{
-              width: "140px",
-              height: "3px",
-              background: "var(--line-strong)",
-              marginTop: "8px",
-              marginLeft: "auto",
-            }}
-          >
-            <div
-              style={{
-                width: `${(discovered / totalProjects) * 100}%`,
-                height: "100%",
-                background: "var(--accent)",
-                transition: "width 400ms ease",
-              }}
-            />
+          <div className={styles.track}>
+            <div className={styles.fill} style={{ width: `${(discovered / totalProjects) * 100}%` }} />
           </div>
         </div>
       )}
 
       {/* Help button */}
       {started && (
-        <button
-          onClick={() => setShowHelp((v) => !v)}
-          aria-label="Game help"
-          style={{
-            position: "absolute",
-            top: "84px",
-            left: "clamp(16px, 4vw, 40px)",
-            width: "34px",
-            height: "34px",
-            borderRadius: "50%",
-            border: "1px solid var(--line-strong)",
-            background: "rgba(5,6,10,0.7)",
-            color: "var(--ink-dim)",
-            fontFamily: "var(--font-mono-stack)",
-            fontSize: "14px",
-            cursor: "pointer",
-          }}
-        >
+        <button type="button" onClick={() => setShowHelp((v) => !v)} aria-label="Game help" className={styles.help}>
           ?
         </button>
       )}
 
       {/* Toast */}
-      {toast && (
-        <div
-          className="mono-sm"
-          style={{
-            position: "absolute",
-            top: "140px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "rgba(13,16,24,0.92)",
-            border: "1px solid var(--accent)",
-            color: "var(--accent-soft)",
-            padding: "10px 22px",
-            letterSpacing: "0.1em",
-            pointerEvents: "none",
-            whiteSpace: "nowrap",
-            maxWidth: "90vw",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {toast}
-        </div>
-      )}
+      {toast && <div className={`mono-sm ${styles.toast}`}>{toast}</div>}
 
       {/* Info panel */}
       {started && panel && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: isTouch ? "120px" : "28px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "min(560px, calc(100vw - 32px))",
-            background: "rgba(10,12,18,0.92)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid var(--line-strong)",
-            padding: "18px 22px",
-            zIndex: 5,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "12px" }}>
-            <span
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 900,
-                fontSize: "20px",
-                textTransform: "uppercase",
-                letterSpacing: "-0.02em",
-                color: "var(--ink)",
-              }}
-            >
-              {panel.title}
-            </span>
+        <div className={isTouch ? `${styles.panel} ${styles.panelTouch}` : styles.panel}>
+          <div className={styles.panelHead}>
+            <span className={styles.panelTitle}>{panel.title}</span>
             {panel.kind === "project" && (
-              <span className="mono-sm" style={{ color: "var(--accent-soft)", whiteSpace: "nowrap" }}>
-                {panel.collected ? "✓ DISCOVERED" : "NEW"}
-              </span>
+              <span className={`mono-sm ${styles.panelTag}`}>{panel.collected ? "✓ DISCOVERED" : "NEW"}</span>
             )}
           </div>
-          {panel.subtitle && (
-            <div className="mono-sm" style={{ color: "var(--accent-soft)", marginTop: "4px" }}>
-              {panel.subtitle}
-            </div>
-          )}
-          {panel.body && (
-            <p style={{ color: "var(--ink-dim)", fontSize: "14px", lineHeight: 1.5, margin: "10px 0 0" }}>
-              {panel.body}
-            </p>
-          )}
+          {panel.subtitle && <div className={`mono-sm ${styles.panelSub}`}>{panel.subtitle}</div>}
+          {panel.body && <p className={styles.panelBody}>{panel.body}</p>}
           {panel.chips && panel.chips.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
+            <div className={styles.chips}>
               {panel.chips.map((c) => (
-                <span key={c} className="chip" style={{ fontSize: "11px", padding: "4px 10px" }}>
+                <span key={c} className={`chip ${styles.chip}`}>
                   {c}
                 </span>
               ))}
             </div>
           )}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "14px", alignItems: "center" }}>
+          <div className={styles.actions}>
             {panel.actions.map((a, idx) => (
               <button
                 key={a.label}
+                type="button"
                 onClick={() => {
                   trackEvent("game_interact", { target: panel.id, link_url: a.href });
-                  if (a.internal) router.push(a.href);
-                  else window.open(a.href, "_blank", "noopener,noreferrer");
+                  followAction(router, a);
                 }}
-                className="mono-sm"
-                style={{
-                  background: idx === 0 ? "var(--accent)" : "transparent",
-                  color: idx === 0 ? "#fff" : "var(--ink-dim)",
-                  border: idx === 0 ? "1px solid var(--accent)" : "1px solid var(--line-strong)",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                }}
+                className={idx === 0 ? "btn-fill" : "btn-line"}
               >
                 {a.label}
               </button>
             ))}
             {!isTouch && (
-              <span className="mono-sm" style={{ color: "var(--muted)" }}>
-                or press <b style={{ color: "var(--ink-dim)" }}>E</b>
+              <span className={`mono-sm ${styles.hint}`}>
+                or press <b>E</b>
               </span>
             )}
           </div>
@@ -1900,24 +1890,7 @@ export default function PortfolioGame() {
         <>
           <Joystick vecRef={joyRef} />
           {panel && (
-            <button
-              onClick={() => interactRef.current?.()}
-              style={{
-                position: "absolute",
-                right: "28px",
-                bottom: "44px",
-                width: "72px",
-                height: "72px",
-                borderRadius: "50%",
-                border: "1px solid var(--accent)",
-                background: "rgba(77,98,255,0.25)",
-                color: "var(--ink)",
-                fontFamily: "var(--font-mono-stack)",
-                fontSize: "13px",
-                letterSpacing: "0.1em",
-                zIndex: 6,
-              }}
-            >
+            <button type="button" onClick={() => interactRef.current?.()} className={styles.go}>
               GO
             </button>
           )}
@@ -1926,72 +1899,33 @@ export default function PortfolioGame() {
 
       {/* Intro / help overlay */}
       {(!started || showHelp) && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 10,
-            background: "rgba(5,6,10,0.82)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "24px",
-          }}
-        >
-          <div style={{ maxWidth: "520px", textAlign: "center" }}>
-            <p className="mono-label" style={{ color: "var(--accent-soft)", marginBottom: "18px" }}>
-              PORTFOLIO · PLAYABLE EDITION
-            </p>
-            <h1
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 900,
-                fontSize: "clamp(36px, 8vw, 64px)",
-                letterSpacing: "-0.03em",
-                textTransform: "uppercase",
-                lineHeight: 1,
-                marginBottom: "20px",
-              }}
-            >
+        <div className={styles.overlay}>
+          <div className={styles.intro}>
+            <p className={`mono-label ${styles.kicker}`}>PORTFOLIO · PLAYABLE EDITION</p>
+            <h1 className={styles.title}>
               Enter the
               <br />
-              <span style={{ color: "var(--accent)" }}>Grid</span>
+              <span>Grid</span>
             </h1>
-            <p style={{ color: "var(--ink-dim)", fontSize: "15px", lineHeight: 1.6, marginBottom: "26px" }}>
+            <p className={styles.lede}>
               Pilot the orb through my portfolio world. Discover all{" "}
               {totalProjects} project crystals, climb the experience towers,
               charge the stat pillars, and jump through portals to my socials
               and tools.
             </p>
-            <div
-              className="mono-sm"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "auto 1fr",
-                gap: "8px 18px",
-                textAlign: "left",
-                width: "fit-content",
-                margin: "0 auto 30px",
-                color: "var(--muted)",
-              }}
-            >
-              <span style={{ color: "var(--ink-dim)" }}>{isTouch ? "JOYSTICK" : "WASD / ↑↓←→"}</span>
+            <div className={`mono-sm ${styles.keys}`}>
+              <span>{isTouch ? "JOYSTICK" : "WASD / ↑↓←→"}</span>
               <span>move</span>
-              <span style={{ color: "var(--ink-dim)" }}>{isTouch ? "GO BUTTON / TAP" : "E / CLICK"}</span>
+              <span>{isTouch ? "GO BUTTON / TAP" : "E / CLICK"}</span>
               <span>interact · open links</span>
               {!isTouch && (
                 <>
-                  <span style={{ color: "var(--ink-dim)" }}>SHIFT</span>
+                  <span>SHIFT</span>
                   <span>boost</span>
                 </>
               )}
             </div>
-            <button
-              onClick={startGame}
-              className="btn-fill"
-              style={{ cursor: "pointer", border: "none", fontSize: "14px" }}
-            >
+            <button type="button" onClick={startGame} className="btn-fill">
               {started ? "Resume" : "Start Exploring"}
             </button>
           </div>
@@ -2003,7 +1937,7 @@ export default function PortfolioGame() {
 
 /* ─────────────────── Touch joystick ─────────────────── */
 
-function Joystick({ vecRef }: { vecRef: React.MutableRefObject<{ x: number; y: number }> }) {
+function Joystick({ vecRef }: { vecRef: React.RefObject<{ x: number; y: number }> }) {
   const baseRef = useRef<HTMLDivElement>(null);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
   const activeId = useRef<number | null>(null);
@@ -2034,6 +1968,7 @@ function Joystick({ vecRef }: { vecRef: React.MutableRefObject<{ x: number; y: n
   return (
     <div
       ref={baseRef}
+      className={styles.joystick}
       onPointerDown={(e) => {
         activeId.current = e.pointerId;
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -2044,32 +1979,10 @@ function Joystick({ vecRef }: { vecRef: React.MutableRefObject<{ x: number; y: n
       }}
       onPointerUp={reset}
       onPointerCancel={reset}
-      style={{
-        position: "absolute",
-        left: "28px",
-        bottom: "36px",
-        width: "110px",
-        height: "110px",
-        borderRadius: "50%",
-        border: "1px solid var(--line-strong)",
-        background: "rgba(13,16,24,0.5)",
-        touchAction: "none",
-        zIndex: 6,
-      }}
     >
       <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          width: "44px",
-          height: "44px",
-          borderRadius: "50%",
-          background: "rgba(77,98,255,0.55)",
-          border: "1px solid var(--accent-soft)",
-          transform: `translate(calc(-50% + ${knob.x}px), calc(-50% + ${knob.y}px))`,
-          pointerEvents: "none",
-        }}
+        className={styles.knob}
+        style={{ transform: `translate(calc(-50% + ${knob.x}px), calc(-50% + ${knob.y}px))` }}
       />
     </div>
   );
