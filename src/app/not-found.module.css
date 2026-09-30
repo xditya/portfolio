@@ -1,0 +1,108 @@
+/* 404 · not-found.tsx.
+   A full-height section with one slow ink drip behind the type. The
+   section is the ink layer's host (positioned, clipped, vertical panning
+   only), so the canvas fills it and the page still scrolls under a finger.
+   The header follows the links page: the title on the content column, its
+   sentence at the right edge on the same baseline, both resting on a
+   hairline; the two lines and the link sit under it. Tokens come from
+   globals.css. */
+
+.stage {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--surface-0);
+  touch-action: pan-y;
+}
+
+/* Keeps the type at AA where the ink pools. The ink is faint here, but
+   where both dyes meet the canvas goes pale, so the text column stands on
+   its own ground. */
+.ground {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    80% 70% at 32% 55%,
+    rgba(7, 10, 18, 0.78) 0%,
+    rgba(7, 10, 18, 0.42) 45%,
+    rgba(7, 10, 18, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding-top: 112px;
+  padding-bottom: clamp(64px, 10vh, 120px);
+}
+
+/* Side padding follows the row grid in components/index/Row.module.css,
+   so the title sits on the same column as the other index pages. */
+.head,
+.text {
+  padding-inline: calc(clamp(8px, 1.5vw, 20px) + 56px + 24px) clamp(8px, 1.5vw, 20px);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 40px;
+  padding-bottom: clamp(20px, 2.4vw, 32px);
+  border-bottom: 1px solid var(--line);
+}
+.head h1 {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.lede {
+  margin: 0;
+  text-align: right;
+}
+
+.text {
+  padding-top: clamp(24px, 3vw, 40px);
+}
+
+.ask {
+  max-width: 44ch;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.line {
+  max-width: 44ch;
+  margin: 0 0 32px;
+}
+
+/* 44px tall, so the target is a comfortable one on a phone too. */
+.back {
+  min-height: 44px;
+}
+
+@media (max-width: 760px) {
+  .inner {
+    padding-top: 96px;
+  }
+  .head,
+  .text {
+    padding-inline: calc(8px + 28px + 12px) 8px;
+  }
+  .head {
+    display: block;
+  }
+  .lede {
+    margin-top: 12px;
+    text-align: left;
+  }
+}

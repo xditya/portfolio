@@ -1,0 +1,129 @@
+/* Terms · page.tsx.
+   The same grid language as the links index: the title starts on the
+   column the clause titles start on and shares its baseline with the
+   sentence at the right edge; the intro sits between the header and the
+   list's top hairline. Each clause is a square row with its number in the
+   narrow index column, separated by hairlines. Nothing here moves. The
+   footer supplies the space under the closing lines. */
+
+.page {
+  --index-col: 56px;
+  --col-gap: 24px;
+  --row-pad: clamp(8px, 1.5vw, 20px);
+  padding-top: 88px;
+}
+
+/* Side padding follows the row grid in components/index/Row.module.css:
+   row padding + index column + column gap on the left, row padding on the
+   right. */
+.head,
+.intro,
+.closing {
+  padding-inline: calc(var(--row-pad) + var(--index-col) + var(--col-gap)) var(--row-pad);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 40px;
+  padding-top: clamp(28px, 5vw, 72px);
+}
+.head h1 {
+  margin: 0;
+}
+
+.lede {
+  margin: 0;
+  text-align: right;
+}
+
+/* ── Intro · the sentence between the title and the list ── */
+
+.intro {
+  max-width: calc(54ch + var(--row-pad) + var(--index-col) + var(--col-gap) + var(--row-pad));
+  margin: 0;
+  padding-block: clamp(20px, 2.4vw, 32px);
+}
+
+.intro a {
+  color: var(--accent-2);
+}
+
+/* ── Clauses ── */
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.clause {
+  display: grid;
+  grid-template-columns: var(--index-col) minmax(0, 1fr);
+  column-gap: var(--col-gap);
+  padding: clamp(24px, 3vw, 36px) var(--row-pad);
+  border-bottom: 1px solid var(--line);
+}
+
+/* A quiet marker on the title's baseline. */
+.num {
+  padding-top: 0.35em;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.title {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variation-settings: "wdth" 90, "opsz" 96;
+  text-wrap: balance;
+}
+
+/* 60 to 70 characters a line (a ch of Geist is wider than its average glyph). */
+.body {
+  max-width: 54ch;
+  margin: 0;
+}
+
+/* ── Closing lines ── */
+
+.closing {
+  padding-block: clamp(24px, 3vw, 36px);
+}
+.agree {
+  max-width: 54ch;
+  margin: 0 0 8px;
+}
+.note {
+  margin: 0;
+  color: var(--text-3);
+}
+
+@media (max-width: 760px) {
+  .page {
+    --index-col: 28px;
+    --col-gap: 12px;
+    --row-pad: 8px;
+    padding-top: 84px;
+  }
+  .head {
+    display: block;
+  }
+  .lede {
+    margin-top: 12px;
+    text-align: left;
+  }
+  .clause {
+    padding-block: 22px;
+  }
+  .num {
+    padding-top: 0.3em;
+  }
+}
