@@ -1,0 +1,157 @@
+/* The More sheet. Floats where the dock sits, over a dimmed page.
+   Phone only; hidden above 760px. */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(7, 10, 18, 0.6);
+  touch-action: none;
+}
+
+.sheet {
+  position: fixed;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  left: 12px;
+  z-index: 121;
+  max-height: calc(100dvh - 24px - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
+  border: 1px solid var(--line-strong, rgba(238, 237, 230, 0.18));
+  border-radius: var(--radius-panel, 20px);
+  background: var(--surface-1, #0c1120);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.sheet:focus-visible {
+  outline: 2px solid var(--accent-2, #b9c4ff);
+  outline-offset: -2px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 2px 2px 14px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text, #eeede6);
+}
+
+.close {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-pill, 999px);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-2, #a6abb8);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.close:active {
+  color: var(--text, #eeede6);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: left;
+  color: var(--text, #eeede6);
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.row:active {
+  background: var(--surface-2, #131a2c);
+}
+
+.row[aria-current="page"] {
+  color: var(--accent-2, #b9c4ff);
+}
+
+.row[aria-current="page"]::after {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent, #4d62ff);
+}
+
+.searchCell {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line, rgba(238, 237, 230, 0.09));
+}
+
+.search {
+  justify-content: flex-start;
+  gap: 10px;
+  color: var(--text-2, #a6abb8);
+}
+
+.search svg {
+  flex: none;
+}
+
+.close:focus-visible,
+.row:focus-visible {
+  outline: 2px solid var(--accent-2, #b9c4ff);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .row:hover {
+    background: var(--surface-2, #131a2c);
+  }
+
+  .close:hover {
+    color: var(--text, #eeede6);
+  }
+}
+
+@media (min-width: 761px) {
+  .backdrop,
+  .sheet {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}

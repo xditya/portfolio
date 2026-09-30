@@ -1,0 +1,232 @@
+/* Shell top bar: wordmark, desktop glass pill, phone search button.
+   Colour and easing tokens come from globals.css; the fallbacks keep the
+   bar legible until the token pass lands. */
+
+/* 21px tall so it leaves the viewport once the page is scrolled past 20px. */
+.sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 21px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 102;
+  height: 64px;
+  border-bottom: 1px solid transparent;
+  background: rgba(7, 10, 18, 0);
+  /* Empty bar space lets the pointer reach the ink layer beneath. */
+  pointer-events: none;
+  transition:
+    background-color 300ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    border-color 300ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.header[data-scrolled] {
+  background: rgba(7, 10, 18, 0.82);
+  border-bottom-color: var(--line, rgba(238, 237, 230, 0.09));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 100%;
+}
+
+.inner > * {
+  pointer-events: auto;
+}
+
+/* Wordmark */
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  min-height: 44px;
+  margin-left: -2px;
+  padding-inline: 2px;
+  border-radius: var(--radius-pill, 999px);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 44px;
+  letter-spacing: -0.02em;
+  font-variation-settings: "wdth" 90;
+  color: var(--text, #eeede6);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dot {
+  color: var(--accent, #4d62ff);
+}
+
+/* Desktop glass pill */
+.pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 4px;
+  border: 1px solid var(--line-strong, rgba(238, 237, 230, 0.18));
+  border-radius: var(--radius-pill, 999px);
+  background: rgba(12, 17, 32, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: var(--radius-pill, 999px);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-2, #a6abb8);
+  text-decoration: none;
+  transition: color 250ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+/* Extends the hit area to 44px without changing the drawn item. */
+.link::before {
+  content: "";
+  position: absolute;
+  inset: -5px 0;
+}
+
+.link:hover,
+.link[aria-current="page"] {
+  color: var(--text, #eeede6);
+}
+
+.marker {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px solid rgba(77, 98, 255, 0.45);
+  border-radius: var(--radius-pill, 999px);
+  background: rgba(77, 98, 255, 0.28);
+  pointer-events: none;
+}
+
+/* Command palette trigger, last item in the pill */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  margin-left: 2px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: var(--radius-pill, 999px);
+  background: transparent;
+  color: var(--text-3, #7d8497);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    color 200ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    background-color 200ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    transform 160ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.trigger kbd {
+  font: inherit;
+}
+
+.trigger:hover {
+  color: var(--text, #eeede6);
+  background: rgba(238, 237, 230, 0.06);
+}
+
+.trigger:active {
+  transform: scale(0.96);
+}
+
+/* Phone search button, top right */
+.search {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -12px;
+  border: 0;
+  border-radius: var(--radius-pill, 999px);
+  background: transparent;
+  color: var(--text-2, #a6abb8);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 200ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    transform 160ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.search:active {
+  color: var(--text, #eeede6);
+  transform: scale(0.96);
+}
+
+/* Focus */
+.wordmark:focus-visible,
+.link:focus-visible,
+.trigger:focus-visible,
+.search:focus-visible {
+  outline: 2px solid var(--accent-2, #b9c4ff);
+  outline-offset: 2px;
+}
+
+/* Breakpoints */
+@media (min-width: 761px) {
+  .header {
+    height: 72px;
+  }
+}
+
+@media (max-width: 760px) {
+  .pill {
+    display: none;
+  }
+
+  .search {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .link,
+  .trigger,
+  .search {
+    transition: none;
+  }
+}

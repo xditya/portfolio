@@ -2,78 +2,83 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useReducedMotion } from "motion/react";
 import { event as trackEvent } from "@/lib/gtag";
-import { profile, navItems } from "@/content";
+import { navItems, profile } from "@/content";
+import Dock from "@/components/nav/Dock";
+import Marker from "@/components/nav/Marker";
+import { SearchIcon } from "@/components/nav/Icons";
+import { isActivePath, openPalette } from "@/components/nav/shared";
+import s from "./Navbar.module.css";
+
+// The shortcut hint depends on the platform, which the server cannot know.
+// useSyncExternalStore renders the Mac glyph first and swaps after hydration
+// without a state update inside an effect.
+const subscribeNever = () => () => {};
+const readCmdKey = () =>
+  /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
+    ? "⌘"
+    : "Ctrl+";
+const readServerCmdKey = () => "⌘";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const reduce = useReducedMotion() === true;
+  const cmdKey = useSyncExternalStore(
+    subscribeNever,
+    readCmdKey,
+    readServerCmdKey,
+  );
   const [scrolled, setScrolled] = useState(false);
-  const [cmdKey, setCmdKey] = useState("⌘");
+  // Hover is remembered together with the route it happened on, so a route
+  // change made elsewhere (palette, back button) drops it without an effect.
+  const [hover, setHover] = useState<{ href: string; at: string } | null>(
+    null,
+  );
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
+  const isGame = pathname === "/game";
+  const activeHref =
+    navItems.find((item) => isActivePath(pathname, item.href))?.href ?? null;
+  const markedHref =
+    hover !== null && hover.at === pathname ? hover.href : activeHref;
+
+  // Tint the bar once the page is scrolled past 20px. A 21px sentinel at the
+  // top of the document leaves the viewport at exactly that point.
   useEffect(() => {
-    if (!/Mac|iPhone|iPad/.test(navigator.platform ?? "")) setCmdKey("Ctrl+");
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setScrolled(!entry.isIntersecting);
+    });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
 
+  // The game keeps its joystick where the dock would sit. globals.css drops
+  // the body padding reservation while this attribute is present.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    if (!isGame) return;
+    document.body.dataset.route = "game";
+    return () => {
+      delete document.body.dataset.route;
+    };
+  }, [isGame]);
 
-  // Close menu on route change
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
-  // Dispatch event + lock body scroll while the overlay is open
-  useEffect(() => {
-    window.dispatchEvent(
-      new CustomEvent("mobileMenuToggle", { detail: { open: menuOpen } }),
-    );
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-  }, [menuOpen]);
-
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const clearHover = () => setHover(null);
 
   return (
     <>
-      <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 102,
-          background:
-            scrolled && !menuOpen ? "rgba(5, 6, 10, 0.82)" : "transparent",
-          backdropFilter: scrolled && !menuOpen ? "blur(14px)" : "none",
-          WebkitBackdropFilter: scrolled && !menuOpen ? "blur(14px)" : "none",
-          borderBottom:
-            scrolled && !menuOpen
-              ? "1px solid var(--line)"
-              : "1px solid transparent",
-          transition: "background 300ms ease, border-color 300ms ease",
-        }}
-      >
-        <nav
-          className="container-x"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            height: "68px",
-          }}
-        >
-          {/* Wordmark */}
+      <div ref={sentinelRef} className={s.sentinel} aria-hidden="true" />
+
+      <header className={s.header} data-scrolled={scrolled ? "" : undefined}>
+        <div className={`container-x ${s.inner}`}>
           <Link
             href="/"
+            className={s.wordmark}
+            aria-label={`${profile.handle} · home`}
             onClick={() =>
               trackEvent("nav_click", {
                 link_label: "Home",
@@ -81,252 +86,75 @@ export default function Navbar() {
                 source: "logo",
               })
             }
-            aria-label="xditya · home"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 900,
-              fontSize: "18px",
-              letterSpacing: "-0.03em",
-              textTransform: "uppercase",
-              display: "flex",
-              alignItems: "baseline",
-              zIndex: 102,
-              position: "relative",
-            }}
           >
-            xditya
-            <span style={{ color: "var(--accent)" }}>.</span>
+            {profile.handle}
+            <span className={s.dot}>.</span>
           </Link>
 
-          {/* Desktop links */}
-          <div
-            className="nav-desktop"
-            style={{ display: "flex", alignItems: "center", gap: "32px" }}
-          >
-            {navItems.map(({ href, label }, i) => (
-              <Link
-                key={href}
-                href={href}
-                className="link-u"
-                onClick={() =>
-                  trackEvent("nav_click", {
-                    link_label: label,
-                    link_url: href,
-                    source: "desktop",
-                  })
+          <nav className={s.pill} aria-label="Primary">
+            <ul
+              className={s.list}
+              onPointerLeave={clearHover}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                  clearHover();
                 }
-                style={{
-                  fontFamily: "var(--font-mono-stack)",
-                  fontSize: "12px",
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: isActive(href) ? "var(--accent-soft)" : "var(--ink-dim)",
-                }}
-              >
-                <span style={{ color: "var(--muted)", marginRight: "6px" }}>
-                  0{i + 1}
-                </span>
-                {label}
-              </Link>
-            ))}
-            <button
-              className="cmdk-trigger"
-              onClick={() => window.dispatchEvent(new CustomEvent("cmdk:open"))}
-              aria-label="Open command palette"
-            >
-              <SearchIcon />
-              <kbd style={{ fontFamily: "inherit" }}>{cmdKey}K</kbd>
-            </button>
-          </div>
-
-          {/* Mobile: search + hamburger */}
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent("cmdk:open"))}
-            aria-label="Search"
-            className="nav-burger"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "8px",
-              color: "var(--ink-dim)",
-              display: "none",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 102,
-              position: "relative",
-              marginLeft: "auto",
-              marginRight: "4px",
-            }}
-          >
-            <SearchIcon size={18} />
-          </button>
-
-          {/* Hamburger */}
-          <button
-            onClick={() => {
-              const nextOpen = !menuOpen;
-              setMenuOpen(nextOpen);
-              trackEvent("mobile_menu_toggle", {
-                state: nextOpen ? "open" : "close",
-              });
-            }}
-            aria-label="Toggle navigation menu"
-            aria-expanded={menuOpen}
-            className="nav-burger"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "8px",
-              color: "var(--ink)",
-              display: "none",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 102,
-              position: "relative",
-            }}
-          >
-            <HamburgerIcon open={menuOpen} />
-          </button>
-        </nav>
-      </header>
-
-      {/* Full-screen overlay menu */}
-      <div
-        aria-hidden={!menuOpen}
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 101,
-          background: "var(--bg)",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          padding: "0 clamp(24px, 8vw, 80px)",
-          opacity: menuOpen ? 1 : 0,
-          pointerEvents: menuOpen ? "all" : "none",
-          transition: "opacity 350ms ease",
-        }}
-      >
-        {navItems.map(({ href, label }, i) => (
-          <Link
-            key={href}
-            href={href}
-            onClick={() =>
-              trackEvent("nav_click", {
-                link_label: label,
-                link_url: href,
-                source: "mobile_overlay",
-              })
-            }
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 11vw, 72px)",
-              letterSpacing: "-0.03em",
-              textTransform: "uppercase",
-              lineHeight: 1.15,
-              color: isActive(href) ? "var(--accent)" : "var(--ink)",
-              display: "flex",
-              alignItems: "baseline",
-              gap: "16px",
-              borderBottom: "1px solid var(--line)",
-              padding: "14px 0",
-              transform: menuOpen ? "translateY(0)" : "translateY(28px)",
-              opacity: menuOpen ? 1 : 0,
-              transition: `transform 450ms cubic-bezier(0.22,1,0.36,1) ${i * 55}ms, opacity 450ms ease ${i * 55}ms, color 250ms ease`,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-mono-stack)",
-                fontWeight: 400,
-                fontSize: "13px",
-                letterSpacing: "0.15em",
-                color: "var(--muted)",
               }}
             >
-              0{i + 1}
-            </span>
-            {label}
-          </Link>
-        ))}
+              {navItems.map((item) => {
+                const active = isActivePath(pathname, item.href);
+                const mark = () => setHover({ href: item.href, at: pathname });
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={s.link}
+                      aria-current={active ? "page" : undefined}
+                      onPointerEnter={mark}
+                      onFocus={mark}
+                      onClick={() =>
+                        trackEvent("nav_click", {
+                          link_label: item.label,
+                          link_url: item.href,
+                          source: "desktop",
+                        })
+                      }
+                    >
+                      {markedHref === item.href && (
+                        <Marker
+                          id="nav-pill-marker"
+                          className={s.marker}
+                          reduce={reduce}
+                        />
+                      )}
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            <button
+              type="button"
+              className={s.trigger}
+              aria-label="Open command palette"
+              onClick={openPalette}
+            >
+              <kbd>{cmdKey}K</kbd>
+            </button>
+          </nav>
 
-        <div
-          className="mono-label"
-          style={{ position: "absolute", bottom: "32px", left: "clamp(24px, 8vw, 80px)" }}
-        >
-          © {new Date().getFullYear()} {`${profile.name} · ${profile.location}`}
+          <button
+            type="button"
+            className={s.search}
+            aria-label="Search"
+            onClick={openPalette}
+          >
+            <SearchIcon size={20} />
+          </button>
         </div>
-      </div>
+      </header>
 
-      {/* Responsive switch */}
-      <style>{`
-        @media (max-width: 720px) {
-          .nav-desktop { display: none !important; }
-          .nav-burger  { display: flex !important; }
-        }
-      `}</style>
+      {!isGame && <Dock />}
     </>
-  );
-}
-
-function SearchIcon({ size = 14 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <line x1="21" y1="21" x2="16.5" y2="16.5" />
-    </svg>
-  );
-}
-
-function HamburgerIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 22 22"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <line
-        x1="3"
-        y1={open ? "11" : "7"}
-        x2="19"
-        y2={open ? "11" : "7"}
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        style={{
-          transform: open ? "rotate(45deg)" : "none",
-          transformOrigin: "11px 11px",
-          transition: "all 300ms ease",
-        }}
-      />
-      <line
-        x1="3"
-        y1={open ? "11" : "15"}
-        x2="19"
-        y2={open ? "11" : "15"}
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        style={{
-          transform: open ? "rotate(-45deg)" : "none",
-          transformOrigin: "11px 11px",
-          transition: "all 300ms ease",
-        }}
-      />
-    </svg>
   );
 }
