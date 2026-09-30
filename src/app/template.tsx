@@ -1,5 +1,16 @@
-// Re-mounts on every route change, giving each page a subtle enter
-// transition (opacity + 8px rise, strong ease-out · see .page-enter).
-export default function Template({ children }: { children: React.ReactNode }) {
-  return <div className="page-enter">{children}</div>;
+import type { ReactNode } from "react";
+import PageTransition from "@/components/PageTransition";
+import styles from "./template.module.css";
+
+// Re-mounts on every route change. The new page is revealed through a
+// circle that grows from where the pointer last went down (the ink bloom,
+// see template.module.css). Phones get a short fade, reduced motion gets
+// no animation at all.
+export default function Template({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <PageTransition />
+      <div className={styles.page}>{children}</div>
+    </>
+  );
 }

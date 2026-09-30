@@ -1,0 +1,174 @@
+/* Footer · the sign-off, page links, socials and the copyright line.
+   Tokens come from globals.css (:root). Geist for the eyebrow and links,
+   Bricolage for the wordmark and the sign-off, Geist Mono for the
+   copyright line only. */
+
+.footer {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(80px, 12vw, 160px);
+  border-top: 1px solid var(--line);
+}
+
+/* ── Sign-off ── */
+
+.signoff {
+  padding-block: clamp(64px, 10vw, 160px);
+}
+
+.eyebrow {
+  margin: 0 0 24px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.available {
+  color: var(--accent-2);
+}
+
+/* The big link. Hover follows the external-link rule: the arrow nudges
+   up and to the right and the text turns pale. No fill. */
+.cta {
+  display: inline-block;
+  color: var(--text);
+  text-decoration: none;
+  transform-origin: left center;
+  transition:
+    color 300ms var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 350ms var(--ease-spring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta:hover { color: var(--accent-2); }
+  .cta:hover .arrow { transform: translate(0.1em, -0.1em); }
+}
+
+.cta:focus-visible { color: var(--accent-2); }
+.cta:focus-visible .arrow { transform: translate(0.1em, -0.1em); }
+
+.cta:active { transform: scale(0.98); }
+
+/* ── Bottom row ── */
+
+.bottom {
+  border-top: 1px solid var(--line);
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 40px;
+  row-gap: 20px;
+  padding-block: 28px;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-variation-settings: "wdth" 90;
+}
+
+.dot {
+  color: var(--accent);
+}
+
+.links,
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 20px;
+  row-gap: 10px;
+}
+
+.socials {
+  justify-content: flex-end;
+}
+
+.link,
+.social {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color 200ms var(--ease-out);
+}
+
+/* Page links go bone on hover, external links go pale. */
+@media (hover: hover) and (pointer: fine) {
+  .link:hover { color: var(--text); }
+  .social:hover { color: var(--accent-2); }
+}
+
+.legal {
+  padding-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--text-3);
+}
+
+/* ── Tablet · socials take their own row ── */
+
+@media (max-width: 1100px) {
+  .bar {
+    grid-template-columns: auto 1fr;
+  }
+  .socials {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+/* ── Phone · everything stacks, links sit in two rows of three ── */
+
+@media (max-width: 760px) {
+  .bar {
+    grid-template-columns: 1fr;
+    row-gap: 24px;
+    padding-block: 28px 24px;
+  }
+  .links {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+    column-gap: 28px;
+    row-gap: 12px;
+  }
+  .socials {
+    row-gap: 12px;
+  }
+}
+
+/* ── Reduced motion · colour changes only, nothing moves ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .cta,
+  .arrow,
+  .link,
+  .social {
+    transition: none;
+  }
+  .cta:hover .arrow,
+  .cta:focus-visible .arrow,
+  .cta:active {
+    transform: none;
+  }
+}

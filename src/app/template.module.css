@@ -1,0 +1,41 @@
+/* Page transition · ink bloom on enter.
+   The new route is revealed through a circle that grows from where the
+   pointer last went down (--tx / --ty / --tr on <html>, written by
+   PageTransition.tsx), with a short opacity fade underneath. Only
+   clip-path and opacity animate. The animation leaves nothing behind
+   once it ends (no forwards fill), so a tall page is never clipped and
+   the wrapper stops being a stacking context. */
+
+.page {
+  animation:
+    bloom 550ms var(--ease-out) backwards,
+    fade 220ms var(--ease-out) backwards;
+}
+
+@keyframes bloom {
+  from {
+    clip-path: circle(0px at var(--tx, 50%) var(--ty, 20%));
+  }
+  to {
+    clip-path: circle(var(--tr, 100vmax) at var(--tx, 50%) var(--ty, 20%));
+  }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Phones · a short fade instead of the bloom */
+@media (max-width: 760px) {
+  .page {
+    animation: fade 200ms var(--ease-out) backwards;
+  }
+}
+
+/* Reduced motion · the page simply appears */
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    animation: none;
+  }
+}
