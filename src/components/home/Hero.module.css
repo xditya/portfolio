@@ -1,7 +1,8 @@
 /* Hero · the ink pool with the name on it and one row under a hairline:
    tagline and location on the left, the two CTAs with the availability
-   line under them on the right. Each small fact sits with what it belongs
-   to (where I am with who I am, availability with getting in touch). InkLayer fills the section with its canvas and listens for
+   line under them on the right. The two small facts are quiet meta text,
+   each next to what it belongs to, and never joined into one line (that
+   read as "available in Kerala"). InkLayer fills the section with its canvas and listens for
    pointer events on the section itself, so the section owns position,
    overflow and touch-action. Tokens come from globals.css. */
 
@@ -62,19 +63,19 @@
   padding-bottom: clamp(32px, 5vh, 56px);
 }
 
-/* ── Availability line · plain text with the one green dot ──
-   It sits in the dark band with the rest of the row, so it needs no glass
+/* ── Availability line · quiet meta text with one small green dot ──
+   It sits in the dark band with the rest of the row, so it needs no ground
    of its own. The pseudo-element gives the link a 44px tall target. */
 
 .status {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.4;
-  color: var(--text-2);
+  color: var(--text-3);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   transition: color 200ms var(--ease-out);
@@ -82,7 +83,7 @@
 .status::after {
   content: "";
   position: absolute;
-  inset: -12px -8px;
+  inset: -14px -8px;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -93,18 +94,10 @@
 
 .ok {
   flex-shrink: 0;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--ok);
-  box-shadow: 0 0 0 0 rgba(61, 220, 151, 0.55);
-  animation: ring 2.4s ease-out infinite;
-}
-
-@keyframes ring {
-  0% { box-shadow: 0 0 0 0 rgba(61, 220, 151, 0.55); }
-  70% { box-shadow: 0 0 0 10px rgba(61, 220, 151, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(61, 220, 151, 0); }
 }
 
 /* ── Name · .display-hero from globals, width driven by --w ──
@@ -149,9 +142,9 @@
 .place {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.4;
-  color: var(--text-2);
+  color: var(--text-3);
 }
 
 .tagline {
@@ -205,12 +198,9 @@
   }
 }
 
-/* ── Reduced motion · the dot holds still, nothing transitions ── */
+/* ── Reduced motion · nothing transitions ── */
 
 @media (prefers-reduced-motion: reduce) {
-  .ok {
-    animation: none;
-  }
   .status {
     transition: none;
   }

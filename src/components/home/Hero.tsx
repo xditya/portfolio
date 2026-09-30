@@ -140,7 +140,7 @@ export default function Hero() {
               {profile.tagline.lead} <b>{profile.tagline.emphasis}</b>{" "}
               {profile.tagline.trail}
             </p>
-            <p className={s.place}>{profile.basedIn}</p>
+            <p className={s.place}>{profile.location}</p>
           </div>
 
           <div ref={actionsRef} className={s.actions}>

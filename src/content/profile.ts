@@ -6,7 +6,7 @@ export const currentYear = new Date().getFullYear();
 const name = "Aditya";
 const role = "Full-stack Developer";
 const location = "Kerala, India";
-const available = "Available for freelance work";
+const available = "Available for freelance";
 const birthYear = 2003;
 
 export const profile = {
@@ -21,9 +21,6 @@ export const profile = {
   resume: "/resume.pdf",
   siteUrl: "https://xditya.me",
   available,
-  /** Hero, under the tagline. Kept apart from the availability line so the
-      two never read as "available in Kerala". */
-  basedIn: `Based in ${location}`,
   /** Hero tagline; the middle part is set in bold ink. */
   tagline: {
     lead: "Full-stack dev.",
