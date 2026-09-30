@@ -7,26 +7,31 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CommandPalette from "@/components/CommandPalette";
 import PageAssist from "@/components/PageAssist";
 import { profile } from "@/content";
-import { Archivo, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 
-const archivo = Archivo({
+// Display: variable weight plus the width and optical-size axes, so the
+// hero can run condensed (wdth 78) and labels can use the small optical cut.
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-archivo",
+  weight: "variable",
+  axes: ["opsz", "wdth"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
-const space = Space_Grotesk({
+// Body
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-space",
+  weight: "variable",
+  variable: "--font-geist",
   display: "swap",
 });
 
-const jetmono = JetBrains_Mono({
+// Data: years, stars, uptime, keyboard hints
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
+  weight: "variable",
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -65,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${archivo.variable} ${space.variable} ${jetmono.variable}`}
+      className={`dark ${bricolage.variable} ${geist.variable} ${geistMono.variable}`}
     >
       <head />
       <body className="grid-bg">
