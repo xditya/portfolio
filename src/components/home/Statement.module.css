@@ -1,0 +1,75 @@
+/* Statement · a wide measure of display type, the link to /about, then
+   the stats grid (Stats.module.css). Section spacing 64 to 160px. */
+
+.section {
+  padding-block: clamp(64px, 10vw, 160px);
+}
+
+.text {
+  max-width: 1080px;
+  margin: 0;
+  color: var(--text);
+}
+
+/* Full opacity here beats the global .w-rv value. Statement.tsx sets the
+   dim starting value inline once it runs, so server HTML and reduced
+   motion both read the paragraph as written. */
+.text .word {
+  display: inline-block;
+  opacity: 1;
+}
+
+.moreRow {
+  margin: clamp(20px, 4vw, 40px) 0 0;
+}
+
+.more {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--accent-2);
+  text-decoration: none;
+  transition: color 200ms var(--ease-out);
+}
+
+/* External-link rule: the arrow nudges up and to the right. */
+.arrow {
+  display: inline-block;
+  transition: transform 350ms var(--ease-spring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .more:hover {
+    color: var(--text);
+  }
+  .more:hover .arrow {
+    transform: translate(0.12em, -0.12em);
+  }
+}
+
+.more:focus-visible .arrow {
+  transform: translate(0.12em, -0.12em);
+}
+
+/* ── "All N Projects" under the featured stack ── */
+
+.all {
+  display: flex;
+  justify-content: center;
+  padding-top: clamp(32px, 5vw, 56px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .more,
+  .arrow {
+    transition: none;
+  }
+  .more:hover .arrow,
+  .more:focus-visible .arrow {
+    transform: none;
+  }
+}
