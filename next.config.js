@@ -14,6 +14,10 @@ const redirectLinks = {
 const nextConfig = {
   // Stop `next dev` from appending its agent-rules block to CLAUDE.md.
   agentRules: false,
+  // Phones reach `next dev` through an ngrok tunnel. Without this the dev
+  // server drops the hot-reload socket for that origin and the page never
+  // hydrates (no ink layer, no interactions). Dev only.
+  allowedDevOrigins: ["*.ngrok-free.app"],
   async redirects() {
     return Object.entries(redirectLinks).map(([key, value]) => ({
       source: `/${key}`,
