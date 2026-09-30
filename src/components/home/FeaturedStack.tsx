@@ -22,9 +22,9 @@ const RECEDE_OPACITY = 0.55;
 // TILT_RANGE degrees of tilt. The rest position follows the reading slowly
 // (TILT_SETTLE per event), so the card lies flat however the phone is
 // held once it stops moving, and there is nothing to calibrate.
-const TILT_MAX = 6;
+const TILT_MAX = 9;
 const TILT_RANGE = 30;
-const TILT_SETTLE = 0.02;
+const TILT_SETTLE = 0.004;
 
 type OrientationWithPermission = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<"granted" | "denied">;
@@ -76,13 +76,19 @@ function attachTilt(stack: HTMLElement) {
   // user gesture; the first touch on the strip is that gesture. Elsewhere the
   // events flow without asking.
   const Orientation = DeviceOrientationEvent as OrientationWithPermission;
+  // Asked on every touch until granted: a dismissed sheet or a touch that
+  // Safari did not count as a gesture gets another chance.
   const ask = () => {
     Orientation.requestPermission?.()
-      .then((state) => state === "granted" && listen())
+      .then((state) => {
+        if (state !== "granted") return;
+        stack.removeEventListener("touchend", ask);
+        listen();
+      })
       .catch(() => {});
   };
   if (Orientation.requestPermission) {
-    stack.addEventListener("touchend", ask, { once: true, passive: true });
+    stack.addEventListener("touchend", ask, { passive: true });
   } else {
     listen();
   }

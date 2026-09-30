@@ -533,6 +533,10 @@ function mountTray(tray: HTMLElement) {
   tray.addEventListener("pointermove", onMove);
   tray.addEventListener("pointerup", onUp);
   tray.addEventListener("pointercancel", onUp);
+  // Safari counts a touch or a click as the gesture the permission needs,
+  // not a pointer event, so the tray asks on those too.
+  tray.addEventListener("touchend", askTilt, { passive: true });
+  tray.addEventListener("click", askTilt);
   document.addEventListener("visibilitychange", onVisibility);
   reduced.addEventListener("change", onReduced);
 
@@ -545,6 +549,8 @@ function mountTray(tray: HTMLElement) {
     tray.removeEventListener("pointermove", onMove);
     tray.removeEventListener("pointerup", onUp);
     tray.removeEventListener("pointercancel", onUp);
+    tray.removeEventListener("touchend", askTilt);
+    tray.removeEventListener("click", askTilt);
     document.removeEventListener("visibilitychange", onVisibility);
     reduced.removeEventListener("change", onReduced);
     window.removeEventListener("deviceorientation", onTilt);
