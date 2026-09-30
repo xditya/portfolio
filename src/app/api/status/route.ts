@@ -103,15 +103,11 @@ function splitRowsByDate(rows: string[]): SplitData {
       dailyData[dateStr] = [];
     }
 
-    let result = 0;
-    if (resultStr && resultStr.trim() === "success") {
-      result = 1;
-    }
-    // Only count successful/failed results for overall uptime
-    if (
-      resultStr &&
-      (resultStr.trim() === "success" || resultStr.trim() === "failure")
-    ) {
+    const outcome = resultStr?.trim();
+    const result = outcome === "success" ? 1 : 0;
+    // Only checks with a verdict count towards the uptime figure. The logs
+    // write "failed"; "failure" is kept for older rows.
+    if (outcome === "success" || outcome === "failed" || outcome === "failure") {
       sum += result;
       count++;
     }
