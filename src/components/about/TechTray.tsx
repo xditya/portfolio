@@ -59,6 +59,11 @@ const SETTLE_OVER = 20;
 // if a wedged chip is still twitching under the steep spring.
 const SETTLE_CAP = SETTLE_AFTER + SETTLE_OVER + 90;
 const DRAG_START = 4; // px the pointer travels before a press counts as a drag
+// Phone tilt: sideways lean of the device, in degrees, that gives the full
+// sideways pull; smaller leans scale down, and a lean under the dead zone
+// counts as level so a phone held in the hand does not keep the pile awake.
+const TILT_FULL = 30;
+const TILT_DEAD = 4;
 
 /**
  * The outline of a chip around its centre, clockwise. Matter's own chamfer
@@ -88,6 +93,7 @@ function mountTray(tray: HTMLElement) {
   const chips = Array.from(tray.children) as HTMLElement[];
   const count = chips.length;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
 
   let M: typeof Matter | null = null;
   let engine: Matter.Engine | null = null;
@@ -125,6 +131,9 @@ function mountTray(tray: HTMLElement) {
   let acc = 0;
   let calm = 0;
   let slow = 0; // steps in a row with nothing held, entering or faster than FAST
+  let tiltX = 0; // sideways pull from the phone's lean, -1 to 1
+  let tiltOn = false;
+  let tiltAsking = false;
 
   /**
    * Moves the chips to their bodies. The solver leaves a resting chip a
@@ -199,6 +208,7 @@ function mountTray(tray: HTMLElement) {
       const air = AIR + ease * (THICK_AIR - AIR);
       const righting = RIGHTING * (1 - ease);
       engine.gravity.y = GRAVITY + ease * (SETTLED_GRAVITY - GRAVITY);
+      engine.gravity.x = engine.gravity.y * tiltX;
       for (let k = 0; k < poured; k++) {
         const b = bodies[order[k]];
         b.frictionAir = air;
@@ -357,6 +367,7 @@ function mountTray(tray: HTMLElement) {
       .then(([mod]) => {
         M = ((mod as { default?: typeof Matter }).default ?? mod) as typeof Matter;
         build();
+        askTilt();
       })
       .catch(() => {
         // the static list stays as it is
@@ -432,9 +443,60 @@ function mountTray(tray: HTMLElement) {
     // the body keeps whatever velocity the drag gave it: that is the flick
     drop();
     run();
+    askTilt();
   };
 
   const onVisibility = () => (document.hidden ? pause() : run());
+
+  // Gravity follows the phone's lean: tilt it and the pile slides that way.
+  // Only the sideways axis is used, so the pile never falls up. The lean is
+  // read against the screen's rotation, so landscape works the same.
+  const onTilt = (e: DeviceOrientationEvent) => {
+    const beta = e.beta ?? 0;
+    const gamma = e.gamma ?? 0;
+    const turn = screen.orientation?.angle ?? 0;
+    const lean = turn === 90 ? beta : turn === 270 ? -beta : turn === 180 ? -gamma : gamma;
+    const size = Math.max(0, Math.abs(lean) - TILT_DEAD);
+    const next = Math.sign(lean) * Math.min(1, size / (TILT_FULL - TILT_DEAD));
+    const changed = Math.abs(next - tiltX) > 0.05;
+    tiltX = next;
+    if (changed) {
+      slow = 0;
+      run();
+    }
+  };
+  const listenTilt = () => {
+    if (tiltOn) return;
+    tiltOn = true;
+    window.addEventListener("deviceorientation", onTilt);
+  };
+  const tiltPermission = () =>
+    (window.DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> } | undefined)
+      ?.requestPermission;
+  // Some browsers hand out orientation events only after a permission
+  // request. Asked once when the tray builds; where that needs a user
+  // gesture (iOS) it fails quietly and is asked again when a chip is
+  // released, which is one.
+  const askTilt = () => {
+    if (tiltOn || tiltAsking || !coarse || !("DeviceOrientationEvent" in window)) return;
+    const ask = tiltPermission();
+    if (!ask) {
+      listenTilt();
+      return;
+    }
+    tiltAsking = true;
+    ask
+      .call(window.DeviceOrientationEvent)
+      .then((state) => {
+        if (state === "granted") listenTilt();
+      })
+      .catch(() => {
+        // needs a gesture, or declined: the tray works without it
+      })
+      .finally(() => {
+        tiltAsking = false;
+      });
+  };
   const onReduced = () => {
     if (reduced.matches) unbuild();
     else if (near) load();
@@ -485,6 +547,7 @@ function mountTray(tray: HTMLElement) {
     tray.removeEventListener("pointercancel", onUp);
     document.removeEventListener("visibilitychange", onVisibility);
     reduced.removeEventListener("change", onReduced);
+    window.removeEventListener("deviceorientation", onTilt);
     unbuild();
   };
 }
