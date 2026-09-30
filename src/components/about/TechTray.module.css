@@ -1,0 +1,110 @@
+/* Tech stack · a plain wrapped list of six chips. Where motion is allowed the
+   list becomes a tray: a panel one shade above the ground that the chips
+   rest in (and, once the physics is running, fall into). Without script the
+   chips sit along the tray floor, which is where they would settle anyway. */
+
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 22px 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    border-color 160ms var(--ease-out),
+    background-color 160ms var(--ease-out);
+}
+
+/* Simple Icons are one colour: the file is the mask, the tint is the box. */
+.logo {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  background: var(--c);
+  -webkit-mask: var(--logo) center / contain no-repeat;
+  mask: var(--logo) center / contain no-repeat;
+}
+
+@media (max-width: 760px) {
+  .chip {
+    height: 48px;
+    padding: 0 18px 0 15px;
+    font-size: 15px;
+  }
+  .logo {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tray {
+    position: relative;
+    align-content: flex-end;
+    height: clamp(280px, 24vw, 340px);
+    /* same inset as the physics walls, so the resting row does not shift
+       when the bodies take over */
+    padding: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+    background: var(--surface-1);
+    /* a finger on empty tray space still scrolls the page */
+    touch-action: pan-y;
+  }
+
+  .tray[data-live] .chip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content;
+    will-change: transform;
+    touch-action: none;
+  }
+
+  .tray[data-dragging] {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .tray[data-live] .chip[data-held] {
+    border-color: var(--accent);
+    background: #1a2340;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .tray[data-live] .chip {
+      cursor: grab;
+    }
+    .tray[data-live] .chip:hover {
+      border-color: rgba(238, 237, 230, 0.34);
+    }
+    .tray[data-live] .chip[data-held] {
+      border-color: var(--accent);
+      cursor: grabbing;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .tray {
+      height: 300px;
+    }
+  }
+}
