@@ -170,6 +170,12 @@ export default function CommandPalette() {
         else openPalette("keyboard");
       } else if (e.key === "Escape" && open) {
         setOpen(false);
+      } else if (e.key === "Tab" && open) {
+        // The input is the only tab stop (results move with the arrow
+        // keys). Handled on window so it still holds after a click on the
+        // panel has dropped focus to the body.
+        e.preventDefault();
+        inputRef.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -186,9 +192,10 @@ export default function CommandPalette() {
   /* Focus the input on open and lock page scroll while open. Both html and
      body are set: globals.css gives html overflow-x: clip, which stops a
      body-only overflow from reaching the viewport. Both are restored to
-     what they were on close. */
+     what they were on close, and focus goes back to whatever had it. */
   useEffect(() => {
     if (!open) return;
+    const opener = document.activeElement as HTMLElement | null;
     inputRef.current?.focus();
     const html = document.documentElement;
     const body = document.body;
@@ -199,6 +206,7 @@ export default function CommandPalette() {
     return () => {
       html.style.overflow = previousHtml;
       body.style.overflow = previousBody;
+      opener?.focus({ preventScroll: true });
     };
   }, [open]);
 
@@ -214,7 +222,8 @@ export default function CommandPalette() {
       role="status"
       style={{
         position: "fixed",
-        bottom: "28px",
+        // Clears the phone dock; the variable is 0px on desktop and on /game.
+        bottom: "calc(var(--dock-space) + 28px)",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 210,
@@ -301,6 +310,7 @@ export default function CommandPalette() {
                     data-active={i === active}
                     className="cmdk-item"
                     role="option"
+                    tabIndex={-1}
                     aria-selected={i === active}
                     onPointerMove={() => setActive(i)}
                     onClick={() => runItem(item)}
