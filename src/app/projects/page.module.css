@@ -1,0 +1,221 @@
+/* Projects index · page.tsx.
+   The title is a ghost: one word as wide as the window, with the search
+   field and the filter chips sitting over its lower half, so the title
+   belongs to the tool. Below it the page is two columns: a narrow one for
+   counts and year numerals, a wide one for the tool and the rows. The year
+   numeral is sticky while its group scrolls. Under 900px the columns stack;
+   under 760px the chips become one strip that scrolls sideways. */
+
+.page {
+  --year-col: clamp(120px, 14vw, 200px);
+  --col-gap: clamp(24px, 3vw, 48px);
+  padding-top: 88px;
+}
+
+/* ── Header ── */
+
+/* The word is sized in vw and must never widen the page, whatever font
+   ends up rendering it. */
+.header {
+  overflow-x: clip;
+}
+
+.ghost {
+  margin: 0 0 -0.47em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: max(72px, 29.4vw);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  font-variation-settings: "wdth" 90, "opsz" 96;
+  text-align: center;
+  white-space: nowrap;
+  /* A variable font's glyphs are built from overlapping shapes and a stroke
+     would trace every one of them. An opaque fill painted over a 2px stroke
+     hides the inner lines and leaves a 1px edge around each letter. */
+  color: color-mix(in srgb, var(--text) 5%, var(--surface-0));
+  -webkit-text-stroke: 2px var(--line-strong);
+  paint-order: stroke fill;
+  pointer-events: none;
+}
+
+/* Positioned so it paints over the title it overlaps. */
+.tool {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--year-col) minmax(0, 1fr);
+  grid-template-areas:
+    ". lede"
+    "count search"
+    ". chips";
+  column-gap: var(--col-gap);
+}
+
+.lede {
+  grid-area: lede;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+
+.search {
+  grid-area: search;
+  align-self: baseline;
+  /* A placeholder longer than a narrow phone ends in an ellipsis */
+  text-overflow: ellipsis;
+}
+/* The underline is the focus mark; a second pixel makes it hard to miss. */
+.search:focus-visible {
+  box-shadow: 0 1px 0 var(--accent);
+}
+
+/* Sits in the narrow column, on the search field's baseline: the same
+   column that carries each year's own count further down. */
+.count {
+  grid-area: count;
+  align-self: baseline;
+  margin: 0;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.chips {
+  grid-area: chips;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* 36px tall with 8px between chips; the pseudo-element takes half the gap
+   on every side, so each target is 44px and none overlap. */
+.filter {
+  position: relative;
+  flex: none;
+  min-height: 36px;
+  white-space: nowrap;
+}
+.filter::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.filterCount {
+  color: var(--text-3);
+}
+.filter[data-on="true"] .filterCount {
+  color: inherit;
+}
+
+/* ── Index ── */
+
+.index {
+  padding-top: clamp(44px, 6vw, 88px);
+}
+
+.group {
+  display: grid;
+  grid-template-columns: var(--year-col) minmax(0, 1fr);
+  column-gap: var(--col-gap);
+  align-items: start;
+  margin-bottom: clamp(48px, 7vw, 88px);
+}
+
+/* Pinned under the fixed navigation (64px) until the group's last row
+   has passed. */
+.year {
+  position: sticky;
+  top: 96px;
+  padding-top: 22px;
+}
+
+.yearNum {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(44px, 5vw, 72px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  font-variation-settings: "wdth" 90, "opsz" 96;
+  font-variant-numeric: tabular-nums;
+}
+
+.yearCount {
+  display: block;
+  margin-top: 10px;
+  color: var(--text-3);
+}
+
+.empty {
+  margin-left: calc(var(--year-col) + var(--col-gap));
+  padding-bottom: 72px;
+}
+.emptyText {
+  margin: 0 0 20px;
+}
+
+/* ── Narrow windows · one column, the year above its rows ── */
+
+@media (max-width: 899px) {
+  .tool {
+    display: block;
+  }
+  .count {
+    margin-top: 14px;
+  }
+
+  .group {
+    display: block;
+  }
+  .year {
+    position: static;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 0;
+    margin-bottom: 16px;
+  }
+  .yearNum {
+    font-size: clamp(40px, 9vw, 64px);
+  }
+  .yearCount {
+    margin-top: 0;
+  }
+
+  .empty {
+    margin-left: 0;
+  }
+}
+
+/* ── Phones · the chips run in one strip that scrolls sideways ── */
+
+@media (max-width: 760px) {
+  .page {
+    padding-top: 84px;
+  }
+
+  .ghost {
+    margin-bottom: -0.3em;
+  }
+
+  /* Bleeds to both screen edges so a chip cut by the edge says there is
+     more; the padding puts the first chip back on the gutter. */
+  .chips {
+    flex-wrap: nowrap;
+    margin: 12px calc(-1 * clamp(20px, 3.5vw, 48px)) 0;
+    padding: 5px clamp(20px, 3.5vw, 48px);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: clamp(20px, 3.5vw, 48px);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .count {
+    margin-top: 8px;
+  }
+}
