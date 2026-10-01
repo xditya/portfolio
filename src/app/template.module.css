@@ -1,0 +1,35 @@
+/* --bx / --by / --br are set inline by PageBloom.tsx; the fallbacks cover
+   the moment before hydration. No forwards fill, so a tall page is never
+   left clipped and the wrapper stops being a stacking context. */
+
+.page {
+  animation:
+    bloom 500ms var(--ease-out) backwards,
+    fade 220ms var(--ease-out) backwards;
+}
+
+@keyframes bloom {
+  from {
+    clip-path: circle(0px at var(--bx, 50%) var(--by, 20vh));
+  }
+  to {
+    clip-path: circle(var(--br, 100vmax) at var(--bx, 50%) var(--by, 20vh));
+  }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (max-width: 760px) {
+  .page {
+    animation: fade 200ms var(--ease-out) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    animation: none;
+  }
+}

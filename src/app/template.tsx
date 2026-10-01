@@ -1,5 +1,13 @@
-// Re-mounts on every route change, giving each page a subtle enter
-// transition (opacity + 8px rise, strong ease-out · see .page-enter).
-export default function Template({ children }: { children: React.ReactNode }) {
-  return <div className="page-enter">{children}</div>;
+import type { ReactNode } from "react";
+import PageTransition from "@/components/PageTransition";
+import PageBloom from "@/components/PageBloom";
+import styles from "./template.module.css";
+
+export default function Template({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <PageTransition />
+      <PageBloom className={styles.page}>{children}</PageBloom>
+    </>
+  );
 }

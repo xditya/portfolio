@@ -12,6 +12,24 @@ const redirectLinks = {
 };
 
 const nextConfig = {
+  // Stop `next dev` from appending its agent-rules block to CLAUDE.md.
+  agentRules: false,
+  // Dev only: without this, phones on the ngrok tunnel lose the HMR socket and never hydrate.
+  allowedDevOrigins: ["*.ngrok-free.app"],
+  poweredByHeader: false,
+  // Gyroscope and accelerometer stay allowed: the phone tilt uses them.
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return Object.entries(redirectLinks).map(([key, value]) => ({
       source: `/${key}`,

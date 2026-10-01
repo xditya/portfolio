@@ -1,0 +1,137 @@
+.page {
+  padding-bottom: 48px;
+}
+
+/* InkLayer listens for pointer events here, so the header owns position,
+   overflow and touch-action. */
+.pool {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(400px, 52vh, 560px);
+  padding-top: 88px;
+  padding-bottom: clamp(40px, 6vh, 64px);
+  overflow: hidden;
+  background: var(--surface-0);
+  touch-action: pan-y;
+}
+
+/* Keeps text readable over dense ink. Worst case (white ink) blends to about
+   #343438 at the core, which keeps --text-2 above AA, so .meta uses --text-2. */
+.ground {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(
+      ellipse 46% 58% at 50% 52%,
+      rgba(7, 10, 18, 0.82) 0%,
+      rgba(7, 10, 18, 0.74) 40%,
+      rgba(7, 10, 18, 0) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(7, 10, 18, 0.9) 0,
+      rgba(7, 10, 18, 0.5) 60px,
+      rgba(7, 10, 18, 0) 140px
+    );
+  pointer-events: none;
+}
+
+.heading {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+}
+
+.dot {
+  color: var(--accent);
+}
+
+.meta {
+  margin: 18px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.lede {
+  max-width: 34ch;
+  margin: 14px 0 0;
+  text-wrap: balance;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: clamp(32px, 5vw, 80px);
+  align-items: start;
+  padding-top: clamp(32px, 4vw, 56px);
+  border-top: 1px solid var(--line);
+}
+
+.direct {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.formCol {
+  grid-column: 2;
+  grid-row: 1;
+  padding-left: clamp(32px, 5vw, 80px);
+  border-left: 1px solid var(--line);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    display: block;
+  }
+  .formCol {
+    padding-left: 0;
+    border-left: none;
+  }
+  .direct {
+    margin-top: clamp(48px, 8vw, 72px);
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 760px) {
+  .pool {
+    min-height: clamp(340px, 50vh, 460px);
+    padding-top: 84px;
+  }
+  .ground {
+    background:
+      radial-gradient(
+        ellipse 86% 50% at 50% 52%,
+        rgba(7, 10, 18, 0.82) 0%,
+        rgba(7, 10, 18, 0.74) 44%,
+        rgba(7, 10, 18, 0) 100%
+      ),
+      linear-gradient(
+        to top,
+        rgba(7, 10, 18, 0.9) 0,
+        rgba(7, 10, 18, 0.5) 50px,
+        rgba(7, 10, 18, 0) 120px
+      );
+  }
+  .meta {
+    margin-top: 14px;
+  }
+  .lede {
+    margin-top: 12px;
+  }
+}

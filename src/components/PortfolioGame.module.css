@@ -1,0 +1,322 @@
+.root {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--surface-0);
+}
+
+.mount {
+  position: absolute;
+  inset: 0;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(3, 4, 8, 0.6) 100%);
+}
+
+.zone {
+  position: absolute;
+  top: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  letter-spacing: 0.2em;
+  pointer-events: none;
+  text-align: center;
+  /* Keeps the label readable over the bright spawn sign framed beneath it. */
+  text-shadow: 0 0 6px var(--surface-0), 0 0 2px var(--surface-0);
+}
+
+.progress {
+  position: absolute;
+  top: 84px;
+  right: clamp(16px, 4vw, 40px);
+  text-align: right;
+  pointer-events: none;
+  color: var(--text-2);
+}
+.track {
+  width: 140px;
+  height: 2px;
+  margin-top: 10px;
+  margin-left: auto;
+  border-radius: var(--radius-pill);
+  background: var(--line-strong);
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  transition: width 400ms var(--ease-out);
+}
+
+.help {
+  position: absolute;
+  top: 78px;
+  left: clamp(16px, 4vw, 40px);
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-line);
+  background: var(--glass-chip);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 200ms var(--ease-out),
+    border-color 200ms var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+.help:active {
+  transform: scale(0.97);
+}
+
+.toast {
+  position: absolute;
+  top: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(90vw, 560px);
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--accent);
+  background: var(--glass-float);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  color: var(--accent-2);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.panel {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 32px));
+  padding: 20px 22px;
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--glass-line);
+  background: var(--glass-float);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  z-index: 5;
+}
+.panelTouch {
+  bottom: 132px;
+}
+.panelHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.panelTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variation-settings: "wdth" 90, "opsz" 24;
+  color: var(--text);
+}
+.panelTag {
+  color: var(--accent-2);
+  white-space: nowrap;
+}
+.panelSub {
+  margin-top: 4px;
+  color: var(--accent-2);
+}
+.panelBody {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.chips .chip {
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: default;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+.hint {
+  color: var(--text-3);
+}
+.hint b {
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.go {
+  position: absolute;
+  right: 28px;
+  bottom: 44px;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--accent);
+  background: rgba(77, 98, 255, 0.28);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 6;
+  transition: transform 160ms var(--ease-out);
+}
+.go:active {
+  transform: scale(0.97);
+}
+
+.joystick {
+  position: absolute;
+  left: 28px;
+  bottom: 36px;
+  width: 110px;
+  height: 110px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-line);
+  background: var(--glass-chip);
+  touch-action: none;
+  z-index: 6;
+}
+.knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: rgba(77, 98, 255, 0.55);
+  border: 1px solid var(--accent-2);
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 10, 18, 0.82);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.intro {
+  max-width: 520px;
+  text-align: center;
+}
+.kicker {
+  margin: 0 0 18px;
+  color: var(--accent-2);
+}
+.title {
+  margin: 0 0 20px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(40px, 8vw, 72px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  font-variation-settings: "wdth" 85, "opsz" 96;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.title span {
+  color: var(--accent);
+}
+.lede {
+  margin: 0 0 26px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+.keys {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 18px;
+  width: fit-content;
+  margin: 0 auto 30px;
+  text-align: left;
+  color: var(--text-3);
+}
+.keys span:nth-child(odd) {
+  color: var(--text-2);
+}
+
+.fallback {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  text-align: center;
+  background: var(--surface-0);
+}
+.fallback p {
+  margin: 0;
+  max-width: 44ch;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .help:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill,
+  .help,
+  .go {
+    transition: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .zone {
+    top: 76px;
+    max-width: calc(100vw - 150px);
+    letter-spacing: 0.12em;
+  }
+  .progress {
+    top: 128px;
+  }
+  .help {
+    top: 72px;
+  }
+  .toast {
+    top: 168px;
+  }
+}

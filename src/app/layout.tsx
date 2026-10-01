@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import Navbar from "@/components/Navbar";
@@ -6,66 +6,66 @@ import Footer from "@/components/Footer";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CommandPalette from "@/components/CommandPalette";
 import PageAssist from "@/components/PageAssist";
-import { Archivo, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { profile } from "@/content";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 
-const archivo = Archivo({
+// The opsz and wdth axes let the hero run condensed and labels use the small optical cut.
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-archivo",
+  weight: "variable",
+  axes: ["opsz", "wdth"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
-const space = Space_Grotesk({
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-space",
+  weight: "variable",
+  variable: "--font-geist",
   display: "swap",
 });
 
-const jetmono = JetBrains_Mono({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
+  weight: "variable",
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(profile.siteUrl),
   title: {
-    default: "Aditya · Full-stack Developer",
-    template: "%s · Aditya",
+    default: profile.meta.title,
+    template: profile.meta.titleTemplate,
   },
-  description:
-    "Full-stack developer building web apps, Telegram bots, and open-source tools. Based in Kerala, India.",
-  keywords: [
-    "Aditya",
-    "xditya",
-    "full-stack developer",
-    "open source",
-    "Telegram bot",
-    "Python",
-    "TypeScript",
-    "Next.js",
-    "portfolio",
-  ],
-  authors: [{ name: "Aditya", url: "https://xditya.me" }],
-  creator: "Aditya",
+  description: profile.meta.description,
+  keywords: profile.meta.keywords,
+  authors: [{ name: profile.name, url: profile.siteUrl }],
+  creator: profile.name,
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://xditya.me",
-    siteName: "Aditya Portfolio",
-    title: "Aditya · Full-stack Developer",
-    description:
-      "Full-stack developer building web apps, Telegram bots, and open-source tools.",
+    url: profile.siteUrl,
+    siteName: profile.meta.siteName,
+    title: profile.meta.title,
+    description: profile.meta.ogDescription,
   },
   twitter: {
     card: "summary_large_image",
-    creator: "@xditya",
+    creator: profile.meta.twitterCreator,
   },
   robots: {
     index: true,
     follow: true,
   },
+};
+
+// viewport-fit: cover makes env(safe-area-inset-bottom) non-zero on iOS.
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: "#070A12",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -76,7 +76,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${archivo.variable} ${space.variable} ${jetmono.variable}`}
+      className={`dark ${bricolage.variable} ${geist.variable} ${geistMono.variable}`}
     >
       <head />
       <body className="grid-bg">

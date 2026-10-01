@@ -1,0 +1,181 @@
+/* Aligns with the row grid in Row.module.css: row padding + index column +
+   column gap on the left, row padding on the right. */
+.head,
+.summary,
+.legend {
+  padding-inline: calc(clamp(8px, 1.5vw, 20px) + 56px + 24px) clamp(8px, 1.5vw, 20px);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 40px;
+  padding-top: clamp(28px, 5vw, 72px);
+}
+.head h1 {
+  margin: 0;
+}
+
+.aside {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+}
+
+.lede {
+  margin: 0;
+}
+
+.refresh {
+  min-height: 44px;
+  padding-block: 11px;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  min-height: 44px;
+  padding-block: clamp(20px, 2.4vw, 32px);
+}
+
+.note,
+.overall,
+.updated {
+  margin: 0;
+}
+
+.note {
+  color: var(--text-2);
+}
+
+.overall {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+.overall[data-state="ok"] .dot {
+  background: var(--ok);
+}
+.overall[data-state="partial"] .dot {
+  background: var(--warn);
+}
+.overall[data-state="bad"] .dot {
+  background: var(--bad);
+}
+
+.updated {
+  color: var(--text-3);
+}
+
+/* Above the stretched row link, so a bar's tooltip still shows. */
+.strip {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(30, minmax(0, 1fr));
+  align-items: end;
+  gap: 3px;
+  height: 24px;
+}
+
+/* Height carries the state too, so the strip reads without colour. */
+.day {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--ok);
+}
+.day[data-state="partial"] {
+  height: 55%;
+  background: var(--warn);
+}
+.day[data-state="bad"] {
+  height: 25%;
+  background: var(--bad);
+}
+.day[data-state="none"] {
+  box-sizing: border-box;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+}
+
+.uptime {
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 0;
+  padding-block: 20px;
+  list-style: none;
+  color: var(--text-3);
+}
+
+.key {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.axis {
+  display: inline-flex;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+@media (max-width: 760px) {
+  .axis {
+    margin-inline-start: 0;
+  }
+}
+
+.swatch {
+  display: flex;
+  align-items: end;
+  width: 8px;
+  height: 16px;
+}
+
+@media (max-width: 760px) {
+  .head,
+  .summary,
+  .legend {
+    padding-inline: calc(8px + 28px + 12px) 8px;
+  }
+
+  .head {
+    display: block;
+  }
+  .aside {
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+
+  .summary {
+    padding-block: 20px;
+  }
+
+  .strip {
+    gap: 2px;
+    height: 20px;
+  }
+}

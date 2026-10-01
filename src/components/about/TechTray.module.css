@@ -1,0 +1,125 @@
+.tray {
+  --gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 48px;
+  padding: 0 20px 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    border-color 160ms var(--ease-out),
+    background-color 160ms var(--ease-out);
+}
+
+/* Simple Icons are one colour: the file is the mask, the tint is the box. */
+.logo {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: var(--c);
+  -webkit-mask: var(--logo) center / contain no-repeat;
+  mask: var(--logo) center / contain no-repeat;
+}
+
+/* Smaller chips keep the tray near one screen tall on phones. */
+@media (max-width: 760px) {
+  .tray {
+    --gap: 8px;
+  }
+  .chip {
+    gap: 8px;
+    height: 40px;
+    padding: 0 15px 0 12px;
+    font-size: 14px;
+  }
+  .logo {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 400px) {
+  .tray {
+    --gap: 6px;
+  }
+  .chip {
+    gap: 7px;
+    height: 36px;
+    padding: 0 13px 0 10px;
+    font-size: 13px;
+  }
+  .logo {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tray {
+    position: relative;
+    /* 10px matches the physics wall inset; --clear is headroom for the
+       loose pile, which stands taller than the wrapped rows. */
+    padding: calc(10px + var(--clear, 120px)) 10px 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+    background: var(--surface-1);
+    /* a finger moving up or down scrolls the page, on a chip or off it */
+    touch-action: pan-y;
+  }
+
+  .tray[data-live] .chip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .tray[data-dragging] {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .tray[data-live] .chip[data-held] {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .tray[data-live] .chip {
+      cursor: grab;
+    }
+    .tray[data-live] .chip:hover {
+      border-color: color-mix(in srgb, var(--text) 34%, transparent);
+    }
+    .tray[data-live] .chip[data-held] {
+      border-color: var(--accent);
+      cursor: grabbing;
+    }
+  }
+
+  /* Ragged narrow rows already overstate the pile, so clearance grows with width. */
+  @media (max-width: 760px) {
+    .tray {
+      --clear: clamp(0px, (100vw - 320px) * 0.5, 60px);
+    }
+  }
+}

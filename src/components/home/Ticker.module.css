@@ -1,0 +1,75 @@
+/* Two identical chunks so the loop is seamless at xPercent -50. */
+
+.ticker {
+  position: relative;
+  overflow: hidden;
+  padding-block: 18px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  user-select: none;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.chunk {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.cell {
+  display: inline-flex;
+  align-items: center;
+}
+
+.item {
+  padding-inline: 28px;
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.4vw, 30px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-variation-settings: "wdth" 90, "opsz" 40;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.sep {
+  flex-shrink: 0;
+  width: 1px;
+  height: clamp(14px, 1.6vw, 22px);
+  background: var(--line-strong);
+}
+
+@media (max-width: 760px) {
+  .ticker {
+    padding-block: 14px;
+  }
+  .item {
+    padding-inline: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    width: 100%;
+    will-change: auto;
+  }
+  .chunk {
+    flex-wrap: wrap;
+    flex-shrink: 1;
+    justify-content: center;
+    width: 100%;
+    row-gap: 10px;
+  }
+  .dup {
+    display: none;
+  }
+  .cell:last-child .sep {
+    display: none;
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
@@ -19,10 +20,16 @@ import {
   GAME_ABOUT,
   GAME_STATEMENT,
 } from "@/lib/gameData";
-
-/* ───────────────────────── Types ───────────────────────── */
+import styles from "./PortfolioGame.module.css";
 
 type Action = { label: string; href: string; internal?: boolean };
+
+/** In-app routes push, mailto hands off to the mail client, the rest open a tab. */
+function followAction(router: { push: (href: string) => void }, a: Action) {
+  if (a.internal) router.push(a.href);
+  else if (a.href.startsWith("mailto:")) window.location.href = a.href;
+  else window.open(a.href, "_blank", "noopener,noreferrer");
+}
 
 type HudPanel = {
   id: string;
@@ -78,13 +85,9 @@ type Burst = {
   born: number;
 };
 
-/* ─────────────────────── Constants ─────────────────────── */
-
 const C = {
   bg: 0x05060a,
   ink: 0xf4f4ef,
-  inkDim: 0xa3a8b3,
-  muted: 0x5f6470,
   accent: 0x4d62ff,
   accentSoft: 0x97a3ff,
   card: 0x0d1018,
@@ -93,7 +96,91 @@ const C = {
 const WORLD_RADIUS = 132;
 const STORAGE_KEY = "xditya-game-discovered";
 
-/* ─────────────────── Canvas text sprites ─────────────────── */
+function readCollected(): Set<string> {
+  const set = new Set<string>();
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) (JSON.parse(raw) as string[]).forEach((n) => set.add(n));
+  } catch {
+    /* ignore */
+  }
+  return set;
+}
+
+function countCollected(): number {
+  if (typeof window === "undefined") return 0;
+  const set = readCollected();
+  return GAME_PROJECTS.filter((p) => set.has(p.name)).length;
+}
+
+// Module level: these describe the browser, not one mount, so a strict
+// mode remount reuses them.
+
+const subscribeNever = () => () => {};
+const isTouchNow = () => "ontouchstart" in window;
+const getFalse = () => false;
+const getTrue = () => true;
+
+// A canvas cannot read a CSS variable, and the face must be loaded before
+// the first draw or the fallback gets painted into the texture.
+const FALLBACK_FAMILY = "'Arial Black', sans-serif";
+let labelFamily = FALLBACK_FAMILY;
+let labelFontReady = false;
+let labelFontLoading: Promise<void> | null = null;
+const labelFontListeners = new Set<() => void>();
+
+function loadLabelFont() {
+  if (labelFontLoading) return;
+  const declared = getComputedStyle(document.documentElement)
+    .getPropertyValue("--font-bricolage")
+    .trim();
+  const family = declared ? `${declared}, ${FALLBACK_FAMILY}` : FALLBACK_FAMILY;
+  const load =
+    "fonts" in document ? document.fonts.load(`800 90px ${family}`) : Promise.resolve([]);
+  labelFontLoading = load
+    .catch(() => [])
+    .then(() => {
+      labelFamily = family;
+      labelFontReady = true;
+      labelFontListeners.forEach((l) => l());
+    });
+}
+
+function subscribeLabelFont(listener: () => void) {
+  labelFontListeners.add(listener);
+  if (!labelFontReady) loadLabelFont();
+  return () => {
+    labelFontListeners.delete(listener);
+  };
+}
+const getLabelFontReady = () => labelFontReady;
+
+// The renderer can still fail after a good probe; markWebglBroken then
+// shows the fallback instead of throwing.
+let webglState: boolean | null = null;
+const webglListeners = new Set<() => void>();
+
+function getWebgl() {
+  if (webglState === null) {
+    const probe = document.createElement("canvas");
+    const gl = probe.getContext("webgl2") || probe.getContext("webgl");
+    webglState = gl !== null;
+    (gl as WebGLRenderingContext | null)?.getExtension("WEBGL_lose_context")?.loseContext();
+  }
+  return webglState;
+}
+
+function markWebglBroken() {
+  webglState = false;
+  webglListeners.forEach((l) => l());
+}
+
+function subscribeWebgl(listener: () => void) {
+  webglListeners.add(listener);
+  return () => {
+    webglListeners.delete(listener);
+  };
+}
 
 function makeTextSprite(
   text: string,
@@ -110,7 +197,7 @@ function makeTextSprite(
     size = 2,
     color = "#F4F4EF",
     weight = 800,
-    family = "'Archivo', 'Arial Black', sans-serif",
+    family = labelFamily,
     spacing = 0,
     opacity = 1,
   } = opts;
@@ -175,7 +262,7 @@ function makeCounterSprite(suffix: string, size: number) {
   sprite.scale.set(size * (560 / 200), size, 1);
   const draw = (value: number) => {
     ctx.clearRect(0, 0, 560, 200);
-    ctx.font = "900 120px 'Archivo', 'Arial Black', sans-serif";
+    ctx.font = `800 120px ${labelFamily}`;
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
     const label = `${value}`;
@@ -196,8 +283,6 @@ function makeCounterSprite(suffix: string, size: number) {
   draw(0);
   return { sprite, draw };
 }
-
-/* ─────────────── Shared procedural textures ─────────────── */
 
 function makeGlowTexture(): THREE.CanvasTexture {
   const c = document.createElement("canvas");
@@ -222,7 +307,6 @@ function makeGroundTexture(): THREE.CanvasTexture {
   g.addColorStop(1, "#04050a");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 1024, 1024);
-  // faint concentric rings
   ctx.strokeStyle = "rgba(77,98,255,0.10)";
   for (let r = 90; r < 512; r += 84) {
     ctx.beginPath();
@@ -276,8 +360,6 @@ function makeTowerTexture(accentHex: string): THREE.CanvasTexture {
   return tex;
 }
 
-/* ─────────────────────── Component ─────────────────────── */
-
 export default function PortfolioGame() {
   const router = useRouter();
   const mountRef = useRef<HTMLDivElement>(null);
@@ -289,9 +371,11 @@ export default function PortfolioGame() {
   const [showHelp, setShowHelp] = useState(false);
   const [panel, setPanel] = useState<HudPanel | null>(null);
   const [zone, setZone] = useState("THE GRID");
-  const [discovered, setDiscovered] = useState(0);
+  const [discovered, setDiscovered] = useState(countCollected);
   const [toast, setToast] = useState<string | null>(null);
-  const [isTouch, setIsTouch] = useState(false);
+  const isTouch = useSyncExternalStore(subscribeNever, isTouchNow, getFalse);
+  const hasWebgl = useSyncExternalStore(subscribeWebgl, getWebgl, getTrue);
+  const fontReady = useSyncExternalStore(subscribeLabelFont, getLabelFontReady, getFalse);
 
   const totalProjects = GAME_PROJECTS.length;
 
@@ -300,16 +384,17 @@ export default function PortfolioGame() {
   }, [started]);
 
   useEffect(() => {
-    setIsTouch(typeof window !== "undefined" && "ontouchstart" in window);
-  }, []);
-
-  useEffect(() => {
     const mount = mountRef.current;
-    if (!mount) return;
+    if (!mount || !hasWebgl || !fontReady) return;
     const touchDevice = "ontouchstart" in window;
 
-    /* ── Renderer / scene / camera / bloom ── */
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    } catch {
+      markWebglBroken();
+      return;
+    }
     const pixelRatio = Math.min(window.devicePixelRatio, touchDevice ? 1.4 : 2);
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(mount.clientWidth, mount.clientHeight);
@@ -340,14 +425,12 @@ export default function PortfolioGame() {
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
 
-    /* ── Lights ── */
     scene.add(new THREE.HemisphereLight(0x36427e, 0x05060a, 0.85));
     scene.add(new THREE.AmbientLight(0x3c4468, 0.5));
     const keyLight = new THREE.DirectionalLight(0xaab4ff, 0.75);
     keyLight.position.set(40, 90, 30);
     scene.add(keyLight);
 
-    /* ── Sky dome ── */
     const sky = new THREE.Mesh(
       new THREE.SphereGeometry(440, 32, 16),
       new THREE.ShaderMaterial({
@@ -381,7 +464,6 @@ export default function PortfolioGame() {
     );
     scene.add(sky);
 
-    /* ── Ground ── */
     const groundTex = makeGroundTexture();
     const ground = new THREE.Mesh(
       new THREE.CircleGeometry(WORLD_RADIUS + 80, 80),
@@ -397,7 +479,6 @@ export default function PortfolioGame() {
     gridMat.opacity = 0.28;
     scene.add(grid);
 
-    // world edge ring + light pillars
     const edge = new THREE.Mesh(
       new THREE.TorusGeometry(WORLD_RADIUS, 0.3, 8, 160),
       new THREE.MeshBasicMaterial({ color: C.accent, transparent: true, opacity: 0.55 }),
@@ -406,7 +487,6 @@ export default function PortfolioGame() {
     edge.position.y = 0.3;
     scene.add(edge);
 
-    /* ── Bookkeeping ── */
     const floaters: Floater[] = [];
     const spinners: Spinner[] = [];
     const pulses: Pulse[] = [];
@@ -463,7 +543,6 @@ export default function PortfolioGame() {
         metalness: 0.2,
       });
 
-    // edge light pillars at compass points
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2;
       const pillar = new THREE.Mesh(
@@ -482,7 +561,6 @@ export default function PortfolioGame() {
       addPulse(pillar.material, 0.16, 0.08, 0.8 + i * 0.13);
     }
 
-    /* ── Stars ── */
     {
       const starGeo = new THREE.BufferGeometry();
       const n = 1200;
@@ -512,7 +590,6 @@ export default function PortfolioGame() {
       );
     }
 
-    /* ── Ambient drifting dust ── */
     const dust = (() => {
       const n = 320;
       const geo = new THREE.BufferGeometry();
@@ -540,7 +617,6 @@ export default function PortfolioGame() {
       return geo;
     })();
 
-    /* ── Decorative low-poly rocks ── */
     {
       const zoneCenters = [
         new THREE.Vector3(0, 0, 0),
@@ -573,7 +649,6 @@ export default function PortfolioGame() {
       }
     }
 
-    /* ── Glowing chevron paths to each zone ── */
     {
       const chevTex = makeChevronTexture();
       textures.push(chevTex);
@@ -608,7 +683,6 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ── Player ship ── */
     const player = new THREE.Group();
     const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.85, 1), glowMat(C.accent, 1.3));
     player.add(core);
@@ -632,7 +706,6 @@ export default function PortfolioGame() {
     player.position.set(0, 1.6, 14);
     scene.add(player);
 
-    // engine trail · line strip fading to black (additive)
     const TRAIL_N = 64;
     const trailGeo = new THREE.BufferGeometry();
     const trailPos = new Float32Array(TRAIL_N * 3);
@@ -663,7 +736,6 @@ export default function PortfolioGame() {
     trail.frustumCulled = false;
     scene.add(trail);
 
-    // spawn pad
     [
       { r0: 2.4, r1: 3.4, op: 0.5 },
       { r0: 4.2, r1: 4.5, op: 0.25 },
@@ -681,8 +753,6 @@ export default function PortfolioGame() {
       addPulse(ringMat, op, op * 0.5, 1.6);
     });
 
-    /* ════════════ CENTER · hero / about ════════════ */
-
     const heroName = makeTextSprite("XDITYA.", { size: 9, color: "#F4F4EF", weight: 900 });
     heroName.position.set(0, 13, -16);
     scene.add(heroName);
@@ -697,7 +767,6 @@ export default function PortfolioGame() {
     heroSub.position.set(0, 7.6, -16);
     scene.add(heroSub);
 
-    // slow rotating wireframe icosahedron backdrop
     const heroDeco = new THREE.Mesh(
       new THREE.IcosahedronGeometry(9, 1),
       new THREE.MeshBasicMaterial({ color: C.accent, wireframe: true, transparent: true, opacity: 0.14 }),
@@ -707,7 +776,6 @@ export default function PortfolioGame() {
     addSpinner(heroDeco, 0.12);
     addFloater(heroDeco, 1.2, 0.3);
 
-    // About monolith
     {
       const g = new THREE.Group();
       const slab = new THREE.Mesh(new THREE.BoxGeometry(4.5, 7, 0.8), glowMat(C.accent, 0.3));
@@ -746,15 +814,7 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ NORTH · projects archipelago ════════════ */
-
-    const collectedSet = new Set<string>();
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) (JSON.parse(raw) as string[]).forEach((n) => collectedSet.add(n));
-    } catch {
-      /* ignore */
-    }
+    const collectedSet = readCollected();
 
     const crystalByProject = new Map<string, { core: THREE.Mesh; shell: THREE.Mesh; glow: THREE.Sprite }>();
 
@@ -879,8 +939,6 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ EAST · experience towers ════════════ */
-
     {
       const zoneLabel = makeTextSprite("EXPERIENCE", { size: 3, color: "#6F7587", weight: 900, spacing: 8 });
       zoneLabel.position.set(96, 18, 0);
@@ -919,7 +977,6 @@ export default function PortfolioGame() {
         g.add(edges);
 
         if (exp.current) {
-          // antenna with blinking beacon on the current employer's tower
           const mast = new THREE.Mesh(
             new THREE.CylinderGeometry(0.06, 0.06, 3.2, 6),
             new THREE.MeshBasicMaterial({ color: 0x39415c }),
@@ -963,8 +1020,6 @@ export default function PortfolioGame() {
         });
       });
     }
-
-    /* ════════════ SOUTH · stats plaza + tech garden ════════════ */
 
     const statCounters: {
       draw: (v: number) => void;
@@ -1038,7 +1093,6 @@ export default function PortfolioGame() {
         },
       });
 
-      // Tech garden · colored orbs on pedestals
       const techLabel = makeTextSprite("TECH STACK", { size: 1.6, color: "#6F7587", weight: 900, spacing: 6 });
       techLabel.position.set(-42, 9, 62);
       scene.add(techLabel);
@@ -1091,8 +1145,6 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ WEST · portals (socials + links) ════════════ */
-
     {
       const zoneLabel = makeTextSprite("PORTALS", { size: 3, color: "#6F7587", weight: 900, spacing: 8 });
       zoneLabel.position.set(-96, 18, 0);
@@ -1140,7 +1192,6 @@ export default function PortfolioGame() {
         addPulse(discMat, 0.14, 0.08, 1.8);
         addGlow(g, col.getHex(), 7, 3.4, 0.4);
 
-        // orbiting spark particles around the ring
         const sparkN = 10;
         const sparkGeo = new THREE.BufferGeometry();
         sparkGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(sparkN * 3), 3));
@@ -1215,8 +1266,6 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ════════════ NE · contact beacon ════════════ */
-
     let beaconRingsRef: { mesh: THREE.Mesh; offset: number }[] = [];
     {
       const g = new THREE.Group();
@@ -1244,7 +1293,6 @@ export default function PortfolioGame() {
       g.position.set(58, 0, -52);
       scene.add(g);
 
-      // rising pulse rings around the beam
       const beaconRings: { mesh: THREE.Mesh; offset: number }[] = [];
       for (let i = 0; i < 3; i++) {
         const ring = new THREE.Mesh(
@@ -1262,7 +1310,6 @@ export default function PortfolioGame() {
         scene.add(ring);
         beaconRings.push({ mesh: ring, offset: i / 3 });
       }
-      // animated in the loop via closure
       beaconRingsRef = beaconRings;
 
       registerInteractable({
@@ -1284,7 +1331,6 @@ export default function PortfolioGame() {
       });
     }
 
-    /* ── Signposts near spawn ── */
     [
       { t: "PROJECTS", p: new THREE.Vector3(0, 2.2, -8) },
       { t: "EXPERIENCE", p: new THREE.Vector3(12, 2.2, 2) },
@@ -1295,8 +1341,6 @@ export default function PortfolioGame() {
       s.position.copy(p);
       scene.add(s);
     });
-
-    /* ─────────────── Input ─────────────── */
 
     const keys = new Set<string>();
     const onKeyDown = (e: KeyboardEvent) => {
@@ -1314,7 +1358,6 @@ export default function PortfolioGame() {
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
 
-    /* ── Click / tap raycast ── */
     const raycaster = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
     let downAt = 0;
@@ -1352,8 +1395,6 @@ export default function PortfolioGame() {
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
     renderer.domElement.addEventListener("pointerup", onPointerUp);
 
-    /* ─────────────── HUD wiring ─────────────── */
-
     let activeId: string | null = null;
     let lastPanelKey = "";
     let lastZone = "";
@@ -1380,8 +1421,7 @@ export default function PortfolioGame() {
       const a = i.panel.actions[0];
       if (!a) return;
       trackEvent("game_interact", { target: i.id, link_url: a.href });
-      if (a.internal) router.push(a.href);
-      else window.open(a.href, "_blank", "noopener,noreferrer");
+      followAction(router, a);
     };
 
     interactRef.current = () => {
@@ -1389,8 +1429,6 @@ export default function PortfolioGame() {
       const i = interactables.find((x) => x.id === activeId);
       if (i) runFirstAction(i);
     };
-
-    setDiscovered(GAME_PROJECTS.filter((p) => collectedSet.has(p.name)).length);
 
     const spawnBurst = (at: THREE.Vector3, color: number) => {
       const n = 42;
@@ -1472,19 +1510,20 @@ export default function PortfolioGame() {
       return "THE GRID";
     };
 
-    /* ─────────────── Game loop ─────────────── */
-
     const vel = new THREE.Vector3();
     const camTarget = new THREE.Vector3();
-    const clock = new THREE.Clock();
+    const clock = new THREE.Timer();
     let raf = 0;
+    // Summed from clamped deltas so a stalled frame never jumps the world forward.
+    let elapsed = 0;
 
     const loop = () => {
       raf = requestAnimationFrame(loop);
+      clock.update();
       const dt = Math.min(clock.getDelta(), 0.05);
-      const t = clock.elapsedTime;
+      elapsed += dt;
+      const t = elapsed;
 
-      /* movement */
       if (startedRef.current) {
         const dir = new THREE.Vector3();
         if (keys.has("w") || keys.has("arrowup")) dir.z -= 1;
@@ -1508,13 +1547,12 @@ export default function PortfolioGame() {
         vel.multiplyScalar(0.4);
       }
 
-      /* player visuals */
       player.position.y = 1.6 + Math.sin(t * 2.2) * 0.18;
       halo.rotation.z += dt * 0.8;
       player.rotation.z = THREE.MathUtils.lerp(player.rotation.z, -vel.x * 0.012, 0.1);
       player.rotation.x = THREE.MathUtils.lerp(player.rotation.x, vel.z * 0.012, 0.1);
 
-      /* trail: shift ring buffer toward tail, head = player */
+      // Ring buffer: shift toward the tail, head = player.
       const tp = trailGeo.getAttribute("position") as THREE.BufferAttribute;
       const arr = tp.array as Float32Array;
       arr.copyWithin(0, 3);
@@ -1523,7 +1561,6 @@ export default function PortfolioGame() {
       arr[(TRAIL_N - 1) * 3 + 2] = player.position.z;
       tp.needsUpdate = true;
 
-      /* camera follow */
       camTarget.set(
         player.position.x + vel.x * 0.25,
         player.position.y + 13,
@@ -1532,7 +1569,6 @@ export default function PortfolioGame() {
       camera.position.lerp(camTarget, 1 - Math.pow(0.001, dt));
       camera.lookAt(player.position.x, player.position.y + 1.5, player.position.z);
 
-      /* animation registries */
       for (const f of floaters) {
         f.obj.position.y = f.baseY + Math.sin(t * f.speed + f.phase) * f.amp;
       }
@@ -1555,7 +1591,6 @@ export default function PortfolioGame() {
         pa.needsUpdate = true;
       }
 
-      /* beacon rings rise & fade */
       for (const { mesh, offset } of beaconRingsRef) {
         const prog = ((t * 0.25 + offset) % 1 + 1) % 1;
         mesh.position.y = 2 + prog * 46;
@@ -1564,7 +1599,6 @@ export default function PortfolioGame() {
         (mesh.material as THREE.MeshBasicMaterial).opacity = 0.7 * (1 - prog);
       }
 
-      /* dust drift */
       {
         const pa = dust.getAttribute("position") as THREE.BufferAttribute;
         const a = pa.array as Float32Array;
@@ -1575,7 +1609,6 @@ export default function PortfolioGame() {
         pa.needsUpdate = true;
       }
 
-      /* nearest interactable */
       if (startedRef.current) {
         let best: Interactable | null = null;
         let bestD = Infinity;
@@ -1596,7 +1629,6 @@ export default function PortfolioGame() {
         }
       }
 
-      /* stat count-ups */
       for (const sc of statCounters) {
         if (sc.done) continue;
         if (!sc.started && player.position.distanceTo(sc.position) < 22) {
@@ -1610,7 +1642,6 @@ export default function PortfolioGame() {
         }
       }
 
-      /* bursts */
       for (let bi = bursts.length - 1; bi >= 0; bi--) {
         const b = bursts[bi];
         const age = (performance.now() - b.born) / 1000;
@@ -1639,7 +1670,17 @@ export default function PortfolioGame() {
     };
     loop();
 
-    /* ── Resize ── */
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else if (!raf) {
+        clock.update(); // drop the time spent hidden
+        loop();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     const onResize = () => {
       const w = mount.clientWidth;
       const h = mount.clientHeight;
@@ -1651,9 +1692,9 @@ export default function PortfolioGame() {
     };
     window.addEventListener("resize", onResize);
 
-    /* ── Cleanup ── */
     return () => {
       cancelAnimationFrame(raf);
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("resize", onResize);
@@ -1670,9 +1711,11 @@ export default function PortfolioGame() {
       textures.forEach((tx) => tx.dispose());
       composer.dispose();
       renderer.dispose();
+      // Frees the GPU now; a remount creates its own canvas and context.
+      renderer.forceContextLoss();
       mount.removeChild(renderer.domElement);
     };
-  }, [router]);
+  }, [router, hasWebgl, fontReady]);
 
   const startGame = () => {
     setStarted(true);
@@ -1680,318 +1723,127 @@ export default function PortfolioGame() {
     trackEvent("game_start", {});
   };
 
-  /* ─────────────────────── HUD / overlays ─────────────────────── */
+  if (!hasWebgl) {
+    return (
+      <div className={styles.fallback}>
+        <p className="body-lg">
+          This game needs WebGL, which this browser or device does not provide.
+        </p>
+        <Link href="/" className="btn-line">
+          Back to home
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100svh",
-        overflow: "hidden",
-        background: "var(--bg)",
-      }}
-    >
-      <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />
+    <div className={styles.root}>
+      <div ref={mountRef} className={styles.mount} />
 
-      {/* vignette */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background:
-            "radial-gradient(ellipse at center, transparent 52%, rgba(3,4,8,0.6) 100%)",
-        }}
-      />
+      <div aria-hidden="true" className={styles.vignette} />
 
-      {/* Zone label */}
+      {started && <div className={`mono-label ${styles.zone}`}>{zone}</div>}
+
       {started && (
-        <div
-          className="mono-label"
-          style={{
-            position: "absolute",
-            top: "84px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            color: "var(--muted)",
-            letterSpacing: "0.2em",
-            pointerEvents: "none",
-            textAlign: "center",
-          }}
-        >
-          {zone}
-        </div>
-      )}
-
-      {/* Progress */}
-      {started && (
-        <div
-          style={{
-            position: "absolute",
-            top: "84px",
-            right: "clamp(16px, 4vw, 40px)",
-            textAlign: "right",
-            pointerEvents: "none",
-          }}
-        >
-          <div className="mono-label" style={{ color: "var(--ink-dim)" }}>
+        <div className={styles.progress}>
+          <div className="mono-label" style={{ color: "inherit" }}>
             PROJECTS {discovered}/{totalProjects}
           </div>
-          <div
-            style={{
-              width: "140px",
-              height: "3px",
-              background: "var(--line-strong)",
-              marginTop: "8px",
-              marginLeft: "auto",
-            }}
-          >
-            <div
-              style={{
-                width: `${(discovered / totalProjects) * 100}%`,
-                height: "100%",
-                background: "var(--accent)",
-                transition: "width 400ms ease",
-              }}
-            />
+          <div className={styles.track}>
+            <div className={styles.fill} style={{ width: `${(discovered / totalProjects) * 100}%` }} />
           </div>
         </div>
       )}
 
-      {/* Help button */}
       {started && (
-        <button
-          onClick={() => setShowHelp((v) => !v)}
-          aria-label="Game help"
-          style={{
-            position: "absolute",
-            top: "84px",
-            left: "clamp(16px, 4vw, 40px)",
-            width: "34px",
-            height: "34px",
-            borderRadius: "50%",
-            border: "1px solid var(--line-strong)",
-            background: "rgba(5,6,10,0.7)",
-            color: "var(--ink-dim)",
-            fontFamily: "var(--font-mono-stack)",
-            fontSize: "14px",
-            cursor: "pointer",
-          }}
-        >
+        <button type="button" onClick={() => setShowHelp((v) => !v)} aria-label="Game help" className={styles.help}>
           ?
         </button>
       )}
 
-      {/* Toast */}
-      {toast && (
-        <div
-          className="mono-sm"
-          style={{
-            position: "absolute",
-            top: "140px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "rgba(13,16,24,0.92)",
-            border: "1px solid var(--accent)",
-            color: "var(--accent-soft)",
-            padding: "10px 22px",
-            letterSpacing: "0.1em",
-            pointerEvents: "none",
-            whiteSpace: "nowrap",
-            maxWidth: "90vw",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {toast}
-        </div>
-      )}
+      {toast && <div className={`mono-sm ${styles.toast}`}>{toast}</div>}
 
-      {/* Info panel */}
       {started && panel && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: isTouch ? "120px" : "28px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "min(560px, calc(100vw - 32px))",
-            background: "rgba(10,12,18,0.92)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid var(--line-strong)",
-            padding: "18px 22px",
-            zIndex: 5,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "12px" }}>
-            <span
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 900,
-                fontSize: "20px",
-                textTransform: "uppercase",
-                letterSpacing: "-0.02em",
-                color: "var(--ink)",
-              }}
-            >
-              {panel.title}
-            </span>
+        <div className={isTouch ? `${styles.panel} ${styles.panelTouch}` : styles.panel}>
+          <div className={styles.panelHead}>
+            <span className={styles.panelTitle}>{panel.title}</span>
             {panel.kind === "project" && (
-              <span className="mono-sm" style={{ color: "var(--accent-soft)", whiteSpace: "nowrap" }}>
-                {panel.collected ? "✓ DISCOVERED" : "NEW"}
-              </span>
+              <span className={`mono-sm ${styles.panelTag}`}>{panel.collected ? "✓ DISCOVERED" : "NEW"}</span>
             )}
           </div>
-          {panel.subtitle && (
-            <div className="mono-sm" style={{ color: "var(--accent-soft)", marginTop: "4px" }}>
-              {panel.subtitle}
-            </div>
-          )}
-          {panel.body && (
-            <p style={{ color: "var(--ink-dim)", fontSize: "14px", lineHeight: 1.5, margin: "10px 0 0" }}>
-              {panel.body}
-            </p>
-          )}
+          {panel.subtitle && <div className={`mono-sm ${styles.panelSub}`}>{panel.subtitle}</div>}
+          {panel.body && <p className={styles.panelBody}>{panel.body}</p>}
           {panel.chips && panel.chips.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
+            <div className={styles.chips}>
               {panel.chips.map((c) => (
-                <span key={c} className="chip" style={{ fontSize: "11px", padding: "4px 10px" }}>
+                <span key={c} className={`chip ${styles.chip}`}>
                   {c}
                 </span>
               ))}
             </div>
           )}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "14px", alignItems: "center" }}>
+          <div className={styles.actions}>
             {panel.actions.map((a, idx) => (
               <button
                 key={a.label}
+                type="button"
                 onClick={() => {
                   trackEvent("game_interact", { target: panel.id, link_url: a.href });
-                  if (a.internal) router.push(a.href);
-                  else window.open(a.href, "_blank", "noopener,noreferrer");
+                  followAction(router, a);
                 }}
-                className="mono-sm"
-                style={{
-                  background: idx === 0 ? "var(--accent)" : "transparent",
-                  color: idx === 0 ? "#fff" : "var(--ink-dim)",
-                  border: idx === 0 ? "1px solid var(--accent)" : "1px solid var(--line-strong)",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                }}
+                className={idx === 0 ? "btn-fill" : "btn-line"}
               >
                 {a.label}
               </button>
             ))}
             {!isTouch && (
-              <span className="mono-sm" style={{ color: "var(--muted)" }}>
-                or press <b style={{ color: "var(--ink-dim)" }}>E</b>
+              <span className={`mono-sm ${styles.hint}`}>
+                or press <b>E</b>
               </span>
             )}
           </div>
         </div>
       )}
 
-      {/* Touch controls */}
       {started && isTouch && (
         <>
           <Joystick vecRef={joyRef} />
           {panel && (
-            <button
-              onClick={() => interactRef.current?.()}
-              style={{
-                position: "absolute",
-                right: "28px",
-                bottom: "44px",
-                width: "72px",
-                height: "72px",
-                borderRadius: "50%",
-                border: "1px solid var(--accent)",
-                background: "rgba(77,98,255,0.25)",
-                color: "var(--ink)",
-                fontFamily: "var(--font-mono-stack)",
-                fontSize: "13px",
-                letterSpacing: "0.1em",
-                zIndex: 6,
-              }}
-            >
+            <button type="button" onClick={() => interactRef.current?.()} className={styles.go}>
               GO
             </button>
           )}
         </>
       )}
 
-      {/* Intro / help overlay */}
       {(!started || showHelp) && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 10,
-            background: "rgba(5,6,10,0.82)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "24px",
-          }}
-        >
-          <div style={{ maxWidth: "520px", textAlign: "center" }}>
-            <p className="mono-label" style={{ color: "var(--accent-soft)", marginBottom: "18px" }}>
-              PORTFOLIO · PLAYABLE EDITION
-            </p>
-            <h1
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 900,
-                fontSize: "clamp(36px, 8vw, 64px)",
-                letterSpacing: "-0.03em",
-                textTransform: "uppercase",
-                lineHeight: 1,
-                marginBottom: "20px",
-              }}
-            >
+        <div className={styles.overlay}>
+          <div className={styles.intro}>
+            <p className={`mono-label ${styles.kicker}`}>PORTFOLIO · PLAYABLE EDITION</p>
+            <h1 className={styles.title}>
               Enter the
               <br />
-              <span style={{ color: "var(--accent)" }}>Grid</span>
+              <span>Grid</span>
             </h1>
-            <p style={{ color: "var(--ink-dim)", fontSize: "15px", lineHeight: 1.6, marginBottom: "26px" }}>
+            <p className={styles.lede}>
               Pilot the orb through my portfolio world. Discover all{" "}
               {totalProjects} project crystals, climb the experience towers,
               charge the stat pillars, and jump through portals to my socials
               and tools.
             </p>
-            <div
-              className="mono-sm"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "auto 1fr",
-                gap: "8px 18px",
-                textAlign: "left",
-                width: "fit-content",
-                margin: "0 auto 30px",
-                color: "var(--muted)",
-              }}
-            >
-              <span style={{ color: "var(--ink-dim)" }}>{isTouch ? "JOYSTICK" : "WASD / ↑↓←→"}</span>
+            <div className={`mono-sm ${styles.keys}`}>
+              <span>{isTouch ? "JOYSTICK" : "WASD / ↑↓←→"}</span>
               <span>move</span>
-              <span style={{ color: "var(--ink-dim)" }}>{isTouch ? "GO BUTTON / TAP" : "E / CLICK"}</span>
+              <span>{isTouch ? "GO BUTTON / TAP" : "E / CLICK"}</span>
               <span>interact · open links</span>
               {!isTouch && (
                 <>
-                  <span style={{ color: "var(--ink-dim)" }}>SHIFT</span>
+                  <span>SHIFT</span>
                   <span>boost</span>
                 </>
               )}
             </div>
-            <button
-              onClick={startGame}
-              className="btn-fill"
-              style={{ cursor: "pointer", border: "none", fontSize: "14px" }}
-            >
+            <button type="button" onClick={startGame} className="btn-fill">
               {started ? "Resume" : "Start Exploring"}
             </button>
           </div>
@@ -2001,9 +1853,7 @@ export default function PortfolioGame() {
   );
 }
 
-/* ─────────────────── Touch joystick ─────────────────── */
-
-function Joystick({ vecRef }: { vecRef: React.MutableRefObject<{ x: number; y: number }> }) {
+function Joystick({ vecRef }: { vecRef: React.RefObject<{ x: number; y: number }> }) {
   const baseRef = useRef<HTMLDivElement>(null);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
   const activeId = useRef<number | null>(null);
@@ -2034,6 +1884,7 @@ function Joystick({ vecRef }: { vecRef: React.MutableRefObject<{ x: number; y: n
   return (
     <div
       ref={baseRef}
+      className={styles.joystick}
       onPointerDown={(e) => {
         activeId.current = e.pointerId;
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -2044,32 +1895,10 @@ function Joystick({ vecRef }: { vecRef: React.MutableRefObject<{ x: number; y: n
       }}
       onPointerUp={reset}
       onPointerCancel={reset}
-      style={{
-        position: "absolute",
-        left: "28px",
-        bottom: "36px",
-        width: "110px",
-        height: "110px",
-        borderRadius: "50%",
-        border: "1px solid var(--line-strong)",
-        background: "rgba(13,16,24,0.5)",
-        touchAction: "none",
-        zIndex: 6,
-      }}
     >
       <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          width: "44px",
-          height: "44px",
-          borderRadius: "50%",
-          background: "rgba(77,98,255,0.55)",
-          border: "1px solid var(--accent-soft)",
-          transform: `translate(calc(-50% + ${knob.x}px), calc(-50% + ${knob.y}px))`,
-          pointerEvents: "none",
-        }}
+        className={styles.knob}
+        style={{ transform: `translate(calc(-50% + ${knob.x}px), calc(-50% + ${knob.y}px))` }}
       />
     </div>
   );

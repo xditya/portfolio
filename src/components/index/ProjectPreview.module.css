@@ -1,0 +1,74 @@
+.pos {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pos {
+    display: block;
+  }
+}
+
+/* Present but sizeless: a display: none SVG would break the url() reference. */
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Shadow sits outside the filtered frame so the filter region does not crop it. */
+.card {
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-panel);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transform: translate(-50%, -112%) scale(0.96);
+  transition:
+    opacity 160ms var(--ease-out),
+    transform 200ms var(--ease-out);
+}
+.card[data-show] {
+  opacity: 1;
+  transform: translate(-50%, -112%) scale(1);
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface-1);
+}
+
+/* The old picture lingers 200ms under the next one and through the card fade-out. */
+.shot {
+  object-fit: cover;
+  object-position: top center;
+  opacity: 0;
+  transition: opacity 0s linear 200ms;
+}
+.shot[data-on] {
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 160ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card[data-show] {
+    transform: translate(-50%, -112%);
+    transition: none;
+  }
+  .shot,
+  .shot[data-on] {
+    transition: none;
+  }
+}

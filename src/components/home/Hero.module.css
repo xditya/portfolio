@@ -1,0 +1,182 @@
+/* InkLayer listens on the section, so it owns position, overflow and touch-action. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--surface-0);
+  touch-action: pan-y;
+}
+
+/* Where both inks meet the canvas goes almost white, so the bottom row needs
+   an 80%+ ground to keep --text-2 at AA. Stops are px from the bottom so the
+   band covers the row (at most 190px tall on desktop, 270px on phones). */
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      to top,
+      rgba(7, 10, 18, 0.86) 0,
+      rgba(7, 10, 18, 0.84) 200px,
+      rgba(7, 10, 18, 0.45) 300px,
+      rgba(7, 10, 18, 0) 410px
+    ),
+    radial-gradient(
+      120% 90% at 50% 100%,
+      rgba(7, 10, 18, 0) 40%,
+      rgba(7, 10, 18, 0.55) 100%
+    );
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 22px;
+  width: 100%;
+  padding-top: 112px;
+  padding-bottom: clamp(32px, 5vh, 56px);
+}
+
+/* The pseudo-element gives the link a 44px tall target. */
+.status {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-3);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 200ms var(--ease-out);
+}
+.status::after {
+  content: "";
+  position: absolute;
+  inset: -14px -8px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .status:hover {
+    color: var(--text);
+  }
+}
+
+.ok {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+/* Width axis set here, not in .display-hero, so Hero.tsx can scrub --w. */
+.hero .name {
+  margin: 0 0 0 -0.04em;
+  font-variation-settings: "wdth" var(--w, 78), "opsz" 96;
+  white-space: nowrap;
+}
+
+.dot {
+  color: var(--accent);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px 40px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Auto margin keeps the actions right-aligned when the row wraps. */
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.place {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-3);
+}
+
+.tagline {
+  max-width: 40ch;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(17px, 1.5vw, 20px);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.tagline b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 760px) {
+  .vignette {
+    background:
+      linear-gradient(
+        to top,
+        rgba(7, 10, 18, 0.86) 0,
+        rgba(7, 10, 18, 0.84) 280px,
+        rgba(7, 10, 18, 0.4) 355px,
+        rgba(7, 10, 18, 0) 445px
+      ),
+      radial-gradient(
+        120% 90% at 50% 100%,
+        rgba(7, 10, 18, 0) 40%,
+        rgba(7, 10, 18, 0.55) 100%
+      );
+  }
+  .inner {
+    gap: 18px;
+    padding-top: 96px;
+    padding-bottom: calc(28px + var(--dock-space, 0px));
+  }
+  .row {
+    padding-top: 18px;
+  }
+  .actions {
+    align-items: flex-start;
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status {
+    transition: none;
+  }
+}

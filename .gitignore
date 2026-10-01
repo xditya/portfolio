@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -45,3 +46,9 @@ jsrepo.json
 
 .github
 .agent
+# Local AI tooling, skills and notes (kept on disk, not in the repo)
+.claude/
+.agents/
+skills-lock.json
+*.md
+!README.md

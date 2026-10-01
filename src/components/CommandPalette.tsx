@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { event as trackEvent } from "@/lib/gtag";
-import { GAME_PROJECTS, GAME_SOCIALS, GAME_LINKS, GAME_ABOUT } from "@/lib/gameData";
+import { profile, projects, socials, links, palettePages } from "@/content";
 
 type Item = {
   id: string;
@@ -14,13 +14,7 @@ type Item = {
   run: () => void;
 };
 
-/**
- * ⌘K / Ctrl+K command palette.
- *
- * Opens with NO animation: the palette is a keyboard-initiated, high-frequency
- * surface, and animating those makes them feel slow (Emil Kowalski's rule;
- * Raycast does the same).
- */
+// No open animation: a keyboard-driven, high-frequency surface feels slow when animated.
 export default function CommandPalette() {
   const router = useRouter();
   const pathname = usePathname();
@@ -30,6 +24,13 @@ export default function CommandPalette() {
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Closed during render, not in an effect, so the new route never paints with the palette open.
+  const [seenPath, setSeenPath] = useState(pathname);
+  if (seenPath !== pathname) {
+    setSeenPath(pathname);
+    if (open) setOpen(false);
+  }
 
   const goto = useCallback(
     (href: string) => {
@@ -42,26 +43,32 @@ export default function CommandPalette() {
     const external = (href: string) =>
       window.open(href, "_blank", "noopener,noreferrer");
 
-    const pages: Item[] = [
-      { id: "p-home", label: "Home", hint: "/", keywords: "home index start", group: "Pages", run: () => goto("/") },
-      { id: "p-about", label: "About", hint: "/about", keywords: "about me bio experience stats", group: "Pages", run: () => goto("/about") },
-      { id: "p-projects", label: "Projects", hint: "/projects", keywords: "projects work index repos", group: "Pages", run: () => goto("/projects") },
-      { id: "p-contact", label: "Contact", hint: "/contact", keywords: "contact hire form email message", group: "Pages", run: () => goto("/contact") },
-      { id: "p-links", label: "Links", hint: "/links", keywords: "links tools services", group: "Pages", run: () => goto("/links") },
-      { id: "p-game", label: "Play the Game", hint: "/game", keywords: "game 3d play grid explore fun three", group: "Pages", run: () => goto("/game") },
-    ];
+    const pages: Item[] = palettePages.map((p) => ({
+      id: `p-${p.id}`,
+      label: p.label,
+      hint: p.href,
+      keywords: p.keywords,
+      group: "Pages",
+      run: () => goto(p.href),
+    }));
 
     const actions: Item[] = [
       {
         id: "a-email",
         label: "Copy email address",
-        hint: GAME_ABOUT.email,
+        hint: profile.email,
         keywords: "copy email clipboard contact mail",
         group: "Actions",
         run: () => {
-          navigator.clipboard?.writeText(GAME_ABOUT.email).catch(() => {});
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 2000);
+          const clipboard = navigator.clipboard;
+          if (!clipboard) return;
+          clipboard
+            .writeText(profile.email)
+            .then(() => {
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 2000);
+            })
+            .catch(() => {});
         },
       },
       {
@@ -70,11 +77,11 @@ export default function CommandPalette() {
         hint: "PDF",
         keywords: "resume cv download pdf",
         group: "Actions",
-        run: () => external(GAME_ABOUT.resume),
+        run: () => external(profile.resume),
       },
     ];
 
-    const projects: Item[] = GAME_PROJECTS.map((p) => ({
+    const projectItems: Item[] = projects.map((p) => ({
       id: `pr-${p.name}`,
       label: p.name,
       hint: `${p.year} · GitHub ↗`,
@@ -83,7 +90,7 @@ export default function CommandPalette() {
       run: () => external(p.github),
     }));
 
-    const socials: Item[] = GAME_SOCIALS.map((s) => ({
+    const socialItems: Item[] = socials.map((s) => ({
       id: `s-${s.label}`,
       label: s.label,
       hint: "Social ↗",
@@ -92,7 +99,7 @@ export default function CommandPalette() {
       run: () => external(s.href),
     }));
 
-    const tools: Item[] = GAME_LINKS.map((l) => ({
+    const toolItems: Item[] = links.map((l) => ({
       id: `t-${l.name}`,
       label: l.name,
       hint: l.external ? "Tool ↗" : l.href,
@@ -101,7 +108,7 @@ export default function CommandPalette() {
       run: () => (l.external ? external(l.href) : goto(l.href)),
     }));
 
-    return [...pages, ...actions, ...projects, ...socials, ...tools];
+    return [...pages, ...actions, ...projectItems, ...socialItems, ...toolItems];
   }, [goto]);
 
   const results = useMemo(() => {
@@ -143,7 +150,6 @@ export default function CommandPalette() {
     [],
   );
 
-  /* Global shortcuts */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -152,71 +158,81 @@ export default function CommandPalette() {
         else openPalette("keyboard");
       } else if (e.key === "Escape" && open) {
         setOpen(false);
+      } else if (e.key === "Tab" && open) {
+        // The input is the only tab stop; handled on window so it holds after
+        // a click on the panel drops focus to the body.
+        e.preventDefault();
+        inputRef.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, openPalette]);
 
-  /* Open via navbar (custom event keeps Navbar decoupled) */
   useEffect(() => {
     const onOpen = () => openPalette("navbar");
     window.addEventListener("cmdk:open", onOpen);
     return () => window.removeEventListener("cmdk:open", onOpen);
   }, [openPalette]);
 
-  /* Close on route change, focus input on open, lock scroll */
+  // Both are set: html's overflow-x: clip stops body overflow reaching the viewport.
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (open) {
-      inputRef.current?.focus();
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!open) return;
+    const opener = document.activeElement as HTMLElement | null;
+    inputRef.current?.focus();
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtml = html.style.overflow;
+    const previousBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      html.style.overflow = previousHtml;
+      body.style.overflow = previousBody;
+      opener?.focus({ preventScroll: true });
     };
   }, [open]);
 
-  /* Keep active row in view */
   useEffect(() => {
     const el = listRef.current?.querySelector<HTMLElement>(`[data-idx="${active}"]`);
     el?.scrollIntoView({ block: "nearest" });
   }, [active]);
 
-  useEffect(() => {
-    setActive(0);
-  }, [query]);
-
   const copiedToast = copied ? (
     <div
       className="mono-sm"
-      role="status"
+      aria-hidden="true"
       style={{
         position: "fixed",
-        bottom: "28px",
+        bottom: "calc(var(--dock-space) + 28px)",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 210,
-        background: "var(--bg-card)",
+        background: "var(--surface-1)",
         border: "1px solid var(--accent)",
-        color: "var(--accent-soft)",
+        color: "var(--accent-2)",
         padding: "10px 20px",
         borderRadius: "999px",
         letterSpacing: "0.08em",
       }}
     >
-      ✓ Copied {GAME_ABOUT.email}
+      ✓ Copied {profile.email}
     </div>
   ) : null;
 
-  if (!open) return copiedToast;
-
   const flat = grouped.flatMap((g) => g.items);
+
+  // Always mounted so screen readers hear the copy confirmation even when closed.
+  const live = (
+    <div
+      role="status"
+      style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}
+    >
+      {copied ? `Copied ${profile.email}` : open && flat.length === 0 ? `Nothing found for ${query}` : ""}
+    </div>
+  );
+
+  if (!open) return <>{live}{copiedToast}</>;
 
   const onInputKey = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -234,74 +250,84 @@ export default function CommandPalette() {
   let idx = -1;
 
   return (
-    <div
-      className="cmdk-overlay"
-      onPointerDown={(e) => {
-        if (e.target === e.currentTarget) setOpen(false);
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Command palette"
-    >
-      <div className="cmdk-panel">
-        <input
-          ref={inputRef}
-          className="cmdk-input"
-          placeholder="Search pages, projects, socials…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={onInputKey}
-          role="combobox"
-          aria-expanded="true"
-          aria-controls="cmdk-list"
-          aria-activedescendant={flat[active] ? `cmdk-${flat[active].id}` : undefined}
-          spellCheck={false}
-        />
-        <div className="cmdk-list" ref={listRef} id="cmdk-list" role="listbox">
-          {flat.length === 0 && (
-            <div className="cmdk-empty">
-              Nothing found for “{query}”. Try a project name, or “contact”.
-            </div>
-          )}
-          {grouped.map(({ group, items: gi }) => (
-            <div key={group}>
-              <p className="mono-label cmdk-group-label">{group}</p>
-              {gi.map((item) => {
-                idx += 1;
-                const i = idx;
-                return (
-                  <button
-                    key={item.id}
-                    id={`cmdk-${item.id}`}
-                    data-idx={i}
-                    data-active={i === active}
-                    className="cmdk-item"
-                    role="option"
-                    aria-selected={i === active}
-                    onPointerMove={() => setActive(i)}
-                    onClick={() => runItem(item)}
-                  >
-                    <span>{item.label}</span>
-                    <span className="cmdk-hint">{item.hint}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+    <>
+      {live}
+      <div
+        className="cmdk-overlay"
+        // Lenis scrolls in script and ignores the overflow lock.
+        data-lenis-prevent=""
+        onPointerDown={(e) => {
+          if (e.target === e.currentTarget) setOpen(false);
+        }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+      >
+        <div className="cmdk-panel">
+          <input
+            ref={inputRef}
+            className="cmdk-input"
+            aria-label="Search the site"
+            placeholder="Search pages, projects, socials…"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActive(0);
+            }}
+            onKeyDown={onInputKey}
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="cmdk-list"
+            aria-activedescendant={flat[active] ? `cmdk-${flat[active].id}` : undefined}
+            spellCheck={false}
+          />
+          <div className="cmdk-list" ref={listRef} id="cmdk-list" role="listbox">
+            {flat.length === 0 && (
+              <div className="cmdk-empty">
+                Nothing found for “{query}”. Try a project name, or “contact”.
+              </div>
+            )}
+            {grouped.map(({ group, items: gi }) => (
+              <div key={group}>
+                <p className="mono-label cmdk-group-label">{group}</p>
+                {gi.map((item) => {
+                  idx += 1;
+                  const i = idx;
+                  return (
+                    <button
+                      key={item.id}
+                      id={`cmdk-${item.id}`}
+                      data-idx={i}
+                      data-active={i === active}
+                      className="cmdk-item"
+                      role="option"
+                      tabIndex={-1}
+                      aria-selected={i === active}
+                      onPointerMove={() => setActive(i)}
+                      onClick={() => runItem(item)}
+                    >
+                      <span>{item.label}</span>
+                      <span className="cmdk-hint">{item.hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <div className="cmdk-footer">
+            <span className="mono-sm" style={{ color: "var(--text-3)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
+              <kbd className="cmdk-kbd">↑↓</kbd> navigate
+            </span>
+            <span className="mono-sm" style={{ color: "var(--text-3)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
+              <kbd className="cmdk-kbd">↵</kbd> open
+            </span>
+            <span className="mono-sm" style={{ color: "var(--text-3)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
+              <kbd className="cmdk-kbd">esc</kbd> close
+            </span>
+          </div>
         </div>
-        <div className="cmdk-footer">
-          <span className="mono-sm" style={{ color: "var(--muted)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
-            <kbd className="cmdk-kbd">↑↓</kbd> navigate
-          </span>
-          <span className="mono-sm" style={{ color: "var(--muted)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
-            <kbd className="cmdk-kbd">↵</kbd> open
-          </span>
-          <span className="mono-sm" style={{ color: "var(--muted)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
-            <kbd className="cmdk-kbd">esc</kbd> close
-          </span>
-        </div>
+        {copiedToast}
       </div>
-      {copiedToast}
-    </div>
+    </>
   );
 }

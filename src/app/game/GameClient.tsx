@@ -11,10 +11,10 @@ const PortfolioGame = dynamic(() => import("@/components/PortfolioGame"), {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "var(--bg)",
+        background: "var(--surface-0)",
       }}
     >
-      <p className="mono-label" style={{ color: "var(--muted)", letterSpacing: "0.2em" }}>
+      <p className="mono-label" style={{ letterSpacing: "0.2em" }}>
         LOADING THE GRID…
       </p>
     </div>

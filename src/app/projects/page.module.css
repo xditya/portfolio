@@ -1,0 +1,193 @@
+.page {
+  --year-col: clamp(120px, 14vw, 200px);
+  --col-gap: clamp(24px, 3vw, 48px);
+  padding-top: 88px;
+}
+
+.tool {
+  display: grid;
+  grid-template-columns: var(--year-col) minmax(0, 1fr);
+  grid-template-areas:
+    ". title"
+    "count search"
+    ". chips";
+  column-gap: var(--col-gap);
+  padding-top: clamp(28px, 5vw, 72px);
+}
+
+.title {
+  grid-area: title;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 40px;
+  margin-bottom: 4px;
+}
+.title h1 {
+  margin: 0;
+}
+
+.lede {
+  max-width: 30ch;
+  margin: 0;
+  text-align: right;
+  text-wrap: balance;
+}
+
+.search {
+  grid-area: search;
+  align-self: baseline;
+  text-overflow: ellipsis;
+}
+/* The underline is the focus mark; a second pixel makes it hard to miss. */
+.search:focus-visible {
+  box-shadow: 0 1px 0 var(--accent);
+}
+
+.count {
+  grid-area: count;
+  align-self: baseline;
+  margin: 0;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.chips {
+  grid-area: chips;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* 36px + 4px hit area on each side = 44px targets that don't overlap. */
+.filter {
+  position: relative;
+  flex: none;
+  min-height: 36px;
+  white-space: nowrap;
+}
+.filter::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.filterCount {
+  color: var(--text-3);
+}
+.filter[data-on="true"] .filterCount {
+  color: inherit;
+}
+
+.index {
+  padding-top: clamp(44px, 6vw, 88px);
+}
+
+.group {
+  display: grid;
+  grid-template-columns: var(--year-col) minmax(0, 1fr);
+  column-gap: var(--col-gap);
+  align-items: start;
+  margin-bottom: clamp(48px, 7vw, 88px);
+}
+
+/* Clears the 64px fixed nav. */
+.year {
+  position: sticky;
+  top: 96px;
+  padding-top: 22px;
+}
+
+.yearNum {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(44px, 5vw, 72px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  font-variation-settings: "wdth" 90, "opsz" 96;
+  font-variant-numeric: tabular-nums;
+}
+
+.yearCount {
+  display: block;
+  margin-top: 10px;
+  color: var(--text-3);
+}
+
+.empty {
+  margin-left: calc(var(--year-col) + var(--col-gap));
+  padding-bottom: 72px;
+}
+.emptyText {
+  margin: 0 0 20px;
+}
+
+@media (max-width: 899px) {
+  .tool {
+    display: block;
+  }
+  .count {
+    margin-top: 14px;
+  }
+
+  .group {
+    display: block;
+  }
+  .year {
+    position: static;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 0;
+    margin-bottom: 16px;
+  }
+  .yearNum {
+    font-size: clamp(40px, 9vw, 64px);
+  }
+  .yearCount {
+    margin-top: 0;
+  }
+
+  .empty {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding-top: 84px;
+  }
+
+  .title {
+    display: block;
+    margin-bottom: 8px;
+  }
+  .lede {
+    max-width: none;
+    margin-top: 12px;
+    text-align: left;
+  }
+
+  /* Bleeds to the screen edges so a clipped chip hints at more. */
+  .chips {
+    flex-wrap: nowrap;
+    margin: 12px calc(-1 * clamp(20px, 3.5vw, 48px)) 0;
+    padding: 5px clamp(20px, 3.5vw, 48px);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: clamp(20px, 3.5vw, 48px);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .count {
+    margin-top: 8px;
+  }
+}

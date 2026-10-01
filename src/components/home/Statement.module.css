@@ -1,0 +1,70 @@
+.section {
+  padding-block: clamp(64px, 10vw, 160px);
+}
+
+.text {
+  max-width: 1080px;
+  margin: 0;
+  color: var(--text);
+}
+
+/* Beats the global .w-rv opacity so server HTML and reduced motion read the
+   paragraph as written; Statement.tsx dims it inline. */
+.text .word {
+  display: inline-block;
+  opacity: 1;
+}
+
+.moreRow {
+  margin: clamp(20px, 4vw, 40px) 0 0;
+}
+
+.more {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--accent-2);
+  position: relative;
+  text-decoration: none;
+  transition: color 200ms var(--ease-out);
+}
+
+/* A larger hit area for the small standalone link. */
+.more::before {
+  content: "";
+  position: absolute;
+  inset: -12px -6px;
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 350ms var(--ease-spring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .more:hover {
+    color: var(--text);
+  }
+  .more:hover .arrow {
+    transform: translate(0.12em, -0.12em);
+  }
+}
+
+.more:focus-visible .arrow {
+  transform: translate(0.12em, -0.12em);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .more,
+  .arrow {
+    transition: none;
+  }
+  .more:hover .arrow,
+  .more:focus-visible .arrow {
+    transform: none;
+  }
+}

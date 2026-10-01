@@ -1,0 +1,315 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  border-bottom: 1px solid var(--line);
+}
+
+/* Isolated so the bar can sit at z-index -1 without leaving the row. Each row
+   is its own grid, so the end track has a fixed floor to keep columns aligned. */
+.head {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1.4fr) minmax(0, 1fr) minmax(160px, auto) 20px;
+  grid-template-areas: "index main middle end arrow";
+  align-items: center;
+  column-gap: 24px;
+  padding: 24px clamp(8px, 1.5vw, 20px);
+  color: var(--text);
+}
+
+/* Overlaps the hairlines so its edge replaces them instead of doubling them. */
+.highlight {
+  position: absolute;
+  inset: -1px 0;
+  z-index: -1;
+  border: 1px solid rgba(77, 98, 255, 0.45);
+  background: rgba(77, 98, 255, 0.28);
+  pointer-events: none;
+}
+
+.index {
+  grid-area: index;
+  color: var(--text-3);
+  transition: color 200ms var(--ease-out);
+}
+
+/* Not positioned on purpose: the title's ::after must resolve against .head. */
+.main {
+  grid-area: main;
+  min-width: 0;
+}
+
+.titleLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(19px, 2.2vw, 28px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variation-settings: "wdth" 90, "opsz" 96;
+  color: inherit;
+  overflow-wrap: anywhere;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* The ring goes around the row, which is the real target. */
+.title:focus-visible {
+  outline: none;
+}
+.title:focus-visible::after {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -2px;
+}
+
+.title:active::after {
+  background: rgba(238, 237, 230, 0.04);
+}
+
+/* display: none keeps it out of the accessibility tree on desktop. */
+.toggle {
+  display: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.tag[data-accent] {
+  border-color: rgba(77, 98, 255, 0.45);
+  color: var(--accent-2);
+}
+
+.sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.middle {
+  grid-area: middle;
+  min-width: 0;
+  line-height: 1.5;
+  color: var(--text-3);
+  transition: color 200ms var(--ease-out);
+}
+
+.end {
+  grid-area: end;
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 14px;
+}
+
+/* Clickable above the stretched title. */
+.end :is(a, button) {
+  position: relative;
+  z-index: 1;
+}
+
+.stat {
+  color: var(--text-3);
+  white-space: nowrap;
+  transition: color 200ms var(--ease-out);
+}
+
+/* The chip is about 31px tall; the pseudo-element brings the target to 44. */
+.live::before {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
+
+.arrow {
+  grid-area: arrow;
+  justify-self: end;
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.4;
+  transition:
+    transform 200ms var(--ease-out),
+    opacity 200ms var(--ease-out);
+}
+
+/* The small grey text is 3.9:1 on the tint; one step lighter is 6.4:1. */
+.row[data-active] :is(.index, .middle, .stat) {
+  color: var(--text-2);
+}
+
+.row[data-active] .arrow {
+  opacity: 1;
+  transform: translate(4px, -4px);
+}
+
+.plus {
+  display: none;
+}
+
+.panel {
+  display: none;
+  overflow: hidden;
+}
+
+.panelInner {
+  display: grid;
+  gap: 16px;
+  padding: 2px 8px 24px;
+}
+
+.shot {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface-1);
+}
+
+.shotImg {
+  object-fit: cover;
+  object-position: top center;
+}
+
+.desc {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.tech {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 760px) {
+  .head {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "index main arrow"
+      ". middle ."
+      ". end .";
+    align-items: baseline;
+    column-gap: 12px;
+    padding: 18px 8px;
+  }
+
+  /* Margins, not row-gap: a row without these cells must not keep the gaps. */
+  .middle,
+  .end {
+    margin-top: 10px;
+  }
+  .end {
+    justify-self: start;
+  }
+
+  .row[data-disclosure] .link,
+  .row[data-disclosure] .middle,
+  .row[data-disclosure] .arrow {
+    display: none;
+  }
+  .row[data-disclosure] .toggle {
+    display: inline;
+  }
+
+  .row[data-disclosure] .plus {
+    display: block;
+    grid-area: arrow;
+    align-self: start;
+    position: relative;
+    width: 14px;
+    height: 14px;
+    margin-top: 5px;
+    color: var(--text-3);
+  }
+  .plus::before,
+  .plus::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    margin-top: -0.75px;
+    background: currentColor;
+  }
+  .plus::after {
+    transform: rotate(90deg);
+    transition: transform 200ms var(--ease-out);
+  }
+  /* The open panel has its own Live button */
+  .row[data-open] .live {
+    display: none;
+  }
+
+  .row[data-open] .plus::after {
+    transform: rotate(0deg);
+  }
+
+  .panel {
+    display: block;
+  }
+
+  .desc,
+  .tech,
+  .actions {
+    margin-left: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .index,
+  .middle,
+  .stat,
+  .arrow,
+  .plus::after {
+    transition: none;
+  }
+  .row[data-active] .arrow {
+    transform: none;
+  }
+}

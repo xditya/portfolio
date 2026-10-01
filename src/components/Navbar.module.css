@@ -1,0 +1,251 @@
+/* 21px tall so it leaves the viewport once the page is scrolled past 20px. */
+.sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 21px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 102;
+  height: 64px;
+  /* Empty bar space lets the pointer reach the ink layer beneath. */
+  pointer-events: none;
+}
+
+/* On its own layer so the header never becomes the backdrop the pill samples. */
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -24px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--glass-bar);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.header[data-scrolled] {
+  pointer-events: auto;
+}
+
+.header[data-scrolled]::before {
+  opacity: 1;
+}
+
+/* Over the tinted bar a second blur on the pill is a pass for nothing. */
+.header[data-scrolled] .pill {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 100%;
+}
+
+.inner > * {
+  pointer-events: auto;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  min-height: 44px;
+  margin-left: -2px;
+  padding-inline: 2px;
+  border-radius: var(--radius-pill, 999px);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 44px;
+  letter-spacing: -0.02em;
+  font-variation-settings: "wdth" 90;
+  color: var(--text, #eeede6);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dot {
+  color: var(--accent, #4d62ff);
+}
+
+.pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 4px;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--glass-chip);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: var(--radius-pill, 999px);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-2, #a6abb8);
+  text-decoration: none;
+  transition: color 250ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+/* Extends the hit area to 44px without changing the drawn item. */
+.link::before {
+  content: "";
+  position: absolute;
+  inset: -5px 0;
+}
+
+.link[aria-current="page"] {
+  color: var(--text, #eeede6);
+}
+
+/* Reserves the width of "Ctrl+K" so the pill never shifts when "⌘K" swaps after hydration. */
+.trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  min-inline-size: calc(6ch + 0.12em + 24px);
+  margin-left: 2px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: var(--radius-pill, 999px);
+  background: transparent;
+  color: var(--text-2, #a6abb8);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    color 200ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    background-color 200ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    transform 160ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.trigger::before {
+  content: "";
+  position: absolute;
+  inset: -5px 0;
+}
+
+.trigger kbd {
+  font: inherit;
+}
+
+.trigger:active {
+  transform: scale(0.97);
+}
+
+/* On a touch tablet hover would stick. */
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    color: var(--text, #eeede6);
+  }
+
+  .trigger:hover {
+    color: var(--text, #eeede6);
+    background: rgba(238, 237, 230, 0.06);
+  }
+}
+
+.search {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -12px;
+  border: 0;
+  border-radius: var(--radius-pill, 999px);
+  background: transparent;
+  color: var(--text, #eeede6);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.search:active {
+  transform: scale(0.97);
+}
+
+.wordmark:focus-visible,
+.link:focus-visible,
+.trigger:focus-visible,
+.search:focus-visible {
+  outline: 2px solid var(--accent-2, #b9c4ff);
+  outline-offset: 2px;
+}
+
+@media (min-width: 761px) {
+  .header {
+    height: 72px;
+  }
+}
+
+@media (max-width: 760px) {
+  .pill {
+    display: none;
+  }
+
+  .search {
+    display: inline-flex;
+  }
+}
+
+/* Solid bar with a real edge when transparency is reduced or contrast raised */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  .header::before {
+    inset: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+    border-bottom: 1px solid var(--glass-line);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header::before,
+  .link,
+  .trigger,
+  .search {
+    transition: none;
+  }
+}

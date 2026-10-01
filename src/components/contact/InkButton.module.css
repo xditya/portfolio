@@ -1,0 +1,13 @@
+/* --ink-filter is set by the script only while the fill animates. */
+.ink::before {
+  filter: var(--ink-filter, none);
+}
+
+/* Present but sizeless: a display: none SVG would break the url() reference. */
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}

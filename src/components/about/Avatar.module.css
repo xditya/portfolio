@@ -1,0 +1,43 @@
+.avatar {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 88px;
+  height: 88px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface-1);
+  overflow: hidden;
+}
+
+.avatar::before {
+  content: attr(data-initial);
+  /* Empty alt text hides the letter from screen readers; the line above is the fallback. */
+  content: attr(data-initial) / "";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  color: var(--accent);
+}
+
+.img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 1199px) {
+  .avatar {
+    width: 64px;
+    height: 64px;
+  }
+  .avatar::before {
+    font-size: 24px;
+  }
+}
