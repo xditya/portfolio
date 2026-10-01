@@ -9,7 +9,7 @@ export type Service = {
 export const services: Service[] = [
   { key: "website", url: "https://xditya.me" },
   { key: "apis", url: "https://apis.xditya.me", name: "APIs" },
-  { key: "pastebin", url: "https://paste.xditya.me", name: "PasteBin" },
+  { key: "pastebin", url: "https://pastr.xditya.me", name: "PasteBin" },
   { key: "shortener", url: "https://short.xditya.me" },
   { key: "ultroid_docs", url: "https://ultroid.tech" },
   { key: "ultroid_bans", url: "https://bans.ultroid.tech" },
