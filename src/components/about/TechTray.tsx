@@ -50,8 +50,8 @@ const SETTLE_CAP = SETTLE_AFTER + SETTLE_OVER + 90;
 const DRAG_START = 4; // px the pointer travels before a press counts as a drag
 // Device lean in degrees for full sideways pull; under the dead zone counts
 // as level so a hand-held phone does not keep the pile awake.
-const TILT_FULL = 30;
-const TILT_DEAD = 4;
+const TILT_FULL = 18;
+const TILT_DEAD = 2;
 
 // Matter's chamfer stops each arc one step short and leaves resting chips
 // tilted about a degree; this outline is symmetric so chips lie flat.
@@ -180,7 +180,7 @@ function mountTray(tray: HTMLElement) {
       const air = AIR + ease * (THICK_AIR - AIR);
       const righting = RIGHTING * (1 - ease);
       engine.gravity.y = GRAVITY + ease * (SETTLED_GRAVITY - GRAVITY);
-      engine.gravity.x = engine.gravity.y * tiltX;
+      engine.gravity.x = GRAVITY * 1.5 * tiltX;
       for (let k = 0; k < poured; k++) {
         const b = bodies[order[k]];
         b.frictionAir = air;

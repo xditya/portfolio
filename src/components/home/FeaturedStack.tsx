@@ -22,8 +22,8 @@ const RECEDE_OPACITY = 0.55;
 // Degrees: up to TILT_MAX of lean at TILT_RANGE of phone tilt. The rest
 // position drifts toward the reading (TILT_SETTLE per event), so the card
 // lies flat however the phone is held and nothing needs calibrating.
-const TILT_MAX = 9;
-const TILT_RANGE = 30;
+const TILT_MAX = 16;
+const TILT_RANGE = 20;
 const TILT_SETTLE = 0.004;
 
 type OrientationWithPermission = typeof DeviceOrientationEvent & {
