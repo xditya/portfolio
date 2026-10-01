@@ -219,7 +219,7 @@ export default function CommandPalette() {
   const copiedToast = copied ? (
     <div
       className="mono-sm"
-      role="status"
+      aria-hidden="true"
       style={{
         position: "fixed",
         // Clears the phone dock; the variable is 0px on desktop and on /game.
@@ -227,9 +227,9 @@ export default function CommandPalette() {
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 210,
-        background: "var(--bg-card)",
+        background: "var(--surface-1)",
         border: "1px solid var(--accent)",
-        color: "var(--accent-soft)",
+        color: "var(--accent-2)",
         padding: "10px 20px",
         borderRadius: "999px",
         letterSpacing: "0.08em",
@@ -239,9 +239,20 @@ export default function CommandPalette() {
     </div>
   ) : null;
 
-  if (!open) return copiedToast;
-
   const flat = grouped.flatMap((g) => g.items);
+
+  // One live region, mounted whether or not the palette is open, so screen
+  // readers hear the copy confirmation and an empty result.
+  const live = (
+    <div
+      role="status"
+      style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}
+    >
+      {copied ? `Copied ${profile.email}` : open && flat.length === 0 ? `Nothing found for ${query}` : ""}
+    </div>
+  );
+
+  if (!open) return <>{live}{copiedToast}</>;
 
   const onInputKey = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -259,83 +270,87 @@ export default function CommandPalette() {
   let idx = -1;
 
   return (
-    <div
-      className="cmdk-overlay"
-      // Lenis scrolls the page programmatically on wheel, which an overflow
-      // lock cannot stop; this keeps wheel events over the palette out of
-      // Lenis, so the page stays put and the result list scrolls natively.
-      data-lenis-prevent=""
-      onPointerDown={(e) => {
-        if (e.target === e.currentTarget) setOpen(false);
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Command palette"
-    >
-      <div className="cmdk-panel">
-        <input
-          ref={inputRef}
-          className="cmdk-input"
-          placeholder="Search pages, projects, socials…"
-          value={query}
-          onChange={(e) => {
-            // A new query starts from the first result.
-            setQuery(e.target.value);
-            setActive(0);
-          }}
-          onKeyDown={onInputKey}
-          role="combobox"
-          aria-expanded="true"
-          aria-controls="cmdk-list"
-          aria-activedescendant={flat[active] ? `cmdk-${flat[active].id}` : undefined}
-          spellCheck={false}
-        />
-        <div className="cmdk-list" ref={listRef} id="cmdk-list" role="listbox">
-          {flat.length === 0 && (
-            <div className="cmdk-empty">
-              Nothing found for “{query}”. Try a project name, or “contact”.
-            </div>
-          )}
-          {grouped.map(({ group, items: gi }) => (
-            <div key={group}>
-              <p className="mono-label cmdk-group-label">{group}</p>
-              {gi.map((item) => {
-                idx += 1;
-                const i = idx;
-                return (
-                  <button
-                    key={item.id}
-                    id={`cmdk-${item.id}`}
-                    data-idx={i}
-                    data-active={i === active}
-                    className="cmdk-item"
-                    role="option"
-                    tabIndex={-1}
-                    aria-selected={i === active}
-                    onPointerMove={() => setActive(i)}
-                    onClick={() => runItem(item)}
-                  >
-                    <span>{item.label}</span>
-                    <span className="cmdk-hint">{item.hint}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+    <>
+      {live}
+      <div
+        className="cmdk-overlay"
+        // Lenis scrolls the page programmatically on wheel, which an overflow
+        // lock cannot stop; this keeps wheel events over the palette out of
+        // Lenis, so the page stays put and the result list scrolls natively.
+        data-lenis-prevent=""
+        onPointerDown={(e) => {
+          if (e.target === e.currentTarget) setOpen(false);
+        }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+      >
+        <div className="cmdk-panel">
+          <input
+            ref={inputRef}
+            className="cmdk-input"
+            aria-label="Search the site"
+            placeholder="Search pages, projects, socials…"
+            value={query}
+            onChange={(e) => {
+              // A new query starts from the first result.
+              setQuery(e.target.value);
+              setActive(0);
+            }}
+            onKeyDown={onInputKey}
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="cmdk-list"
+            aria-activedescendant={flat[active] ? `cmdk-${flat[active].id}` : undefined}
+            spellCheck={false}
+          />
+          <div className="cmdk-list" ref={listRef} id="cmdk-list" role="listbox">
+            {flat.length === 0 && (
+              <div className="cmdk-empty">
+                Nothing found for “{query}”. Try a project name, or “contact”.
+              </div>
+            )}
+            {grouped.map(({ group, items: gi }) => (
+              <div key={group}>
+                <p className="mono-label cmdk-group-label">{group}</p>
+                {gi.map((item) => {
+                  idx += 1;
+                  const i = idx;
+                  return (
+                    <button
+                      key={item.id}
+                      id={`cmdk-${item.id}`}
+                      data-idx={i}
+                      data-active={i === active}
+                      className="cmdk-item"
+                      role="option"
+                      tabIndex={-1}
+                      aria-selected={i === active}
+                      onPointerMove={() => setActive(i)}
+                      onClick={() => runItem(item)}
+                    >
+                      <span>{item.label}</span>
+                      <span className="cmdk-hint">{item.hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <div className="cmdk-footer">
+            <span className="mono-sm" style={{ color: "var(--text-3)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
+              <kbd className="cmdk-kbd">↑↓</kbd> navigate
+            </span>
+            <span className="mono-sm" style={{ color: "var(--text-3)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
+              <kbd className="cmdk-kbd">↵</kbd> open
+            </span>
+            <span className="mono-sm" style={{ color: "var(--text-3)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
+              <kbd className="cmdk-kbd">esc</kbd> close
+            </span>
+          </div>
         </div>
-        <div className="cmdk-footer">
-          <span className="mono-sm" style={{ color: "var(--muted)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
-            <kbd className="cmdk-kbd">↑↓</kbd> navigate
-          </span>
-          <span className="mono-sm" style={{ color: "var(--muted)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
-            <kbd className="cmdk-kbd">↵</kbd> open
-          </span>
-          <span className="mono-sm" style={{ color: "var(--muted)", display: "inline-flex", gap: "6px", alignItems: "center" }}>
-            <kbd className="cmdk-kbd">esc</kbd> close
-          </span>
-        </div>
+        {copiedToast}
       </div>
-      {copiedToast}
-    </div>
+    </>
   );
 }

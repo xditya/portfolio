@@ -60,44 +60,6 @@
 
   /* Phone dock reservation · set on phones below, zero on /game */
   --dock-space: 0px;
-
-  /* ── Aliases · every previous token name keeps resolving ── */
-  --bg:       var(--surface-0);
-  --bg-soft:  var(--surface-1);
-  --bg-card:  var(--surface-1);
-  --ink:      var(--text);
-  --ink-dim:  var(--text-2);
-  --muted:    var(--text-3);
-  --accent-soft: var(--accent-2);
-  --accent-ink:  var(--surface-0);
-  --font-mono-stack:    var(--font-mono);
-  --ease-out-strong:    var(--ease-out);
-  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
-
-  /* The retired next/font variables · status/page.tsx still names them inline */
-  --font-archivo: var(--font-display);
-  --font-space:   var(--font-body);
-
-  /* Older inline styles */
-  --background:      var(--bg);
-  --foreground:      var(--ink);
-  --primary:         var(--accent);
-  --primary-alpha:   rgba(77, 98, 255, 0.35);
-  --secondary:       var(--bg-card);
-  --bg-base:         var(--bg);
-  --bg-surface:      var(--bg-soft);
-  --bg-elevated:     var(--bg-card);
-  --bg-hover:        var(--surface-2);
-  --accent-emphasis: var(--accent);
-  --accent-hover:    var(--accent-2);
-  --accent-dim:      var(--accent);
-  --accent-glow:     rgba(77, 98, 255, 0.12);
-  --accent-border:   rgba(77, 98, 255, 0.35);
-  --text-primary:    var(--text);
-  --text-secondary:  var(--text-2);
-  --text-muted:      var(--text-3);
-  --border:          var(--line);
-  --border-strong:   var(--line-strong);
 }
 
 /* ═══════════════════════════════════════════════
@@ -107,6 +69,8 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+  scroll-padding-bottom: calc(var(--dock-space) + 16px);
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -157,13 +121,10 @@ h1, h2, h3, h4, h5, h6 {
 
 a { color: inherit; text-decoration: none; }
 
-.font-body    { font-family: var(--font-body); }
-.font-mono    { font-family: var(--font-mono); }
-
 /* ═══════════════════════════════════════════════
    GROUND · plain
    The film grain and the top glow are gone. The
-   ink layer (phase 3) is the page's only texture.
+   ink layer is the page's only texture.
    `grid-bg` stays as the body hook in layout.tsx.
 ═══════════════════════════════════════════════ */
 .grid-bg { background-color: var(--surface-0); }
@@ -179,11 +140,6 @@ a { color: inherit; text-decoration: none; }
   padding-left: clamp(20px, 3.5vw, 48px);
   padding-right: clamp(20px, 3.5vw, 48px);
 }
-
-.section-pad { padding-block: clamp(64px, 10vw, 160px); }
-
-.hairline-t { border-top: 1px solid var(--line); }
-.hairline-b { border-bottom: 1px solid var(--line); }
 
 /* ═══════════════════════════════════════════════
    TYPE SYSTEM
@@ -227,7 +183,7 @@ a { color: inherit; text-decoration: none; }
   font-variation-settings: "wdth" 92, "opsz" 96;
 }
 
-/* Small label · Geist 12. Uppercase stays until the pages move to sentence case. */
+/* Small label · Geist 12, uppercase. */
 .mono-label {
   font-family: var(--font-body);
   font-size: 12px;
@@ -251,15 +207,9 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-2);
 }
 
-.outline-text {
-  color: transparent;
-  -webkit-text-stroke: 1px var(--line-strong);
-}
-
 /* ═══════════════════════════════════════════════
    BUTTONS · pills whose fill moves the way the
-   action moves. `--o` is the pointer's entry side
-   (set by the navigation and later phases).
+   action moves. `--o` is the pointer's entry side, set on pointerenter.
      .btn-fill  accent, fills pale from the entry side
      .btn-line  outline, fills accent from the entry side
      .btn-down  pours top to bottom (downloads)
@@ -349,9 +299,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Arrow glyphs move where the action goes */
-.btn-down .btn-arrow,
 .btn-down .arr,
-.btn-up .btn-arrow,
 .btn-up .arr {
   display: inline-block;
   transition: transform 350ms var(--ease-spring);
@@ -384,13 +332,9 @@ a { color: inherit; text-decoration: none; }
   .btn-down:hover::before { transform: scaleY(1); }
   .btn-up:hover::before { transform: translate(-50%, 50%) rotate(45deg) scale(1); }
 
-  .btn-down:hover .btn-arrow,
   .btn-down:hover .arr { transform: translateY(3px); }
-  .btn-down:active .btn-arrow,
   .btn-down:active .arr { transform: translateY(7px); }
-  .btn-up:hover .btn-arrow,
   .btn-up:hover .arr { transform: translate(3px, -3px); }
-  .btn-up:active .btn-arrow,
   .btn-up:active .arr { transform: translate(6px, -6px); }
 
   .btn-fill:disabled:hover { color: #fff; }
@@ -428,136 +372,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   MARQUEE TICKER
-═══════════════════════════════════════════════ */
-.marquee {
-  overflow: hidden;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding-block: 18px;
-  user-select: none;
-}
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee-scroll 40s linear infinite;
-}
-.marquee:hover .marquee-track { animation-play-state: paused; }
-.marquee-chunk {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-.marquee-item {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(18px, 2.4vw, 30px);
-  letter-spacing: -0.01em;
-  font-variation-settings: "wdth" 90;
-  color: var(--text-2);
-  padding-inline: 28px;
-  white-space: nowrap;
-}
-.marquee-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex-shrink: 0;
-}
-@keyframes marquee-scroll {
-  to { transform: translateX(-50%); }
-}
-
-/* ═══════════════════════════════════════════════
-   PROJECT INDEX ROWS · hover inverts to accent
-═══════════════════════════════════════════════ */
-.idx-row {
-  display: grid;
-  grid-template-columns: 64px 1.4fr 1fr auto;
-  align-items: center;
-  gap: 24px;
-  padding: 26px clamp(8px, 1.5vw, 20px);
-  border-bottom: 1px solid var(--line);
-  color: var(--text);
-  transition: background 250ms var(--ease-out), color 250ms var(--ease-out), padding-left 250ms var(--ease-out);
-  position: relative;
-}
-.idx-row:first-of-type { border-top: 1px solid var(--line); }
-.idx-row { cursor: pointer; }
-/* Stretched link · the title anchor covers the whole row */
-.idx-stretch::after { content: ''; position: absolute; inset: 0; }
-.idx-row:active { background: var(--surface-2); }
-@media (hover: hover) and (pointer: fine) {
-  .idx-row:hover {
-    background: var(--accent);
-    color: var(--accent-ink);
-    padding-left: clamp(16px, 2.5vw, 32px);
-  }
-  .idx-row:hover .idx-dim   { color: rgba(7, 10, 18, 0.65); }
-  .idx-row:hover .idx-title { color: var(--accent-ink); }
-  .idx-row:hover .idx-arrow { transform: translate(4px, -4px); opacity: 1; }
-  .idx-row:hover:active { background: var(--accent-2); }
-}
-.idx-row .idx-dim   { color: var(--text-3); transition: color 200ms var(--ease-out); }
-.idx-row .idx-title { transition: color 200ms var(--ease-out); }
-.idx-arrow {
-  opacity: 0.4;
-  transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out);
-}
-@media (max-width: 760px) {
-  .idx-row {
-    grid-template-columns: 40px 1fr auto;
-    gap: 14px;
-    padding-block: 20px;
-  }
-  .idx-row .idx-tech { display: none; }
-}
-
-/* ═══════════════════════════════════════════════
-   STICKY STACKING FEATURE CARDS
-═══════════════════════════════════════════════ */
-.stack-wrap { display: flex; flex-direction: column; gap: 0; }
-.stack-card {
-  position: sticky;
-  top: clamp(84px, 12vh, 120px);
-  background: var(--surface-1);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-panel);
-  padding: clamp(28px, 4vw, 56px);
-  margin-bottom: clamp(20px, 3vw, 40px);
-  min-height: clamp(360px, 52vh, 520px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
-}
-.stack-card .stack-num {
-  position: absolute;
-  right: clamp(20px, 3vw, 48px);
-  top: clamp(12px, 2vw, 28px);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(64px, 10vw, 140px);
-  line-height: 1;
-  font-variation-settings: "wdth" 78, "opsz" 96;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--line-strong);
-  pointer-events: none;
-}
-
-/* ═══════════════════════════════════════════════
    CARDS / CHIPS / BADGES (shared by status & misc pages)
 ═══════════════════════════════════════════════ */
-.card {
-  background: var(--surface-1);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-panel);
-  transition: border-color 250ms var(--ease-out);
-}
-.card:hover { border-color: var(--line-strong); }
-
 .badge {
   display: inline-flex;
   align-items: center;
@@ -575,12 +391,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--accent-2);
   border: 1px solid rgba(77, 98, 255, 0.35);
 }
-.badge-muted {
-  background: var(--surface-1);
-  color: var(--text-2);
-  border: 1px solid var(--line);
-}
-
 .chip {
   display: inline-flex;
   align-items: center;
@@ -634,43 +444,8 @@ a { color: inherit; text-decoration: none; }
 /* ═══════════════════════════════════════════════
    ANIMATION HOOKS
 ═══════════════════════════════════════════════ */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.6; transform: scale(0.9); }
-}
-@keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 40%, transparent); }
-  70%  { box-shadow: 0 0 0 8px color-mix(in srgb, currentColor 0%, transparent); }
-  100% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 0%, transparent); }
-}
-.pulse {
-  color: var(--accent-2);
-  animation:
-    pulse-dot 2.4s ease-in-out infinite,
-    pulse-ring 2.4s cubic-bezier(0.33, 1, 0.68, 1) infinite;
-}
-
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 1s linear infinite; }
-
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Scroll-cue line */
-@keyframes scroll-cue {
-  0%   { transform: scaleY(0); transform-origin: top; }
-  45%  { transform: scaleY(1); transform-origin: top; }
-  55%  { transform: scaleY(1); transform-origin: bottom; }
-  100% { transform: scaleY(0); transform-origin: bottom; }
-}
-.scroll-cue {
-  width: 1px;
-  height: 56px;
-  background: var(--text-2);
-  animation: scroll-cue 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
 
 /* Word-reveal targets (GSAP scrubs opacity) */
 .w-rv { opacity: 0.13; display: inline-block; }
@@ -911,46 +686,16 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   PROJECTS INDEX · hover preview
-═══════════════════════════════════════════════ */
-.idx-preview-pos {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 60;
-  pointer-events: none;
-  will-change: transform;
-}
-.idx-preview {
-  width: 300px;
-  height: 190px;
-  border-radius: var(--radius-panel);
-  overflow: hidden;
-  border: 1px solid var(--line-strong);
-  background-size: cover;
-  background-position: center;
-  background-color: var(--surface-1);
-  opacity: 0;
-  transform: translate(-50%, -112%) scale(0.95);
-  transition: opacity 180ms var(--ease-out), transform 200ms var(--ease-out);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
-}
-.idx-preview[data-show="true"] {
-  opacity: 1;
-  transform: translate(-50%, -112%) scale(1);
-}
-
-/* ═══════════════════════════════════════════════
    PHONE DOCK RESERVATION
-   The fixed bottom dock (Navbar) needs 64px plus
-   the safe area under every page. The navigation
-   agent sets body[data-route="game"] on /game,
-   where the dock is hidden and the space is not.
+   The fixed bottom dock (nav/Dock.tsx) needs 64px
+   plus the safe area under every page. /game sets
+   body[data-route="game"], where the dock is
+   hidden and the space is not.
 ═══════════════════════════════════════════════ */
 @media (max-width: 760px) {
   :root { --dock-space: calc(64px + env(safe-area-inset-bottom, 0px)); }
   body[data-route="game"] { --dock-space: 0px; }
-  .to-top { bottom: calc(var(--dock-space) + 12px); }
+  .to-top { display: none; }
 }
 
 /* ═══════════════════════════════════════════════
@@ -986,14 +731,12 @@ a { color: inherit; text-decoration: none; }
     transition-duration: 0.01ms !important;
   }
   html { scroll-behavior: auto; }
-  .marquee-track { animation: none; }
   .w-rv { opacity: 1; }
-  .scroll-cue { animation: none; }
   .btn-fill, .btn-line, .btn-down, .btn-up,
   .btn-fill::before, .btn-line::before, .btn-down::before, .btn-up::before,
-  .btn-down .btn-arrow, .btn-down .arr, .btn-up .btn-arrow, .btn-up .arr,
-  .link-u, .link-u::after, .chip, .card, .field-u, .copy-btn, .copy-btn .copy-btn-label,
-  .to-top, .idx-row, .idx-row .idx-dim, .idx-row .idx-title, .idx-arrow, .idx-preview {
+  .btn-down .arr, .btn-up .arr,
+  .link-u, .link-u::after, .chip, .field-u, .copy-btn, .copy-btn .copy-btn-label,
+  .to-top {
     transition: none;
   }
   /* Buttons change colour only: no press scale, no arrow travel */
@@ -1001,8 +744,6 @@ a { color: inherit; text-decoration: none; }
   .to-top:active {
     transform: none;
   }
-  .btn-down:hover .btn-arrow, .btn-down:active .btn-arrow,
-  .btn-up:hover .btn-arrow, .btn-up:active .btn-arrow,
   .btn-down:hover .arr, .btn-down:active .arr,
   .btn-up:hover .arr, .btn-up:active .arr {
     transform: none;

@@ -12,6 +12,8 @@ import s from "./MoreSheet.module.css";
 type Props = {
   open: boolean;
   onClose: () => void;
+  /** Closes without the menu toggle event, for a row or Search. */
+  onDismiss: () => void;
   /** The More button, which takes focus back when the sheet closes. */
   returnFocus: RefObject<HTMLButtonElement | null>;
 };
@@ -21,7 +23,7 @@ const FOCUSABLE = 'a[href], button:not([disabled])';
 // Bottom sheet behind the dock's More cell. Slides up over a dimmed page,
 // traps focus while open, and closes on Esc, backdrop tap, Close, a row,
 // or a route change (handled by the parent).
-export default function MoreSheet({ open, onClose, returnFocus }: Props) {
+export default function MoreSheet({ open, onClose, onDismiss, returnFocus }: Props) {
   const pathname = usePathname();
   const reduce = useReducedMotion() === true;
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -147,7 +149,7 @@ export default function MoreSheet({ open, onClose, returnFocus }: Props) {
                         link_url: item.href,
                         source: "dock_more",
                       });
-                      onClose();
+                      onDismiss();
                     }}
                   >
                     {item.label}
@@ -159,7 +161,7 @@ export default function MoreSheet({ open, onClose, returnFocus }: Props) {
                   type="button"
                   className={`${s.row} ${s.search}`}
                   onClick={() => {
-                    onClose();
+                    onDismiss();
                     openPalette();
                   }}
                 >

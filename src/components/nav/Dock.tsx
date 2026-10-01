@@ -36,8 +36,9 @@ export default function Dock() {
     trackEvent("mobile_menu_toggle", { state: next ? "open" : "close" });
   };
 
-  // Every user-initiated close (backdrop, Esc, Close, a row) goes through
-  // here; the route-change close above stays silent, like the old overlay.
+  // Backdrop, Esc and Close go through here. A row or Search closes the
+  // sheet silently, like the route-change close above, so a navigation
+  // reports only its nav_click.
   const closeSheet = useCallback(() => {
     setOpen(false);
     trackEvent("mobile_menu_toggle", { state: "close" });
@@ -98,7 +99,12 @@ export default function Dock() {
         </ul>
       </nav>
 
-      <MoreSheet open={open} onClose={closeSheet} returnFocus={moreRef} />
+      <MoreSheet
+        open={open}
+        onClose={closeSheet}
+        onDismiss={() => setOpen(false)}
+        returnFocus={moreRef}
+      />
     </>
   );
 }

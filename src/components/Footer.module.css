@@ -160,11 +160,14 @@
     row-gap: 24px;
     padding-block: 28px 24px;
   }
-  .links {
+  /* Equal tracks, so the page links and the socials share columns. */
+  .links,
+  .socials {
     display: grid;
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(3, minmax(max-content, 1fr));
     justify-content: start;
     column-gap: 28px;
+    row-gap: 24px;
   }
 }
 
