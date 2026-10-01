@@ -4,11 +4,14 @@ import { useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
-import InkLayer from "@/components/ink/InkLayer";
+import dynamic from "next/dynamic";
 import { setFillOrigin } from "@/lib/fillOrigin";
-import s from "./not-found.module.css";
 
 gsap.registerPlugin(ScrambleTextPlugin);
+
+// Loaded lazily: the not-found page sits in every route's tree, and a static
+// import made every page preload the ink stylesheet without using it.
+const InkLayer = dynamic(() => import("@/components/ink/InkLayer"), { ssr: false });
 
 const DRIP = { x: 0.68, y: 0.3 };
 
@@ -44,27 +47,27 @@ export default function NotFoundStage() {
 
   // Not <main>: the layout already provides one.
   return (
-    <section ref={stageRef} className={s.stage}>
+    <section ref={stageRef} className="nf-stage">
       <InkLayer intensity={0.55} idle opening={DRIP} />
-      <div className={s.ground} aria-hidden="true" />
+      <div className="nf-ground" aria-hidden="true" />
 
-      <div className={`container-x ${s.inner}`}>
-        <header className={s.head}>
+      <div className="container-x nf-inner">
+        <header className="nf-head">
           <h1 ref={titleRef} className="display-lg">
             404
           </h1>
-          <p className={`body-lg ${s.lede}`}>Page not found</p>
+          <p className="body-lg nf-lede">Page not found</p>
         </header>
 
-        <div className={s.text}>
-          <p className={`body-lg ${s.ask}`}>Lost among the stars?</p>
-          <p className={`body-lg ${s.line}`}>
+        <div className="nf-text">
+          <p className="body-lg nf-ask">Lost among the stars?</p>
+          <p className="body-lg nf-line">
             The page you&apos;re looking for seems to have drifted into a black
             hole. Let&apos;s get you back to solid ground.
           </p>
           <Link
             href="/"
-            className={`btn-line ${s.back}`}
+            className="btn-line nf-back"
             onPointerEnter={setFillOrigin}
             onPointerLeave={setFillOrigin}
           >

@@ -1,4 +1,5 @@
-@import "tailwindcss";
+/* Scan only src for class names, not the local tooling folders beside it. */
+@import "tailwindcss" source("..");
 
 :root {
   --surface-0: #070A12;
@@ -652,5 +653,104 @@ a { color: inherit; text-decoration: none; }
   .btn-down:hover .arr, .btn-down:active .arr,
   .btn-up:hover .arr, .btn-up:active .arr {
     transform: none;
+  }
+}
+
+/* Not-found page. Kept here rather than in a module: the not-found page is
+   in every route's tree, so its own stylesheet was preloaded on every page. */
+/* Hosts the ink canvas; pan-y keeps the page scrollable under a finger. */
+.nf-stage {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--surface-0);
+  touch-action: pan-y;
+}
+
+/* Keeps the text at AA where the two dyes meet and the canvas goes pale. */
+.nf-ground {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    80% 70% at 32% 55%,
+    rgba(7, 10, 18, 0.78) 0%,
+    rgba(7, 10, 18, 0.42) 45%,
+    rgba(7, 10, 18, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.nf-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding-top: 112px;
+  padding-bottom: clamp(64px, 10vh, 120px);
+}
+
+/* Matches the row grid in components/index/Row.module.css. */
+.nf-head,
+.nf-text {
+  padding-inline: calc(clamp(8px, 1.5vw, 20px) + 56px + 24px) clamp(8px, 1.5vw, 20px);
+}
+
+.nf-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 40px;
+  padding-bottom: clamp(20px, 2.4vw, 32px);
+  border-bottom: 1px solid var(--line);
+}
+.nf-head h1 {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.nf-lede {
+  margin: 0;
+  text-align: right;
+}
+
+.nf-text {
+  padding-top: clamp(24px, 3vw, 40px);
+}
+
+.nf-ask {
+  max-width: 44ch;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.nf-line {
+  max-width: 44ch;
+  margin: 0 0 32px;
+}
+
+.nf-back {
+  min-height: 44px;
+}
+
+@media (max-width: 760px) {
+  .nf-inner {
+    padding-top: 96px;
+  }
+  .nf-head,
+  .nf-text {
+    padding-inline: calc(8px + 28px + 12px) 8px;
+  }
+  .nf-head {
+    display: block;
+  }
+  .nf-lede {
+    margin-top: 12px;
+    text-align: left;
   }
 }
