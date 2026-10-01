@@ -1,5 +1,3 @@
-// The numbers on the home page, /about and the game's stat plaza.
-
 import { currentYear, profile } from "./profile";
 
 export type Stat = {

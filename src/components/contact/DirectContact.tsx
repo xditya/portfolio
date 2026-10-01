@@ -8,16 +8,13 @@ import s from "./DirectContact.module.css";
 const telegram = social("Telegram");
 const github = social("GitHub");
 
-// Email opens the mail app, so it stays in this tab. The other two are
-// external pages and open a new one.
 const directLinks = [
   { label: "Email", value: profile.email, href: `mailto:${profile.email}`, newTab: false },
   { label: "Telegram", value: bareUrl(telegram.href), href: telegram.href, newTab: true },
   { label: "GitHub", value: bareUrl(github.href), href: github.href, newTab: true },
 ];
 
-// Copies the address and shows "Copied" for two seconds. A short blur masks
-// each label swap (the .copy-btn styles in globals.css).
+// `swap` drives the short blur in .copy-btn that masks each label change.
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   const [swap, setSwap] = useState(false);

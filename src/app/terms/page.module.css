@@ -1,11 +1,3 @@
-/* Terms · page.tsx.
-   The same grid language as the links index: the title starts on the
-   column the clause titles start on and shares its baseline with the
-   sentence at the right edge; the intro sits between the header and the
-   list's top hairline. Each clause is a square row with its number in the
-   narrow index column, separated by hairlines. Nothing here moves. The
-   footer supplies the space under the closing lines. */
-
 .page {
   --index-col: 56px;
   --col-gap: 24px;
@@ -13,9 +5,8 @@
   padding-top: 88px;
 }
 
-/* Side padding follows the row grid in components/index/Row.module.css:
-   row padding + index column + column gap on the left, row padding on the
-   right. */
+/* Matches the row grid in components/index/Row.module.css: row padding +
+   index column + column gap. */
 .head,
 .intro,
 .closing {
@@ -39,8 +30,6 @@
   text-align: right;
 }
 
-/* ── Intro · the sentence between the title and the list ── */
-
 .intro {
   max-width: calc(54ch + var(--row-pad) + var(--index-col) + var(--col-gap) + var(--row-pad));
   margin: 0;
@@ -50,8 +39,6 @@
 .intro a {
   color: var(--accent-2);
 }
-
-/* ── Clauses ── */
 
 .list {
   margin: 0;
@@ -68,7 +55,6 @@
   border-bottom: 1px solid var(--line);
 }
 
-/* A quiet marker on the title's baseline. */
 .num {
   padding-top: 0.35em;
   color: var(--text-3);
@@ -91,8 +77,6 @@
   max-width: 54ch;
   margin: 0;
 }
-
-/* ── Closing lines ── */
 
 .closing {
   padding-block: clamp(24px, 3vw, 36px);

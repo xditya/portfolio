@@ -15,23 +15,14 @@ import s from "./InkButton.module.css";
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
-// How far the noise pushes the fill's edge around, in px, while the fill
-// arrives, and how long each half takes. Leaving is quicker than arriving.
-const DISPLACE = 44;
+const DISPLACE = 44; // px
 const ARRIVE_SECONDS = 0.8;
 const DISSOLVE_SECONDS = 0.4;
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement>;
 
-/**
- * A .btn-fill whose hover fill arrives as ink in water. The fill itself is
- * the class's own ::before, growing from the pointer's entry side by CSS;
- * on fine pointers with motion allowed, an SVG displacement filter (fractal
- * noise) is put over that layer while it grows and eased back to nothing,
- * so the edge wobbles like dye and then settles. The filter comes off once
- * settled, and never goes on for touch or reduced motion: there the button
- * is the plain .btn-fill.
- */
+// A .btn-fill whose fill edge is displaced while it animates; the filter is
+// removed once settled and never applied on touch or reduced motion.
 export default function InkButton({ children, onPointerEnter, onPointerLeave, ...rest }: Props) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const mapRef = useRef<SVGFEDisplacementMapElement>(null);

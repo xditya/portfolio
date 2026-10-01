@@ -1,9 +1,6 @@
-// The tech stack chips on /about. The first six are also the orbs in the
-// game's tech garden (src/lib/gameData.ts).
-// `logo` is the Simple Icons slug, served from /logos/<slug>.svg. `color` is
-// the tool's brand colour where it reads on a dark chip; brands that are
-// black or a deep blue get a lighter tint so every logo keeps at least 3:1
-// against the chip.
+// The first six are also the game's tech garden orbs (src/lib/gameData.ts).
+// `logo` is a Simple Icons slug at /logos/<slug>.svg. Dark brand colours are
+// lightened so every logo keeps at least 3:1 against the chip.
 
 export type TechStackItem = {
   name: string;

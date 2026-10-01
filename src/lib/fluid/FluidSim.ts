@@ -1,12 +1,9 @@
-/* A stable fluids solver on the GPU: advection, divergence, a Jacobi
-   pressure solve, curl with vorticity confinement, splats and a dye field
-   that decays. Written for this site. The class owns one WebGL context and
-   never allocates inside the frame loop: every framebuffer is created at
-   init or on resize and reused after that.
+/* Stable fluids on the GPU. Never allocates inside the frame loop: every
+   framebuffer is created at init or on resize.
 
-   Units: positions are fractions of the canvas (x from the left, y from the
-   top). Velocities and radii are fractions of the canvas height, per second
-   for velocities, so the motion looks the same on the 64 and 128 grids. */
+   Units: positions are fractions of the canvas (y from the top). Velocities
+   and radii are fractions of the canvas height (velocities per second), so
+   the motion looks the same on any grid size. */
 
 import {
   type GL,
@@ -59,7 +56,6 @@ export interface FluidOptions {
   /* Per second. The field loses this share of itself every second. */
   velocityDissipation: number;
   dyeDissipation: number;
-  /* Vorticity confinement strength. */
   curl: number;
   /* Fastest allowed flow, in canvas heights per second. */
   velocityMax: number;
@@ -131,7 +127,6 @@ export class FluidSim {
   private aspect = 1;
   private broken = false;
 
-  /* Returns the simulation, or the reason it could not be built. */
   static create(canvas: HTMLCanvasElement, opts: FluidOptions): FluidSim | string {
     const gl = getContext(canvas, {
       webgl1: opts.force?.webgl1,
@@ -153,7 +148,6 @@ export class FluidSim {
     this.opts = opts;
     this.webgl2 = isWebGL2(gl);
 
-    /* Pick the texture formats. Half float first, bytes as the fallback. */
     const force = opts.force || {};
     let halfType: number | null = null;
     let linear = false;
@@ -322,7 +316,6 @@ export class FluidSim {
     return null;
   }
 
-  /* True once the grids exist and nothing has failed. */
   get ready(): boolean {
     return this.p !== null && this.velocity !== null && !this.broken;
   }
@@ -401,7 +394,6 @@ export class FluidSim {
     this.curl = curl;
     this.divergence = divergence;
 
-    /* Texel sizes for every program that reads neighbours. */
     const simGrid = [p.divergence, p.curl, p.vorticity, p.pressure, p.gradient, p.clear, p.advectVel, p.splatVel];
     for (const prog of simGrid) {
       gl.useProgram(prog.program);
@@ -525,23 +517,8 @@ export class FluidSim {
     this.blit(null);
   }
 
-  /* Test helper: the drawn colour at a fraction position, read right after
-     render() in the same task. Not used by the frame loop. */
-  readPixel(x: number, y: number, out: Uint8Array): void {
-    const gl = this.gl;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
-    const px = Math.min(w - 1, Math.max(0, Math.floor(x * w)));
-    const py = Math.min(h - 1, Math.max(0, Math.floor((1 - y) * h)));
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.readPixels(px, py, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, out);
-  }
-
-  /* Free every GL object. The context itself stays alive: a canvas hands
-     back the same context on every getContext call, so losing it here would
-     leave a remount on the same canvas (React runs effects twice in
-     development) with a dead context and no ink. The browser reclaims the
-     context with the canvas. */
+  /* Keeps the context alive: a canvas returns the same context on every
+     getContext call, so losing it would break a strict mode remount. */
   dispose(): void {
     const gl = this.gl;
     const lost = gl.isContextLost();

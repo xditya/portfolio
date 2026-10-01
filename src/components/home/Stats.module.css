@@ -1,7 +1,3 @@
-/* Stats · four odometers in a row, two by two on phones. Bricolage for the
-   numbers (tabular so the count does not jitter), the accent for the
-   suffix, Geist sentence case for the labels. */
-
 .grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -23,7 +19,7 @@
   line-height: 1;
   letter-spacing: -0.03em;
   font-variation-settings: "wdth" 85, "opsz" 96;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; /* the count does not jitter */
   color: var(--text);
 }
 

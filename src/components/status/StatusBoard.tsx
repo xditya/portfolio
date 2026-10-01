@@ -57,7 +57,6 @@ async function fetchStatus(signal?: AbortSignal): Promise<View> {
   }
 }
 
-/** Today across every service: one sentence and a dot. */
 function Overall({ services }: { services: ServiceStatus[] }) {
   // A service with no reading yet says nothing about today.
   const today = services
@@ -111,11 +110,6 @@ function Strip({ service, at }: { service: ServiceStatus; at: number }) {
   );
 }
 
-/**
- * The seven services and their last 30 days. The server renders the loading
- * line; the data arrives in an effect and every later state, including the
- * time it was fetched, lives in `view`.
- */
 export default function StatusBoard() {
   const [view, setView] = useState<View>({ state: "loading" });
   const [refreshing, setRefreshing] = useState(false);
@@ -154,7 +148,7 @@ export default function StatusBoard() {
         </div>
       </header>
 
-      {/* One live region for the summary, present from the first render. */}
+      {/* Live region must exist from the first render to announce updates. */}
       <div className={s.summary} aria-live="polite">
         {view.state === "loading" && (
           <p className={s.note}>Fetching status data...</p>

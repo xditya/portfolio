@@ -1,9 +1,3 @@
-/* Game HUD and intro overlay. The world itself is drawn by three.js on a
-   canvas inside .mount; everything here floats over it. Colour, glass,
-   radius and easing tokens come from globals.css. Interactive things are
-   pills, the info panel is a 20px glass panel, and hover states only exist
-   for a fine pointer. */
-
 .root {
   position: relative;
   width: 100%;
@@ -24,7 +18,6 @@
   background: radial-gradient(ellipse at center, transparent 52%, rgba(3, 4, 8, 0.6) 100%);
 }
 
-/* The top row sits under the nav bar: zone name centred, help left, progress right. */
 .zone {
   position: absolute;
   top: 84px;
@@ -33,8 +26,7 @@
   letter-spacing: 0.2em;
   pointer-events: none;
   text-align: center;
-  /* The camera frames the spawn sign right under this label; a dark halo
-     keeps it readable over bright world text. */
+  /* Keeps the label readable over the bright spawn sign framed beneath it. */
   text-shadow: 0 0 6px var(--surface-0), 0 0 2px var(--surface-0);
 }
 
@@ -110,8 +102,6 @@
   pointer-events: none;
 }
 
-/* Info panel for the thing the player is standing next to. On phones it
-   clears the joystick and the go button. */
 .panel {
   position: absolute;
   bottom: 28px;
@@ -184,7 +174,6 @@
   color: var(--text-2);
 }
 
-/* Touch controls. The go button mirrors the joystick on the other side. */
 .go {
   position: absolute;
   right: 28px;
@@ -231,7 +220,6 @@
   pointer-events: none;
 }
 
-/* Intro and help overlay */
 .overlay {
   position: absolute;
   inset: 0;
@@ -285,7 +273,6 @@
   color: var(--text-2);
 }
 
-/* Shown instead of the world when the browser has no WebGL. */
 .fallback {
   min-height: 100svh;
   display: flex;

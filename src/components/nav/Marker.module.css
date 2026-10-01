@@ -1,6 +1,3 @@
-/* The tint behind the active or hovered item, shared by the desktop pill
-   and the phone dock so the two cannot drift apart. */
-
 .marker {
   position: absolute;
   inset: 0;

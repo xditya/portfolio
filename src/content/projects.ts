@@ -1,6 +1,3 @@
-// Every project on the site. The index, the home cards, the palette and the
-// game all read this list; the home cards use the optional short fields.
-
 export type Project = {
   name: string;
   /** Shorter name for tight layouts such as the home cards. */
@@ -18,7 +15,7 @@ export type Project = {
   stars?: number;
   users?: string;
   image?: string;
-  /** Gets the Featured mark in the index. */
+  /** Featured tag in the index; home placement is featuredOrder. */
   featured?: boolean;
   /** Stat label on the home cards, such as "Local-first" or "3K+ stars". */
   highlight?: string;
@@ -27,7 +24,6 @@ export type Project = {
 };
 
 export const projects: Project[] = [
-  // 2026
   {
     name: "pastr",
     tagline: "Paste text, get a link, decide when it disappears.",
@@ -87,7 +83,6 @@ export const projects: Project[] = [
     year: 2026,
     github: "https://github.com/xditya/alamara",
   },
-  // 2024
   {
     name: "Campus Services",
     tagline: "College services management app",
@@ -125,7 +120,6 @@ export const projects: Project[] = [
     github: "https://github.com/xditya/WhatsAppUtilitiesBot",
     image: "/images/whatsapputilities.png",
   },
-  // 2023
   {
     name: "GetRestrictedMessages",
     tagline: "Copy messages from restricted chats",
@@ -172,7 +166,6 @@ export const projects: Project[] = [
     github: "https://github.com/xditya/LyricsSearcher/",
     url: "https://github.com/xditya/LyricsSearcher/releases/tag/v0.1",
   },
-  // 2022
   {
     name: "ChannelActionsBot",
     shortName: "ChannelActions",
@@ -208,7 +201,6 @@ export const projects: Project[] = [
     year: 2022,
     github: "https://github.com/xditya/captchaBot",
   },
-  // 2021
   {
     name: "YouTubeFeeds",
     tagline: "YouTube video notifications on Telegram",
@@ -271,7 +263,6 @@ export const projects: Project[] = [
     github: "https://github.com/xditya/VCBot",
     stars: 38,
   },
-  // 2020
   {
     name: "GroupManager",
     tagline: "Python based group managing bot",
@@ -286,7 +277,6 @@ export const projects: Project[] = [
 
 export type FeaturedProject = Project & { featuredOrder: number; highlight: string };
 
-/** The home page set, in display order. */
 export function featuredProjects(): FeaturedProject[] {
   return projects
     .filter(
@@ -296,12 +286,12 @@ export function featuredProjects(): FeaturedProject[] {
     .sort((a, b) => a.featuredOrder - b.featuredOrder);
 }
 
-/** Every year with at least one project, newest first. */
+/** Newest first. */
 export function projectYears(): number[] {
   return [...new Set(projects.map((p) => p.year))].sort((a, b) => b - a);
 }
 
-/** Tech names with how many projects use each, most used first. Ties keep first appearance. */
+/** Most used first; ties keep first appearance. */
 export function techCounts(): [string, number][] {
   const counts = new Map<string, number>();
   projects.forEach((p) =>

@@ -7,24 +7,20 @@ export const alt = `${profile.name} · ${profile.role}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// The tokens from globals.css. The card is rendered by satori, which reads
-// no stylesheet, so the values are repeated here.
+// Satori reads no stylesheet, so these repeat the globals.css tokens.
 const GROUND = "#070A12";
 const TEXT = "#EEEDE6";
 const TEXT_2 = "#A6ABB8";
 const ACCENT = "#4D62FF";
 
-// The still of the ink layer: a pale core over an ultramarine drop, and a
-// cyan drop up and to the right. The first pool sits under the name's dot.
 const INK =
   "radial-gradient(ellipse 14% 20% at 66% 52%, rgba(185, 196, 255, 0.28) 0%, rgba(185, 196, 255, 0) 70%), " +
   "radial-gradient(ellipse 40% 64% at 66% 52%, rgba(77, 98, 255, 0.62) 0%, rgba(77, 98, 255, 0.26) 40%, rgba(77, 98, 255, 0) 72%), " +
   "radial-gradient(ellipse 30% 50% at 90% 14%, rgba(53, 211, 255, 0.36) 0%, rgba(53, 211, 255, 0.12) 42%, rgba(53, 211, 255, 0) 72%), " +
   GROUND;
 
-// Static ExtraBold cut of the display face: satori cannot drive a variable
-// font's axes. Read from the project root so the file is traced into the
-// build output.
+// Static cut because satori cannot drive variable font axes; read via cwd so
+// the file is traced into the build output.
 const FONT = join(process.cwd(), "src", "app", "BricolageGrotesque-ExtraBold.ttf");
 
 export default async function Image() {

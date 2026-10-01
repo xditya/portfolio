@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { headers } from "next/headers";
 
-// Validation schema for contact form
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -12,8 +11,7 @@ const contactSchema = z.object({
   hcaptchaToken: z.string().min(1, "Captcha token is required"),
 });
 
-// The Telegram message is sent as HTML, so a "<" or "&" typed into the form
-// has to become an entity or Telegram rejects the whole call.
+// Telegram rejects HTML-mode messages containing a raw "<" or "&".
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -23,7 +21,6 @@ function escapeHtml(value: string): string {
 }
 
 function getClientIP(headersList: Headers): string {
-  // Try different headers in order of preference
   const headersToCheck = [
     "x-real-ip",
     "x-forwarded-for",
@@ -35,9 +32,8 @@ function getClientIP(headersList: Headers): string {
   for (const header of headersToCheck) {
     const value = headersList.get(header);
     if (value) {
-      // Handle comma-separated IPs (take the first one)
       const ip = value.split(",")[0].trim();
-      // Remove IPv6 prefix if present
+      // Strip the IPv4-mapped IPv6 prefix.
       return ip.replace(/^::ffff:/, "");
     }
   }
@@ -46,7 +42,6 @@ function getClientIP(headersList: Headers): string {
 }
 
 async function getLocationInfo(ip: string) {
-  // Skip lookup for local IPs
   if (ip === "127.0.0.1" || ip === "localhost" || ip === "Unknown") {
     return {
       country: "Local Development",
@@ -63,7 +58,6 @@ async function getLocationInfo(ip: string) {
     }
     const data = await response.json();
 
-    // Check if we got valid data
     if (!data.country_name || !data.city) {
       throw new Error("Invalid location data");
     }
@@ -112,7 +106,6 @@ export async function POST(request: Request) {
       throw validationError;
     }
 
-    // Verify hCaptcha token
     const hcaptchaResponse = await fetch("https://hcaptcha.com/siteverify", {
       method: "POST",
       headers: {
@@ -130,8 +123,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid captcha" }, { status: 400 });
     }
 
-    // Format message with HTML. Everything interpolated came from the
-    // request or a third party, so all of it is escaped.
+    // Every interpolated value is untrusted, so all of it is escaped.
     const e = escapeHtml;
     const telegramMessage = `
 <b>📨 New Contact Form Submission</b>

@@ -16,18 +16,15 @@ async function fetchStatusLog(key: string): Promise<StatusData | null> {
         headers: {
           Accept: "application/vnd.github.raw",
         },
-        // Cache data for 5 minutes
         next: { revalidate: 300 },
       }
     );
 
     if (!response.ok) {
-      // If the file doesn't exist, return null data
       if (response.status === 404) {
         console.warn(`Status log not found for ${key}`);
         return {
           upTime: "--%",
-          // Initialize 30 days with null data
           ...Object.fromEntries(
             Array.from({ length: maxDays }, (_, i) => [i, null])
           ),
@@ -42,7 +39,6 @@ async function fetchStatusLog(key: string): Promise<StatusData | null> {
     return normalizeData(statusLines);
   } catch (error) {
     console.error(`Error fetching status for ${key}:`, error);
-    // Return null data on error
     return {
       upTime: "--%",
       ...Object.fromEntries(
@@ -53,22 +49,21 @@ async function fetchStatusLog(key: string): Promise<StatusData | null> {
 }
 
 function normalizeData(statusLines: string): StatusData {
-  const rows = statusLines.split("\n").filter((row) => row.trim() !== ""); // Filter out empty rows
+  const rows = statusLines.split("\n").filter((row) => row.trim() !== "");
   const dateValues = splitRowsByDate(rows);
 
   const relativeDateMap: {
     [key: number]: number | null;
     upTime: string;
   } = {
-    upTime: dateValues.upTime as string, // upTime is already a string from splitRowsByDate
+    upTime: dateValues.upTime as string,
   };
 
   const now = Date.now();
 
-  // Ensure we cover the last maxDays days, even if no data exists
   for (let i = 0; i < maxDays; i++) {
     const targetDate = new Date(now - i * 24 * 60 * 60 * 1000);
-    targetDate.setHours(0, 0, 0, 0); // Normalize to start of day
+    targetDate.setHours(0, 0, 0, 0);
     const dateStr = targetDate.toDateString();
 
     const dailyValues = dateValues.dailyData[dateStr];
@@ -94,9 +89,8 @@ function splitRowsByDate(rows: string[]): SplitData {
 
   for (const row of rows) {
     const [dateTimeStr, resultStr] = row.split(",", 2);
-    // Parse the date strictly so odd input formats fail loudly
-    // This assumes 'YYYY-MM-DD HH:mm:ss Z' or similar parseable format
-    const dateTime = new Date(dateTimeStr + " GMT"); // Append GMT to treat as UTC
+    // Log timestamps are UTC without a zone suffix.
+    const dateTime = new Date(dateTimeStr + " GMT");
     const dateStr = dateTime.toDateString();
 
     if (!dailyData[dateStr]) {
@@ -105,8 +99,7 @@ function splitRowsByDate(rows: string[]): SplitData {
 
     const outcome = resultStr?.trim();
     const result = outcome === "success" ? 1 : 0;
-    // Only checks with a verdict count towards the uptime figure. The logs
-    // write "failed"; "failure" is kept for older rows.
+    // Only verdicts count towards uptime; "failure" appears in older rows.
     if (outcome === "success" || outcome === "failed" || outcome === "failure") {
       sum += result;
       count++;
@@ -124,7 +117,6 @@ function getDayAverage(val: number[] | undefined): number | null {
   if (!val || val.length === 0) {
     return null;
   }
-  // Ensure all values are numbers before reducing
   const numericValues = val.filter((v) => typeof v === "number") as number[];
   if (numericValues.length === 0) return null;
   return numericValues.reduce((a, v) => a + v, 0) / numericValues.length;

@@ -1,16 +1,9 @@
-/* Footer · the sign-off, page links, socials and the copyright line.
-   Tokens come from globals.css (:root). Geist for the eyebrow and links,
-   Bricolage for the wordmark and the sign-off, Geist Mono for the
-   copyright line only. */
-
 .footer {
   position: relative;
   z-index: 2;
   margin-top: clamp(80px, 12vw, 160px);
   border-top: 1px solid var(--line);
 }
-
-/* ── Sign-off ── */
 
 .signoff {
   padding-block: clamp(64px, 10vw, 160px) 0;
@@ -29,10 +22,6 @@
   color: var(--accent-2);
 }
 
-/* The big link spans the row: words on the left gutter, arrow on the right
-   one, and the line rests on the hairline of the bottom row. Hover follows
-   the external-link rule: the arrow nudges up and to the right and the text
-   turns pale. No fill. */
 .cta {
   display: flex;
   justify-content: space-between;
@@ -61,8 +50,6 @@
 .cta:focus-visible .arrow { transform: translate(0.1em, -0.1em); }
 
 .cta:active { transform: scale(0.98); }
-
-/* ── Bottom row ── */
 
 .bottom {
   border-top: 1px solid var(--line);
@@ -115,8 +102,7 @@
   transition: color 200ms var(--ease-out);
 }
 
-/* A 44px tall hit area around the 20px line of text. The 24px row gaps
-   keep stacked areas from overlapping. */
+/* 44px hit area; the 24px row gaps keep stacked areas from overlapping. */
 .link::before,
 .social::before {
   content: "";
@@ -124,7 +110,6 @@
   inset: -12px -8px;
 }
 
-/* Page links go bone on hover, external links go pale. */
 @media (hover: hover) and (pointer: fine) {
   .link:hover { color: var(--text); }
   .social:hover { color: var(--accent-2); }
@@ -140,8 +125,6 @@
   color: var(--text-3);
 }
 
-/* ── Tablet · socials take their own row ── */
-
 @media (max-width: 1100px) {
   .bar {
     grid-template-columns: auto 1fr;
@@ -151,8 +134,6 @@
     justify-content: flex-start;
   }
 }
-
-/* ── Phone · everything stacks, links sit in two rows of three ── */
 
 @media (max-width: 760px) {
   .bar {
@@ -170,8 +151,6 @@
     row-gap: 24px;
   }
 }
-
-/* ── Reduced motion · colour changes only, nothing moves ── */
 
 @media (prefers-reduced-motion: reduce) {
   .cta,

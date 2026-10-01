@@ -1,6 +1,3 @@
-// Site navigation: the navbar, the footer's page links and the palette's
-// Pages group.
-
 export type NavItem = {
   href: string;
   label: string;

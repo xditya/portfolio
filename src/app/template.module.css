@@ -1,13 +1,6 @@
-/* Page transition · ink bloom on enter.
-   The new route is revealed through a circle that grows from where the
-   pointer last went down, with a short opacity fade underneath. The
-   centre (--bx / --by) and the covering radius (--br) are inline on the
-   wrapper, written by PageBloom.tsx in page-box pixels before the first
-   paint; the fallbacks place the origin a fifth of the way down the first
-   screen for the moment before hydration on a fresh load. Only clip-path
-   and opacity animate. The animation leaves nothing behind once it ends
-   (no forwards fill), so a tall page is never clipped and the wrapper
-   stops being a stacking context. */
+/* --bx / --by / --br are set inline by PageBloom.tsx; the fallbacks cover
+   the moment before hydration. No forwards fill, so a tall page is never
+   left clipped and the wrapper stops being a stacking context. */
 
 .page {
   animation:
@@ -29,14 +22,12 @@
   to   { opacity: 1; }
 }
 
-/* Phones · a short fade instead of the bloom */
 @media (max-width: 760px) {
   .page {
     animation: fade 200ms var(--ease-out) backwards;
   }
 }
 
-/* Reduced motion · the page simply appears */
 @media (prefers-reduced-motion: reduce) {
   .page {
     animation: none;

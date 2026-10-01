@@ -3,13 +3,11 @@
 import { profile } from "@/content";
 import s from "./Avatar.module.css";
 
-// The initial is painted behind the picture (Avatar.module.css), so hiding
-// a picture that failed to load is all the fallback needs.
+// The initial is painted behind the picture, so hiding a failed image is the fallback.
 function hide(img: HTMLImageElement) {
   img.style.display = "none";
 }
 
-/** The round profile picture, with the first letter of the name behind it. */
 export default function Avatar() {
   return (
     <span className={s.avatar} data-initial={profile.name[0]}>

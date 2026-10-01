@@ -1,11 +1,4 @@
-/* Hero · the ink pool with the name on it and one row under a hairline:
-   tagline and location on the left, the two CTAs with the availability
-   line under them on the right. The two small facts are quiet meta text,
-   each next to what it belongs to, and never joined into one line (that
-   read as "available in Kerala"). InkLayer fills the section with its canvas and listens for
-   pointer events on the section itself, so the section owns position,
-   overflow and touch-action. Tokens come from globals.css. */
-
+/* InkLayer listens on the section, so it owns position, overflow and touch-action. */
 .hero {
   position: relative;
   isolation: isolate;
@@ -18,18 +11,9 @@
   touch-action: pan-y;
 }
 
-/* Keeps the type readable where the ink pools. Two layers over the canvas:
-   a band that rises from the bottom edge and holds the bottom row (tagline
-   and CTAs) on a near-solid ground, and the prototype's radial fall-off
-   toward the top corners. The band is what the small text needs: a trail or
-   a press leaves dense dye under the pointer, and where both inks meet the
-   canvas goes almost white, so nothing short of an 80% ground under the
-   row keeps --text-2 at AA there. The stops are in px from the bottom so
-   the strong part covers the row at any viewport height: the tagline's top
-   edge sits at most 190px up on desktop (761px wide, the actions wrapped
-   under it) and 270px up on phones, where the row is taller and clears the
-   dock. Above that the band fades out fast so the pool behind the name
-   keeps most of its colour. */
+/* Where both inks meet the canvas goes almost white, so the bottom row needs
+   an 80%+ ground to keep --text-2 at AA. Stops are px from the bottom so the
+   band covers the row (at most 190px tall on desktop, 270px on phones). */
 .vignette {
   position: absolute;
   inset: 0;
@@ -63,10 +47,7 @@
   padding-bottom: clamp(32px, 5vh, 56px);
 }
 
-/* ── Availability line · quiet meta text with one small green dot ──
-   It sits in the dark band with the rest of the row, so it needs no ground
-   of its own. The pseudo-element gives the link a 44px tall target. */
-
+/* The pseudo-element gives the link a 44px tall target. */
 .status {
   position: relative;
   display: inline-flex;
@@ -100,10 +81,7 @@
   background: var(--ok);
 }
 
-/* ── Name · .display-hero from globals, width driven by --w ──
-   The width axis is set here rather than through the global class so
-   Hero.tsx can scrub it (78 at rest, 100 once the hero has scrolled out). */
-
+/* Width axis set here, not in .display-hero, so Hero.tsx can scrub --w. */
 .hero .name {
   margin: 0 0 0 -0.04em;
   font-variation-settings: "wdth" var(--w, 78), "opsz" 96;
@@ -113,8 +91,6 @@
 .dot {
   color: var(--accent);
 }
-
-/* ── Bottom row · who and where on the left, actions on the right ── */
 
 .row {
   display: flex;
@@ -132,8 +108,7 @@
   gap: 8px;
 }
 
-/* The auto margin keeps the actions at the right edge when the row wraps
-   them onto a line of their own. */
+/* Auto margin keeps the actions right-aligned when the row wraps. */
 .actions {
   display: flex;
   flex-direction: column;
@@ -170,8 +145,6 @@
   gap: 10px;
 }
 
-/* ── Phone · clears the dock, tighter rhythm ── */
-
 @media (max-width: 760px) {
   .vignette {
     background:
@@ -201,8 +174,6 @@
     margin-left: 0;
   }
 }
-
-/* ── Reduced motion · nothing transitions ── */
 
 @media (prefers-reduced-motion: reduce) {
   .status {

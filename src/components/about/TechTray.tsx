@@ -13,40 +13,30 @@ const MAX_SPEED = 40; // px per step, so a hard flick cannot tunnel a wall
 const CALM_FRAMES = 30; // still for this long: stop the loop until the next touch
 const ARC = 8; // segments per rounded end of a chip's outline
 const TAU = Math.PI * 2;
-// A body is a shade larger than its chip, so what squish the solver leaves
-// in a deep pile happens between the outlines, not between the chips.
+// Bodies are a shade larger than chips, so solver squish in a deep pile
+// lands between the outlines instead of overlapping chips.
 const BODY_MARGIN = 1;
 
-// The tray's height follows from the chips: the loose pile stands about
-// PACK times as tall as the chips' area spread over the tray's width, plus
-// a crown of leaning chips on top, measured in chip heights. The crown also
-// holds the clearance under the top edge.
+// Pile height ~ PACK x (chip area / tray width), plus CROWN chip heights of
+// leaning chips and clearance on top.
 const PACK = 1.3;
 const CROWN = 3;
 
-// The pour: chips enter one after another through the top edge.
 const CADENCE = 2; // steps between two chips, at the fastest
 const CLEAR = 5; // steps a chip needs to fall out of the way of the next one
 const ENTRY_SPEED = 14; // px per step, downwards
 const ENTRY_TILT = 0.3; // spread of the entry angle, rad
 
-// A spring towards upright for chips that lean further than LEAN, so none
-// rests on end or upside down. Chips close to flat are left to the pile.
-// Angular acceleration per ms² for each radian of lean past LEAN.
+// Righting spring past LEAN so no chip rests on end: angular acceleration
+// per ms² per radian of lean. Past STEEP a stiffer spring that never eases off.
 const RIGHTING = 8e-5;
 const LEAN = 0.25; // rad
-// Past STEEP a second, stiffer spring joins in, and that one never lets go.
 const STEEP_RIGHTING = 3e-4;
 const STEEP = 0.6; // rad
 
-// A pile this deep keeps creeping long after it has landed, and the spring
-// keeps it shuffling. So SETTLE_AFTER steps after the last chip was let go,
-// poured in or moving faster than FAST, the air thickens and the spring lets
-// go over SETTLE_OVER steps, which eases the pile to a stop. Nothing gets
-// past FAST in thick air, so from there only a pointer wakes the pile.
-// Gravity eases off at the same time: a stack of seventeen rows under full
-// weight sinks into itself faster than the solver can push it apart, and a
-// lighter pile lets the last of that squish out.
+// A deep pile creeps forever, so SETTLE_AFTER quiet steps in, air thickens,
+// the spring and gravity ease off over SETTLE_OVER steps; lighter gravity
+// lets the solver push the remaining overlap out.
 const AIR = 0.02;
 const THICK_AIR = 0.2;
 const GRAVITY = 1.2;
@@ -55,22 +45,16 @@ const FAST = 4; // px per step
 const FAST_TURN = 0.1; // rad per step
 const SETTLE_AFTER = 30;
 const SETTLE_OVER = 20;
-// Thick air for this long past the end of the settle counts as still, even
-// if a wedged chip is still twitching under the steep spring.
+// Past this, thick air counts as still even if a wedged chip still twitches.
 const SETTLE_CAP = SETTLE_AFTER + SETTLE_OVER + 90;
 const DRAG_START = 4; // px the pointer travels before a press counts as a drag
-// Phone tilt: sideways lean of the device, in degrees, that gives the full
-// sideways pull; smaller leans scale down, and a lean under the dead zone
-// counts as level so a phone held in the hand does not keep the pile awake.
+// Device lean in degrees for full sideways pull; under the dead zone counts
+// as level so a hand-held phone does not keep the pile awake.
 const TILT_FULL = 30;
 const TILT_DEAD = 4;
 
-/**
- * The outline of a chip around its centre, clockwise. Matter's own chamfer
- * stops each corner arc one step short, which leaves the long edges slightly
- * slanted and a resting chip tilted by about a degree; this one is symmetric,
- * so a chip lies flat.
- */
+// Matter's chamfer stops each arc one step short and leaves resting chips
+// tilted about a degree; this outline is symmetric so chips lie flat.
 function pill(w: number, h: number) {
   const r = h / 2;
   const half = w / 2 - r;
@@ -84,11 +68,6 @@ function pill(w: number, h: number) {
   return points;
 }
 
-/**
- * Turns the static chip list into a physics tray. Everything lives in this
- * closure and on the DOM nodes (no React state), and the returned function
- * undoes all of it.
- */
 function mountTray(tray: HTMLElement) {
   const chips = Array.from(tray.children) as HTMLElement[];
   const count = chips.length;
@@ -135,12 +114,8 @@ function mountTray(tray: HTMLElement) {
   let tiltOn = false;
   let tiltAsking = false;
 
-  /**
-   * Moves the chips to their bodies. The solver leaves a resting chip a
-   * fraction of a pixel and a fraction of a degree off, which softens its text
-   * and hairline, so the last frame before the loop stops puts every chip on
-   * whole pixels, and flat if it is within half a degree of flat.
-   */
+  // Resting chips snap to whole pixels and to flat within half a degree,
+  // since subpixel offsets blur the text and hairline.
   const draw = (resting = false) => {
     for (let i = 0; i < count; i++) {
       const b = bodies[i];
@@ -162,10 +137,7 @@ function mountTray(tray: HTMLElement) {
     }
   };
 
-  /**
-   * Lets the next chip in if there is room for it under the top edge: a
-   * place along the width that no chip has come through in the last moment.
-   */
+  // Next chip enters at an x no recent chip has come through.
   const pour = () => {
     if (!M || !engine || poured >= count || tick < nextAt) return;
     const i = order[poured];
@@ -277,11 +249,9 @@ function mountTray(tray: HTMLElement) {
     delete tray.dataset.dragging;
   };
 
-  /** Builds (or rebuilds, after the width changed) the walls and one body per chip. */
   const build = () => {
-    // No box means nothing to measure: the list has just been taken out of the
-    // document (the observer can fire before the cleanup runs) or sits in a
-    // hidden subtree. The next resize builds it.
+    // No box: detached (the observer can fire before cleanup) or hidden.
+    // The next resize builds it.
     if (!M || disposed || reduced.matches || !tray.clientWidth) return;
     const { Bodies, Composite, Engine } = M;
     const first = engine === null;
@@ -291,16 +261,11 @@ function mountTray(tray: HTMLElement) {
     // Seventeen rows of chips on a phone need many passes to be pushed apart.
     engine ??= Engine.create({ gravity: { x: 0, y: GRAVITY }, positionIterations: 20, velocityIterations: 6 });
 
-    // Back to the wrapped list for a moment to measure the chips. Its height
-    // (the stylesheet adds clearance above the rows) is the tray's estimate
-    // of what the pile needs; the pile's own need is worked out from the
-    // chips' area below, and that is what the tray is pinned to.
+    // Back to the wrapped list for a moment to measure the chips.
     delete tray.dataset.live;
     tray.style.height = "";
     const box = tray.getBoundingClientRect();
-    // A tray that is on screen when it first comes alive keeps its chips
-    // where they are. In every other case (still below the fold, or built
-    // again for a new width) they wait above the top edge and pour in.
+    // On screen at first build: chips stay put. Otherwise they pour in.
     const inPlace = first && box.bottom > 0 && box.top < window.innerHeight;
     sizes = chips.map((c) => ({ w: c.offsetWidth, h: c.offsetHeight }));
     const home = inPlace
@@ -418,16 +383,15 @@ function mountTray(tray: HTMLElement) {
 
   const onMove = (e: PointerEvent) => {
     if (!grab || e.pointerId !== grab.id) return;
-    // A press that stays put is not a drag: a double click can still select
-    // a chip's name. Selection is switched off only once the chip is pulled.
+    // Selection is turned off only once the chip moves, so a double click
+    // can still select a chip's name.
     if (!grab.dragging && Math.hypot(e.clientX - grab.x, e.clientY - grab.y) > DRAG_START) {
       grab.dragging = true;
       tray.dataset.dragging = "";
       window.getSelection()?.removeAllRanges();
     }
-    // The anchor stops where the chip meets a wall, so the pull can never
-    // drive a chip into one, however far the pointer goes. pointB is the
-    // grip's offset from the chip's centre, kept in world orientation.
+    // Clamp the anchor where the chip meets a wall so the pull cannot drive
+    // it through. pointB is the grip offset in world orientation.
     const at = point(e);
     const { bounds, position } = grab.body;
     const { pointB } = grab.link;
@@ -448,9 +412,7 @@ function mountTray(tray: HTMLElement) {
 
   const onVisibility = () => (document.hidden ? pause() : run());
 
-  // Gravity follows the phone's lean: tilt it and the pile slides that way.
-  // Only the sideways axis is used, so the pile never falls up. The lean is
-  // read against the screen's rotation, so landscape works the same.
+  // Sideways axis only, so the pile never falls up; corrected for screen rotation.
   const onTilt = (e: DeviceOrientationEvent) => {
     const beta = e.beta ?? 0;
     const gamma = e.gamma ?? 0;
@@ -473,10 +435,8 @@ function mountTray(tray: HTMLElement) {
   const tiltPermission = () =>
     (window.DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> } | undefined)
       ?.requestPermission;
-  // Some browsers hand out orientation events only after a permission
-  // request. Asked once when the tray builds; where that needs a user
-  // gesture (iOS) it fails quietly and is asked again when a chip is
-  // released, which is one.
+  // iOS needs a user gesture for the permission: the build-time ask fails
+  // quietly and is retried on chip release.
   const askTilt = () => {
     if (tiltOn || tiltAsking || !coarse || !("DeviceOrientationEvent" in window)) return;
     const ask = tiltPermission();

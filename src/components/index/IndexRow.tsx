@@ -5,9 +5,8 @@ import type { ReactNode } from "react";
 import { RowHighlight, useActiveRow } from "./RowHighlight";
 import s from "./Row.module.css";
 
-/** The list the rows sit in. It draws the top hairline; rows draw the rest. */
 export function RowList({ children }: { children: ReactNode }) {
-  // The explicit role keeps the list announced where list-style: none drops it.
+  // Safari drops list semantics with list-style: none.
   return (
     <ul className={s.list} role="list">
       {children}
@@ -15,7 +14,6 @@ export function RowList({ children }: { children: ReactNode }) {
   );
 }
 
-/** A small text tag: "Featured", "internal", "external". */
 export function RowTag({
   children,
   accent = false,
@@ -42,18 +40,13 @@ type IndexRowProps = {
   external?: boolean;
   /** Accessible name for the link when the title alone does not say enough. */
   linkLabel?: string;
-  /** Sits beside the title. */
   tag?: ReactNode;
-  /** The secondary line under the title. */
   subtitle: string;
   /** Middle column on desktop; drops under the subtitle on phones. */
   middle?: ReactNode;
   /** Sits before the arrow. Links and buttons in here stay clickable. */
   end?: ReactNode;
-  /**
-   * Phones only: the row becomes a button that opens `children` instead of
-   * following the link. `panelId` is the id of the element it controls.
-   */
+  /** Phones only: the title becomes a button toggling `children` (panelId). */
   disclosure?: { open: boolean; onToggle: () => void; panelId: string };
   /** Rendered under the row, inside the same list item. */
   children?: ReactNode;

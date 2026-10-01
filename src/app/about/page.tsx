@@ -7,8 +7,7 @@ import TechTray from "@/components/about/TechTray";
 import TimelineEntry from "@/components/about/TimelineEntry";
 import s from "./page.module.css";
 
-// The GitHub numbers are fetched when the page is built and refreshed
-// every hour after that, the same as on the home page.
+// GitHub stats refresh hourly.
 export const revalidate = 3600;
 
 export const metadata: Metadata = { title: "About" };

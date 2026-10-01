@@ -10,9 +10,6 @@ type Props = {
   reduce: boolean;
 };
 
-// The tint behind the active (or hovered) item. It renders inside whichever
-// item currently owns it; sharing a layoutId lets Motion spring it from the
-// old item to the new one instead of cutting.
 export default function Marker({ id, reduce }: Props) {
   return (
     <motion.span

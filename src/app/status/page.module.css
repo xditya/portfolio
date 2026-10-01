@@ -1,6 +1,3 @@
-/* Status · page.tsx. The board brings its own header; the footer supplies
-   the space under the legend. */
-
 .page {
   padding-top: 88px;
 }

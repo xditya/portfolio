@@ -17,10 +17,8 @@ export default function SmoothScroll() {
       touchMultiplier: 2,
     });
 
-    // Keep GSAP ScrollTrigger in sync with Lenis
     lenis.on("scroll", ScrollTrigger.update);
 
-    // Tick via GSAP's RAF so timings are unified
     gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
     });

@@ -1,70 +1,47 @@
 @import "tailwindcss";
 
-
-/* ═══════════════════════════════════════════════
-   TOKENS · "Ink & Water"
-   Deep ink ground · bone text · ultramarine accent
-   The two dye colours exist only inside the fluid
-   layer. Status colours are for /status alone.
-═══════════════════════════════════════════════ */
 :root {
-  /* Ground and surfaces */
-  --surface-0: #070A12;   /* ground */
-  --surface-1: #0C1120;   /* surface · cards, panels, the nav pill */
-  --surface-2: #131A2C;   /* raised, hover */
+  --surface-0: #070A12;
+  --surface-1: #0C1120;
+  --surface-2: #131A2C;
 
-  /* Text */
   --text:   #EEEDE6;
-  --text-2: #A6ABB8;      /* secondary */
-  --text-3: #7D8497;      /* muted, meta · lifted from #626879 so 12px meta text clears 4.5:1 on every surface */
+  --text-2: #A6ABB8;
+  --text-3: #7D8497;      /* clears 4.5:1 for 12px text on every surface */
 
-  /* Accent */
   --accent:   #4D62FF;
-  --accent-2: #B9C4FF;    /* pale · links and hover on dark */
+  --accent-2: #B9C4FF;
 
-  /* Dye · fluid layer only */
   --dye-1: #4D62FF;
   --dye-2: #35D3FF;
 
-  /* Hairlines */
   --line:        rgba(238, 237, 230, 0.09);
   --line-strong: rgba(238, 237, 230, 0.18);
 
-  /* Glass · one material for the floating shell. The tints are opaque
-     enough that secondary text stays readable over the ink layer even
-     without the blur. Chip = nav pill, float = dock and back-to-top,
-     bar = the scrolled header. */
+  /* Opaque enough that secondary text stays readable over the ink layer without the blur. */
   --glass-chip:   rgba(12, 17, 32, 0.74);
   --glass-float:  rgba(12, 17, 32, 0.82);
   --glass-bar:    rgba(7, 10, 18, 0.82);
   --glass-filter: blur(14px) saturate(140%);
   --glass-line:   var(--line-strong);
 
-  /* Status · /status only */
   --ok:   #3DDC97;
   --warn: #F5B84A;
   --bad:  #FF5C6C;
 
-  /* Font stacks · the next/font variables are set on <html> by layout.tsx */
   --font-display: var(--font-bricolage), system-ui, sans-serif;
   --font-body:    var(--font-geist), system-ui, sans-serif;
   --font-mono:    var(--font-geist-mono), ui-monospace, monospace;
 
-  /* Motion · one easing family */
   --ease-out:    cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.3, 1.4, 0.4, 1);
 
-  /* Shape · pill for interactive, 20px for panels and images, hairlines for rows */
   --radius-pill:  999px;
   --radius-panel: 20px;
 
-  /* Phone dock reservation · set on phones below, zero on /game */
   --dock-space: 0px;
 }
 
-/* ═══════════════════════════════════════════════
-   BASE
-═══════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
@@ -121,19 +98,8 @@ h1, h2, h3, h4, h5, h6 {
 
 a { color: inherit; text-decoration: none; }
 
-/* ═══════════════════════════════════════════════
-   GROUND · plain
-   The film grain and the top glow are gone. The
-   ink layer is the page's only texture.
-   `grid-bg` stays as the body hook in layout.tsx.
-═══════════════════════════════════════════════ */
 .grid-bg { background-color: var(--surface-0); }
 
-/* ═══════════════════════════════════════════════
-   LAYOUT PRIMITIVES
-   Content 1280px · gutters 20px phone, 48px desktop
-   Sections 96-160px desktop, 64-96px phone
-═══════════════════════════════════════════════ */
 .container-x {
   max-width: 1280px;
   margin: 0 auto;
@@ -141,12 +107,6 @@ a { color: inherit; text-decoration: none; }
   padding-right: clamp(20px, 3.5vw, 48px);
 }
 
-/* ═══════════════════════════════════════════════
-   TYPE SYSTEM
-   Display: Bricolage Grotesque, width 90 (hero 78),
-   optical size 96. Body: Geist 17/1.6.
-   Labels and data: Geist Mono.
-═══════════════════════════════════════════════ */
 .display-hero {
   font-family: var(--font-display);
   font-weight: 800;
@@ -183,7 +143,6 @@ a { color: inherit; text-decoration: none; }
   font-variation-settings: "wdth" 92, "opsz" 96;
 }
 
-/* Small label · Geist 12, uppercase. */
 .mono-label {
   font-family: var(--font-body);
   font-size: 12px;
@@ -193,7 +152,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-3);
 }
 
-/* Small data · Geist Mono 12 */
 .mono-sm {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -207,15 +165,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-2);
 }
 
-/* ═══════════════════════════════════════════════
-   BUTTONS · pills whose fill moves the way the
-   action moves. `--o` is the pointer's entry side, set on pointerenter.
-     .btn-fill  accent, fills pale from the entry side
-     .btn-line  outline, fills accent from the entry side
-     .btn-down  pours top to bottom (downloads)
-     .btn-up    sweeps diagonally toward ↗ (external links)
-   Phones keep only the press state.
-═══════════════════════════════════════════════ */
+/* `--o` is the pointer's entry side, set on pointerenter. */
 .btn-fill,
 .btn-line,
 .btn-down,
@@ -245,7 +195,6 @@ a { color: inherit; text-decoration: none; }
     transform 180ms var(--ease-out);
 }
 
-/* The fill layer sits above the button's own background and below its text */
 .btn-fill::before,
 .btn-line::before,
 .btn-down::before,
@@ -298,7 +247,6 @@ a { color: inherit; text-decoration: none; }
   transition-duration: 550ms;
 }
 
-/* Arrow glyphs move where the action goes */
 .btn-down .arr,
 .btn-up .arr {
   display: inline-block;
@@ -317,7 +265,6 @@ a { color: inherit; text-decoration: none; }
   transform: none;
 }
 
-/* Hover fills only on devices that actually hover */
 @media (hover: hover) and (pointer: fine) {
   .btn-fill:hover { color: var(--surface-0); }
   .btn-fill:hover::before { transform: scaleX(1); }
@@ -346,7 +293,6 @@ a { color: inherit; text-decoration: none; }
   .btn-line:disabled:hover::before { transform: scaleX(0); }
 }
 
-/* Underlined text link with grow-in line */
 .link-u {
   position: relative;
   display: inline-block;
@@ -371,9 +317,6 @@ a { color: inherit; text-decoration: none; }
   }
 }
 
-/* ═══════════════════════════════════════════════
-   CARDS / CHIPS / BADGES (shared by status & misc pages)
-═══════════════════════════════════════════════ */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -420,9 +363,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--accent-2);
 }
 
-/* ═══════════════════════════════════════════════
-   FORM · editorial underline fields
-═══════════════════════════════════════════════ */
 .field-u {
   width: 100%;
   background: transparent;
@@ -441,18 +381,11 @@ a { color: inherit; text-decoration: none; }
 .field-u:focus { border-bottom-color: var(--accent); }
 .field-u:focus-visible { outline: none; }
 
-/* ═══════════════════════════════════════════════
-   ANIMATION HOOKS
-═══════════════════════════════════════════════ */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 1s linear infinite; }
 
-/* Word-reveal targets (GSAP scrubs opacity) */
 .w-rv { opacity: 0.13; display: inline-block; }
 
-/* ═══════════════════════════════════════════════
-   SKIP LINK (a11y)
-═══════════════════════════════════════════════ */
 .skip-link {
   position: fixed;
   top: 12px;
@@ -475,9 +408,6 @@ a { color: inherit; text-decoration: none; }
   pointer-events: auto;
 }
 
-/* ═══════════════════════════════════════════════
-   SCROLL PROGRESS + BACK TO TOP
-═══════════════════════════════════════════════ */
 .scroll-progress {
   position: fixed;
   top: 0;
@@ -531,10 +461,6 @@ a { color: inherit; text-decoration: none; }
   .to-top:hover { border-color: var(--accent); color: var(--accent-2); }
 }
 
-/* ═══════════════════════════════════════════════
-   COMMAND PALETTE · no open animation (keyboard-
-   initiated actions must feel instant)
-═══════════════════════════════════════════════ */
 .cmdk-overlay {
   position: fixed;
   inset: 0;
@@ -620,7 +546,6 @@ a { color: inherit; text-decoration: none; }
   padding: 10px 18px;
   border-top: 1px solid var(--line);
 }
-/* Touch devices have none of the keys the footer names */
 @media (hover: none) and (pointer: coarse) {
   .cmdk-footer { display: none; }
 }
@@ -638,8 +563,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-2);
 }
 
-/* Forced colours replace backgrounds, so state carried by a background
-   alone needs a system colour */
+/* Forced colours drop backgrounds, so background-only state needs a system colour. */
 @media (forced-colors: active) {
   .cmdk-item[data-active="true"] {
     forced-color-adjust: none;
@@ -650,9 +574,6 @@ a { color: inherit; text-decoration: none; }
   .scroll-progress { background: Highlight; }
 }
 
-/* ═══════════════════════════════════════════════
-   COPY BUTTON · morphs to confirmation via blur
-═══════════════════════════════════════════════ */
 .copy-btn {
   display: inline-flex;
   align-items: center;
@@ -685,24 +606,13 @@ a { color: inherit; text-decoration: none; }
   opacity: 0.4;
 }
 
-/* ═══════════════════════════════════════════════
-   PHONE DOCK RESERVATION
-   The fixed bottom dock (nav/Dock.tsx) needs 64px
-   plus the safe area under every page. /game sets
-   body[data-route="game"], where the dock is
-   hidden and the space is not.
-═══════════════════════════════════════════════ */
+/* /game sets body[data-route="game"]; the dock is hidden there. */
 @media (max-width: 760px) {
   :root { --dock-space: calc(64px + env(safe-area-inset-bottom, 0px)); }
   body[data-route="game"] { --dock-space: 0px; }
   .to-top { display: none; }
 }
 
-/* ═══════════════════════════════════════════════
-   GLASS FALLBACKS · solid surfaces when the reader
-   asks for less transparency or more contrast, and
-   a brighter edge for more contrast
-═══════════════════════════════════════════════ */
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
   :root {
     --glass-chip:   var(--surface-1);
@@ -720,10 +630,6 @@ a { color: inherit; text-decoration: none; }
   :root { --glass-line: rgba(238, 237, 230, 0.6); }
 }
 
-/* ═══════════════════════════════════════════════
-   REDUCED MOTION · every effect rests in its
-   finished state
-═══════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -739,7 +645,6 @@ a { color: inherit; text-decoration: none; }
   .to-top {
     transition: none;
   }
-  /* Buttons change colour only: no press scale, no arrow travel */
   .btn-fill:active, .btn-line:active, .btn-down:active, .btn-up:active,
   .to-top:active {
     transform: none;

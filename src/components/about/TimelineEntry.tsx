@@ -14,12 +14,7 @@ function subscribe(onChange: () => void) {
 const motionAllowed = () => !window.matchMedia(REDUCED).matches;
 const onServer = () => false;
 
-/**
- * One row of the experience list. The server sends a plain, visible <li>,
- * and reduced motion keeps it. With motion allowed, a row that is still
- * below the fold after hydration is hidden and fades up the first time it
- * scrolls into view; a row already on screen is left as it is.
- */
+// Server markup is visible; only rows below the fold after hydration fade in.
 export default function TimelineEntry({
   index,
   className,

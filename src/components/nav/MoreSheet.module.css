@@ -1,6 +1,3 @@
-/* The More sheet. Floats where the dock sits, over a dimmed page.
-   Phone only; hidden above 760px. */
-
 .backdrop {
   position: fixed;
   inset: 0;
@@ -105,7 +102,6 @@
   background: var(--surface-2, #131a2c);
 }
 
-/* Same marker as the dock and the pill, so the current page has a shape */
 .row[aria-current="page"] {
   color: var(--text, #eeede6);
   background: rgba(77, 98, 255, 0.28);

@@ -1,5 +1,3 @@
-// Single source of truth for site content. Import from "@/content".
-
 export * from "./profile";
 export * from "./projects";
 export * from "./experience";

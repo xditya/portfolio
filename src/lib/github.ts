@@ -1,9 +1,5 @@
-// Live GitHub numbers for the home page: public repos, followers and the
-// stars across every owned repo. Server only: page.tsx awaits
-// getGithubStats() and hands the result to the client sections as props,
-// so GITHUB_TOKEN never reaches the browser. Anything unexpected (network,
-// rate limit, a non-200, a missing field) returns the fallback numbers from
-// src/content/stats.ts. This never throws and never yields NaN.
+// Server only so GITHUB_TOKEN never reaches the browser. Any failure returns
+// fallbackStats; this never throws and never yields NaN.
 
 import { fallbackStats, profile, type GithubStats } from "@/content";
 
@@ -69,8 +65,6 @@ export async function getGithubStats(): Promise<GithubStats> {
       return fallbackStats;
     }
 
-    // 100 repos per page; the account has more than 200, so every
-    // rel="next" page is followed, up to MAX_PAGES.
     let list: Repo[] = reposRes.data;
     let next = nextPageUrl(reposRes.link);
     let pages = 1;

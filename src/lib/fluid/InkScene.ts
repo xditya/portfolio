@@ -1,7 +1,5 @@
-/* Drives one FluidSim on one canvas: the frame loop, pointer splats, the
-   opening drop, idle blooms, pausing when off screen or hidden, resizing,
-   and the fallback when the context is lost. Everything the loop touches is
-   a number on this object, so a frame never allocates. */
+/* Everything the frame loop touches is a number on this object, so a frame
+   never allocates. */
 
 import { FluidSim, type FluidColors, type RGB } from "./FluidSim";
 
@@ -25,11 +23,9 @@ const POINTER_GAIN = 0.8;
 const SPEED_REF = 1.2;
 const MAX_SUBSPLATS = 8;
 
-/* A press drops a blob. */
 const BLOB_RADIUS = 0.07;
 const BLOB_INK = 0.9;
 
-/* Idle blooms keep the pool alive. */
 const BLOOM_RADIUS = 0.05;
 const BLOOM_INK = 0.55;
 const BLOOM_PUSH = 0.22;
@@ -103,7 +99,6 @@ export class InkScene {
   private downX = 0;
   private downY = 0;
 
-  /* Builds the simulation for this device, or returns null after one warning. */
   static create(canvas: HTMLCanvasElement, host: HTMLElement, options: InkSceneOptions): InkScene | null {
     const coarse = window.matchMedia("(pointer: coarse)").matches;
     const colors: FluidColors = {
@@ -199,8 +194,6 @@ export class InkScene {
     this.sim.dispose();
   }
 
-  /* ---- loop ---- */
-
   private updateRunning(): void {
     const want = this.visible && !document.hidden && !this.lost && !this.disposed;
     if (want && !this.running) {
@@ -260,7 +253,6 @@ export class InkScene {
     this.sim.resize(Math.round(w * dpr), Math.round(h * dpr));
   }
 
-  /* Share of the first ink right now, 0 to 1. */
   private mix(): number {
     return 0.5 + 0.5 * Math.sin(this.mixPhase);
   }
@@ -309,9 +301,8 @@ export class InkScene {
     );
   }
 
-  /* One pass per frame: the press blob, then the trail since the last frame,
-     laid down as a few splats along the path so fast moves leave no gaps.
-     Ink is metered per distance travelled, a little more when fast. */
+  /* The trail is laid as several splats along the path so fast moves leave
+     no gaps; ink is metered per distance travelled. */
   private applyPointer(dt: number): void {
     const m = this.mix();
     if (this.downPending) {
@@ -349,8 +340,6 @@ export class InkScene {
     this.prevX = this.px;
     this.prevY = this.py;
   }
-
-  /* ---- events ---- */
 
   private locate(e: PointerEvent): boolean {
     const r = this.canvas.getBoundingClientRect();

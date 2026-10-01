@@ -1,8 +1,5 @@
-// Services monitored on /status. The API route reads the uptime log named by
-// each key from the StatusPage repo; the page turns the key into a title,
-// unless the service carries its own name.
-
 export type Service = {
+  /** Uptime log name in the StatusPage repo. */
   key: string;
   url: string;
   /** Shown instead of the name generated from the key. */

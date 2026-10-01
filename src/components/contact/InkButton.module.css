@@ -1,8 +1,4 @@
-/* Ink button · InkButton.tsx. Everything the button is comes from
-   .btn-fill in globals.css; this only puts the displacement filter over
-   the class's fill layer while the script says so (--ink-filter is set on
-   the button during the arrive and dissolve animations and removed after). */
-
+/* --ink-filter is set by the script only while the fill animates. */
 .ink::before {
   filter: var(--ink-filter, none);
 }

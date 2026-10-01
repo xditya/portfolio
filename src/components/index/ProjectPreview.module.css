@@ -1,8 +1,3 @@
-/* Cursor-following screenshot · ProjectPreview.tsx.
-   .pos is a zero-size anchor the script moves to the cursor; .card hangs
-   above it and fades; .frame is the part the ink filter distorts while a
-   picture arrives. Devices without a fine pointer never see any of it. */
-
 .pos {
   display: none;
   position: fixed;
@@ -27,8 +22,7 @@
   overflow: hidden;
 }
 
-/* The shadow lives here, outside the filtered frame, so the filter region
-   does not crop it. */
+/* Shadow sits outside the filtered frame so the filter region does not crop it. */
 .card {
   aspect-ratio: 16 / 10;
   border-radius: var(--radius-panel);
@@ -54,8 +48,7 @@
   background: var(--surface-1);
 }
 
-/* A picture that is switched off stays for 200ms: long enough to sit under
-   the next one while it fades in, and to stay put while the card fades out. */
+/* The old picture lingers 200ms under the next one and through the card fade-out. */
 .shot {
   object-fit: cover;
   object-position: top center;

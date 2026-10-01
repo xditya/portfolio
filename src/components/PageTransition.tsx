@@ -2,12 +2,7 @@
 
 import { useEffect } from "react";
 
-// Records where the pointer last went down so the next route can bloom
-// from that point. The values live on <html> as --tx / --ty in viewport
-// pixels; PageBloom turns them into page coordinates on the wrapper it
-// mounts around each page (see template.tsx). A key press clears them, so
-// keyboard navigation blooms from the default origin instead of a stale
-// click.
+// A key press clears the origin so keyboard navigation does not bloom from a stale click.
 export default function PageTransition() {
   useEffect(() => {
     const root = document.documentElement.style;

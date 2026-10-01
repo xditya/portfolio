@@ -11,15 +11,8 @@ import s from "./Statement.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Where a word starts before the scroll scrub brings it to full opacity.
 const WORD_DIM = 0.2;
 
-/**
- * The statement, revealed word by word as it scrolls in, the link to
- * /about, and the four odometers. The server sends the words at full
- * opacity; GSAP dims them on mount, so the paragraph reads without JS
- * and under reduced motion.
- */
 export default function Statement({ github }: { github: GithubStats }) {
   const textRef = useRef<HTMLParagraphElement>(null);
 

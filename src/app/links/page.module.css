@@ -1,16 +1,9 @@
-/* Links · page.tsx.
-   The title starts on the column the row titles start on and shares its
-   baseline with the sentence at the right edge, so the header is one line
-   of type resting on the list's top hairline. Nothing here moves; the rows
-   bring their own motion. The footer supplies the space under the list. */
-
 .page {
   padding-top: 88px;
 }
 
-/* Side padding follows the row grid in components/index/Row.module.css:
-   row padding + index column + column gap on the left, row padding on the
-   right. */
+/* Matches the row grid in components/index/Row.module.css: row padding +
+   index column + column gap. */
 .head {
   display: flex;
   flex-wrap: wrap;

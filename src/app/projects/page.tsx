@@ -17,8 +17,7 @@ const techFilters = techCounts().filter(([, n]) => n >= 2);
 export default function ProjectsPage() {
   const [query, setQuery] = useState("");
   const [tech, setTech] = useState<string | null>(null);
-  // Phones: the rows whose details are open. Each row opens on its own, so a
-  // tap never changes the height of anything above the row being tapped.
+  // Rows open independently so a tap never shifts anything above it.
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const searchRef = useRef<HTMLInputElement>(null);
 

@@ -12,9 +12,8 @@ import { SearchIcon } from "@/components/nav/Icons";
 import { isActivePath, openPalette } from "@/components/nav/shared";
 import s from "./Navbar.module.css";
 
-// The shortcut hint depends on the platform, which the server cannot know.
-// useSyncExternalStore renders the Mac glyph first and swaps after hydration
-// without a state update inside an effect.
+// The server cannot know the platform, so it renders the Mac glyph and the
+// client swaps after hydration.
 const subscribeNever = () => () => {};
 const readCmdKey = () =>
   /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
@@ -31,8 +30,7 @@ export default function Navbar() {
     readServerCmdKey,
   );
   const [scrolled, setScrolled] = useState(false);
-  // Hover is remembered together with the route it happened on, so a route
-  // change made elsewhere (palette, back button) drops it without an effect.
+  // Keyed by route so navigating elsewhere drops the hover without an effect.
   const [hover, setHover] = useState<{ href: string; at: string } | null>(
     null,
   );
@@ -44,8 +42,7 @@ export default function Navbar() {
   const markedHref =
     hover !== null && hover.at === pathname ? hover.href : activeHref;
 
-  // Tint the bar once the page is scrolled past 20px. A 21px sentinel at the
-  // top of the document leaves the viewport at exactly that point.
+  // The 21px sentinel leaves the viewport once the page scrolls past 20px.
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
@@ -57,8 +54,7 @@ export default function Navbar() {
     return () => observer.disconnect();
   }, []);
 
-  // The game keeps its joystick where the dock would sit. globals.css drops
-  // the body padding reservation while this attribute is present.
+  // globals.css drops the dock's body padding on the game route.
   useEffect(() => {
     if (!isGame) return;
     document.body.dataset.route = "game";

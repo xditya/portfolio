@@ -1,5 +1,4 @@
-/* Phone bottom dock. globals.css reserves the body padding beneath it;
-   the dock itself reserves nothing. Hidden above 760px. */
+/* globals.css reserves the body padding beneath the dock. */
 
 .dock {
   position: fixed;
@@ -11,8 +10,7 @@
   padding: 3px;
   border: 1px solid var(--glass-line);
   border-radius: var(--radius-pill, 999px);
-  /* The shared glass from globals.css, in its more opaque floating weight
-     because page text scrolls under the dock the whole time. */
+  /* More opaque because page text scrolls under the dock the whole time. */
   background: var(--glass-float);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -86,8 +84,7 @@
   }
 }
 
-/* Narrow phones: a 320px screen leaves each cell 56px, and "Projects" at
-   13px with 4px padding a side needs more than that. */
+/* At 320px each cell is 56px, too narrow for "Projects" at 13px. */
 @media (max-width: 340px) {
   .item {
     padding: 0 2px;

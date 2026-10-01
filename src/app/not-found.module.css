@@ -1,12 +1,4 @@
-/* 404 · not-found.tsx.
-   A full-height section with one slow ink drip behind the type. The
-   section is the ink layer's host (positioned, clipped, vertical panning
-   only), so the canvas fills it and the page still scrolls under a finger.
-   The header follows the links page: the title on the content column, its
-   sentence at the right edge on the same baseline, both resting on a
-   hairline; the two lines and the link sit under it. Tokens come from
-   globals.css. */
-
+/* Hosts the ink canvas; pan-y keeps the page scrollable under a finger. */
 .stage {
   position: relative;
   isolation: isolate;
@@ -20,9 +12,7 @@
   touch-action: pan-y;
 }
 
-/* Keeps the type at AA where the ink pools. The ink is faint here, but
-   where both dyes meet the canvas goes pale, so the text column stands on
-   its own ground. */
+/* Keeps the text at AA where the two dyes meet and the canvas goes pale. */
 .ground {
   position: absolute;
   inset: 0;
@@ -44,8 +34,7 @@
   padding-bottom: clamp(64px, 10vh, 120px);
 }
 
-/* Side padding follows the row grid in components/index/Row.module.css,
-   so the title sits on the same column as the other index pages. */
+/* Matches the row grid in components/index/Row.module.css. */
 .head,
 .text {
   padding-inline: calc(clamp(8px, 1.5vw, 20px) + 56px + 24px) clamp(8px, 1.5vw, 20px);
@@ -85,7 +74,6 @@
   margin: 0 0 32px;
 }
 
-/* 44px tall, so the target is a comfortable one on a phone too. */
 .back {
   min-height: 44px;
 }

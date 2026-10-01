@@ -1,9 +1,3 @@
-/* Ink layer · the fluid canvas, and the still that stands in for it under
-   reduced motion or without WebGL. Both fill the positioned parent and take
-   no pointer events; the parent owns the listeners (position: relative,
-   overflow: hidden, touch-action: pan-y). Colours come from the tokens in
-   globals.css; the hex fallbacks are the same values. */
-
 .canvas {
   position: absolute;
   inset: 0;
@@ -13,9 +7,8 @@
   pointer-events: none;
 }
 
-/* The still: the first drop in ultramarine with a pale core, the second
-   drop in cyan up and to the right, over the ground. The positions are set
-   by the component from the same opening point the simulation uses. */
+/* Stands in for the canvas under reduced motion or without WebGL; positions
+   come from the same opening point the simulation uses. */
 .still {
   --ink-ox: 36%;
   --ink-oy: 62%;
@@ -47,7 +40,7 @@
     var(--surface-0, #070a12);
 }
 
-/* Phones · the box is tall and narrow, so the pools spread a little wider. */
+/* The box is tall and narrow on phones, so the pools spread wider. */
 @media (max-width: 760px) {
   .still {
     background:

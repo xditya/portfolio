@@ -1,17 +1,9 @@
-/* Contact · page.tsx.
-   A shallow ink pool runs the full width with "Say hi." centred on it, the
-   one centred title on the site. Under it, one grid on a hairline: the
-   direct contact block on the left, the form on the right, a hairline
-   between them. Under 900px the two stack, form first. InkLayer fills the
-   header and listens for pointer events on it, so the header owns
-   position, overflow and touch-action. Tokens come from globals.css. */
-
 .page {
   padding-bottom: 48px;
 }
 
-/* ── Pool ── */
-
+/* InkLayer listens for pointer events here, so the header owns position,
+   overflow and touch-action. */
 .pool {
   position: relative;
   isolation: isolate;
@@ -26,13 +18,8 @@
   touch-action: pan-y;
 }
 
-/* Keeps the type readable where the ink pools: a soft ground under the
-   centred text block, since a press or a trail leaves dense dye and where
-   the two inks meet the canvas goes almost white, plus a band at the
-   bottom edge so the pool settles into the page instead of stopping on
-   the hairline. At the ground's core the worst case (white ink) blends to
-   about #343438, which keeps --text-2 above AA; that is why the small
-   line under the title is --text-2 here and not --text-3. */
+/* Keeps text readable over dense ink. Worst case (white ink) blends to about
+   #343438 at the core, which keeps --text-2 above AA, so .meta uses --text-2. */
 .ground {
   position: absolute;
   inset: 0;
@@ -85,8 +72,6 @@
   text-wrap: balance;
 }
 
-/* ── Grid · inside .container-x so the hairline spans the content ── */
-
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
@@ -107,8 +92,6 @@
   padding-left: clamp(32px, 5vw, 80px);
   border-left: 1px solid var(--line);
 }
-
-/* ── Narrow windows · one column, the form first ── */
 
 @media (max-width: 900px) {
   .grid {

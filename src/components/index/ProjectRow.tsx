@@ -12,24 +12,18 @@ type Props = {
   project: Project;
   /** Running number across the whole page, starting at 1. */
   index: number;
-  /** Phones: whether the details are open. The page owns this. */
+  /** Phones: whether the details are open. */
   open: boolean;
   onToggle: () => void;
 };
 
-/**
- * One project in the index. Desktop: the name links to GitHub and the whole
- * row is the hit area. Phones: the name is a button that opens the details
- * in place (screenshot, description, tech, links). Both controls are in the
- * markup and the stylesheet shows one of them, so server and client agree.
- */
+// Both the desktop link and the phone toggle are rendered and CSS shows one,
+// so server and client markup agree.
 export default function ProjectRow({ project, index, open, onToggle }: Props) {
-  // useId's delimiters are awkward inside an id other elements point at.
   const panelId = `project-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const reduce = useReducedMotion() === true;
   const stat = formatStat(project);
-  // The screenshot mounts on the first open, so a closed panel (height 0,
-  // still in flow) does not fetch it.
+  // Mount the screenshot on first open so a closed panel does not fetch it.
   const [opened, setOpened] = useState(open);
   const toggle = () => {
     setOpened(true);
@@ -75,7 +69,6 @@ export default function ProjectRow({ project, index, open, onToggle }: Props) {
         animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={markerTransition(reduce)}
       >
-        {/* Closed, the links inside must not take focus. */}
         <div className={s.panelInner} inert={!open}>
           {project.image && opened && (
             <div className={s.shot}>

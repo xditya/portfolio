@@ -1,19 +1,11 @@
-/* About · page.tsx.
-   One twelve-column grid runs down the page, with the same gap as the four
-   stats, so edges repeat: the profile block and the experience descriptions
-   start on column nine, the second half of "What I do / How I work" starts
-   where the third stat does. The title and the bio share their top and
-   bottom edges with the profile block, and the pair rests on the hairlines
-   of the stats. Under 1200px the avatar moves beside the name; under 900px
-   the header stacks; under 760px everything is one column. */
+/* One twelve-column grid with the stats' gap, so column edges repeat down
+   the page. */
 
 .page {
   --gap: clamp(20px, 3vw, 48px);
   --section: clamp(64px, 9vw, 128px);
   padding-top: 88px;
 }
-
-/* ── Header ── */
 
 .head {
   display: grid;
@@ -22,8 +14,7 @@
   padding-top: clamp(28px, 5vw, 72px);
 }
 
-/* Title at the top, bio at the bottom: whichever column is shorter spreads
-   to the height of the other, so both end on the same line. */
+/* space-between so the bio and the profile block end on the same line. */
 .intro {
   grid-column: 1 / span 8;
   display: flex;
@@ -36,8 +27,6 @@
   margin: clamp(20px, 2.4vw, 32px) 0 0;
 }
 
-/* Who at the top, on the title's first line; what to do next at the bottom,
-   on the bio's last line. */
 .profile {
   grid-column: 9 / -1;
   display: flex;
@@ -55,8 +44,7 @@
   gap: 16px;
 }
 
-/* Name and badge on one line, the role under both. The badge comes last in
-   the markup so the block still reads name, role, badge. */
+/* The badge comes last in the markup so screen readers get name, role, badge. */
 .id {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -81,7 +69,6 @@
   margin: 8px 0 0;
   color: var(--text-2);
   line-height: 1.6;
-  /* When the line has to break, it breaks near the middle */
   text-wrap: balance;
 }
 
@@ -136,16 +123,12 @@
   transform: translate(0.12em, -0.12em);
 }
 
-/* ── Stats · the home grid, resting right under the header ── */
-
 .stats {
   margin-top: clamp(32px, 4vw, 56px);
 }
 .stats > div {
   margin-top: 0;
 }
-
-/* ── What I do / How I work · one hairline between the halves ── */
 
 .pair {
   display: grid;
@@ -186,8 +169,6 @@
   line-height: 1.4;
   color: var(--text-2);
 }
-
-/* ── Tech stack, Experience ── */
 
 .section {
   margin-top: var(--section);
@@ -248,9 +229,7 @@
   color: var(--text-2);
 }
 
-/* ── Mid widths · a smaller avatar at the left, name and role beside it, so
-   the profile stays about as tall as the two-line title and its bio ── */
-
+/* Avatar beside the name keeps the profile about as tall as the title and bio. */
 @media (max-width: 1199px) {
   .who {
     flex-direction: row;
@@ -265,8 +244,6 @@
     margin-top: 6px;
   }
 }
-
-/* ── Narrow windows · the header stacks, descriptions move under titles ── */
 
 @media (max-width: 899px) {
   .head {
@@ -303,8 +280,6 @@
     margin-top: 12px;
   }
 }
-
-/* ── Phones · one column ── */
 
 @media (max-width: 760px) {
   .page {

@@ -24,13 +24,10 @@ function Odometer({
   active: boolean;
   index: number;
 }) {
-  // The rendered text is a motion value, so the count never touches React
-  // state. It starts as the final value: that is what the server sends and
-  // what reduced motion keeps.
+  // A motion value so the count never touches React state. Starts final:
+  // what the server sends and what reduced motion keeps.
   const text = useMotionValue(format(stat.value));
 
-  // With motion allowed, the number is zeroed before the first client
-  // paint and counts up once the grid scrolls into view.
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
     text.set(format(0));
@@ -58,7 +55,6 @@ function Odometer({
   );
 }
 
-/** Four odometers (Repos, GitHub Stars, Followers, Years Coding). */
 export default function Stats({ stats }: { stats: Stat[] }) {
   const gridRef = useRef<HTMLDivElement>(null);
   const inView = useInView(gridRef, { once: true, amount: 0.25 });

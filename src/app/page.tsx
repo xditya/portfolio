@@ -5,8 +5,6 @@ import Ticker from "@/components/home/Ticker";
 import Statement from "@/components/home/Statement";
 import FeaturedStack from "@/components/home/FeaturedStack";
 
-// The GitHub numbers are fetched when the page is built and refreshed
-// every hour after that.
 export const revalidate = 3600;
 
 export default async function HomePage() {

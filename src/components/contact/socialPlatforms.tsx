@@ -1,7 +1,3 @@
-// The four platforms the social handle field can prefill. The icon takes
-// the colour of the field's icon buttons through currentColor, so the
-// active one is coloured by the button's state, not by the icon.
-
 type SocialPlatform = {
   key: string;
   label: string;

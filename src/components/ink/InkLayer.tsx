@@ -4,20 +4,14 @@ import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties }
 import { InkScene } from "@/lib/fluid/InkScene";
 import styles from "./InkLayer.module.css";
 
-/* The site's fluid material: two inks diffusing in water, run on the GPU.
-   Drop it inside an element with position: relative, overflow: hidden and
-   touch-action: pan-y. The canvas fills that parent and the pointer
-   listeners attach to it, so a finger can still scroll the page while a
-   sideways drag stirs the ink. Under prefers-reduced-motion, or when WebGL
-   is unavailable or lost, a still made of soft gradients takes its place. */
+/* The parent needs position: relative, overflow: hidden and touch-action:
+   pan-y so a finger still scrolls the page while a sideways drag stirs. */
 
 interface InkLayerProps {
   className?: string;
   /* 0 to 1. Scales the ink over the ground. */
   intensity?: number;
-  /* Blooms on its own every second or two. */
   idle?: boolean;
-  /* Pointer moves and presses splat. */
   interactive?: boolean;
   /* Where the first drop lands, as fractions of the box. false skips it. */
   opening?: { x: number; y: number } | false;
@@ -30,9 +24,7 @@ const DEFAULT_OPENING = { x: 0.36, y: 0.62 };
 /* Once WebGL has failed on this device, later mounts go straight to the still. */
 let webglBroken = false;
 
-/* External store for useSyncExternalStore: reduced motion plus this
-   instance's own failure flag. Nothing here touches window until the
-   client subscribes or reads a snapshot. */
+/* Nothing here touches window until the client subscribes or reads a snapshot. */
 class ModeStore {
   private failed = false;
   private listeners = new Set<() => void>();

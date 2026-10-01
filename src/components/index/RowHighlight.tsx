@@ -16,8 +16,7 @@ import s from "./Row.module.css";
 // A row the pointer held for less than this before moving on was flicked past.
 const FLICK_MS = 80;
 
-// Damping ratio 0.7 (28 / 40): the bar overshoots by a few percent. Used for
-// the one move that follows a flick; every other move is critically damped.
+// Damping ratio 0.7 (28 / 40): a slight overshoot, only for the move after a flick.
 const FLICK_SPRING = { type: "spring", stiffness: 400, damping: 28 } as const;
 
 const FADE_IN = { duration: 0.15 } as const;
@@ -26,11 +25,10 @@ type Active = {
   id: string;
   /** Hovered with a mouse or pen, as opposed to reached with the keyboard. */
   pointer: boolean;
-  /** When the row became active (event time, ms). */
+  /** Event time, ms. */
   at: number;
-  /** The pointer crossed the previous row fast enough to earn a bounce. */
   flick: boolean;
-  /** No row was active before this one, so the bar fades in instead of travelling. */
+  /** No row was active before, so the bar fades in instead of travelling. */
   fresh: boolean;
 };
 
@@ -63,12 +61,7 @@ function next(
   };
 }
 
-/**
- * Wraps every row that shares one highlight bar. It remembers which row is
- * active: the one under a mouse or pen, or the one holding keyboard focus.
- * Rows are found by their data-row attribute, so they need no handlers of
- * their own. Touch never activates a row.
- */
+// Rows are found by data-row, so they need no handlers. Touch never activates one.
 export function RowGroup({
   children,
   className,
@@ -83,8 +76,7 @@ export function RowGroup({
   const onPointerOver = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return;
     const id = rowOf(e.target);
-    // Gaps between rows (a year header) keep the bar where it is, so it can
-    // travel across them instead of fading out and back in.
+    // Gaps between rows keep the bar, so it travels across instead of fading.
     if (id === null) return;
     const at = e.timeStamp;
     setActive((prev) => next(prev, id, true, at));
@@ -117,15 +109,11 @@ export function RowGroup({
   );
 }
 
-/** The active row of the surrounding RowGroup, or null. */
 export function useActiveRow(): { id: string; pointer: boolean } | null {
   return useContext(GroupContext)?.active ?? null;
 }
 
-/**
- * The bar itself. Every row renders one and only the active row's exists;
- * the shared layoutId lets Motion carry it from the last row to this one.
- */
+// Only the active row's bar exists; the shared layoutId carries it between rows.
 export function RowHighlight({ id }: { id: string }) {
   const group = useContext(GroupContext);
   const active = group?.active;

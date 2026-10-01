@@ -20,9 +20,6 @@ type Props = {
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
-// Bottom sheet behind the dock's More cell. Slides up over a dimmed page,
-// traps focus while open, and closes on Esc, backdrop tap, Close, a row,
-// or a route change (handled by the parent).
 export default function MoreSheet({ open, onClose, onDismiss, returnFocus }: Props) {
   const pathname = usePathname();
   const reduce = useReducedMotion() === true;
@@ -31,7 +28,6 @@ export default function MoreSheet({ open, onClose, onDismiss, returnFocus }: Pro
   useEffect(() => {
     if (!open) return;
     const sheet = sheetRef.current;
-    // Captured now: the button that opened the sheet gets focus back on close.
     const trigger = returnFocus.current;
     sheet?.focus({ preventScroll: true });
 
@@ -41,9 +37,7 @@ export default function MoreSheet({ open, onClose, onDismiss, returnFocus }: Pro
         onClose();
         return;
       }
-      // The palette shortcut closes the sheet first, so the two scroll locks
-      // never overlap: this cleanup puts the overflow back before the
-      // palette records it.
+      // Close before the palette opens so the two scroll locks never overlap.
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         onClose();
         return;
@@ -62,14 +56,10 @@ export default function MoreSheet({ open, onClose, onDismiss, returnFocus }: Pro
         first.focus();
       }
     };
-    // Capture phase: this runs ahead of the palette's own window listener.
-    // React commits each listener's update before the next listener fires,
-    // so in the bubble phase the palette would open (and record the locked
-    // overflow) while the sheet was still holding it.
+    // Capture phase so this runs before the palette's listener records the locked overflow.
     window.addEventListener("keydown", onKey, true);
 
-    // Lock page scroll. Both elements are set because html carries
-    // overflow-x: clip, which stops body's overflow propagating to the viewport.
+    // Both are set: html's overflow-x: clip stops body overflow reaching the viewport.
     const html = document.documentElement;
     const body = document.body;
     const previousHtml = html.style.overflow;
@@ -86,14 +76,10 @@ export default function MoreSheet({ open, onClose, onDismiss, returnFocus }: Pro
   }, [open, onClose, returnFocus]);
 
   const transition = reduce ? INSTANT : { duration: 0.24, ease: EASE_OUT };
-  // Leaving is quicker than arriving.
   const exitTransition = reduce ? INSTANT : { duration: 0.16, ease: EASE_OUT };
 
-  // The wrapper sits outside AnimatePresence, so it always carries the live
-  // `open` value and the stylesheet can take pointer events off the layers
-  // while they animate out. Its children are fixed; it takes no space.
-  // data-lenis-prevent keeps wheel events over the open sheet out of Lenis,
-  // which scrolls the page in script and ignores the overflow lock.
+  // The wrapper sits outside AnimatePresence so CSS can drop pointer events
+  // on leaving layers. data-lenis-prevent: Lenis ignores the overflow lock.
   return (
     <div className={s.layer} data-open={open}>
       <AnimatePresence>

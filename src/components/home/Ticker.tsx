@@ -8,22 +8,14 @@ import s from "./Ticker.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Seconds for one chunk to pass. The desktop loop is scaled by scroll
-// velocity on top of this; phones drift at this speed and nothing else.
+// Seconds for one chunk to pass.
 const DRIFT_DESKTOP = 32;
 const DRIFT_PHONE = 46;
 
-// Scroll velocity (px/s) that doubles the drift. Scrolling up past it
-// turns the loop around; the result is clamped to +-6x.
+// Scroll velocity (px/s) that doubles the drift.
 const VELOCITY_UNIT = 700;
 const MAX_SPEED = 6;
 
-/**
- * The page's one marquee: the eight skills, twice, drifting left. On
- * desktop the speed and direction follow the scroll velocity and settle
- * back with inertia. Hover pauses it. Under reduced motion the items sit
- * in a static wrapped row (Ticker.module.css) and nothing here runs.
- */
 export default function Ticker() {
   const rootRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -33,10 +25,8 @@ export default function Ticker() {
     const track = trackRef.current;
     if (!root || !track) return;
 
-    // gsap.matchMedia only runs the callback while at least one listed
-    // query matches, so the conditions are stated positively: `motion`
-    // matches on a desktop with no preference, `phone` on narrow screens.
-    // Listing only `reduce` and `phone` left the desktop case silent.
+    // gsap.matchMedia only runs the callback while a listed query matches,
+    // so the conditions are stated positively.
     const mm = gsap.matchMedia();
     mm.add(
       {
@@ -53,8 +43,7 @@ export default function Ticker() {
           ease: "none",
           duration: phone ? DRIFT_PHONE : DRIFT_DESKTOP,
         });
-        // Start deep into the repeats so the loop can run backwards for a
-        // long time before it would hit its own start.
+        // Start deep into the repeats so the loop can run backwards.
         loop.totalTime(loop.duration() * 100);
 
         let hovered = false;
@@ -74,7 +63,6 @@ export default function Ticker() {
         root.addEventListener("pointerenter", onEnter);
         root.addEventListener("pointerleave", onLeave);
 
-        // No work while the strip is off screen.
         const observer = new IntersectionObserver((entries) => {
           const entry = entries[0];
           if (!entry) return;

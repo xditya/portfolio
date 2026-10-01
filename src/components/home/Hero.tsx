@@ -13,10 +13,8 @@ import s from "./Hero.module.css";
 
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
-// Width axis of the name: condensed at rest, wide once the hero has
-// scrolled out. Hero.module.css reads it as --w on the h1 (.hero .name), so
-// the value has to be set on the h1 itself: custom properties only flow
-// downward, and a value on the inner span would never reach that rule.
+// --w must be set on the h1 itself: the CSS rule reads it there, and custom
+// properties only flow downward.
 const WIDTH_REST = 78;
 const WIDTH_WIDE = 100;
 
@@ -28,11 +26,8 @@ export default function Hero() {
   const aboutRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
 
-  // The server renders the resting state ("Aditya.", tagline and buttons
-  // visible) so the page reads correctly without JS and under reduced
-  // motion. With motion allowed, the name starts as the handle and
-  // scrambles into place, then the bottom row fades up piece by piece. A layout
-  // effect so the swap happens before the first client paint.
+  // The server renders the resting state so the page reads without JS. A
+  // layout effect so the swap to the intro state happens before first paint.
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const heading = headingRef.current;
@@ -43,7 +38,6 @@ export default function Hero() {
     if (!section || !heading || !name || !dot || !about || !actions) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // Tagline, location, the two buttons, then the availability line.
     const bits = [...Array.from(about.children), ...Array.from(actions.querySelectorAll("a"))];
     const width = { w: WIDTH_REST };
 
@@ -79,8 +73,6 @@ export default function Hero() {
           "-=0.2",
         );
 
-      // The name breathes from condensed to wide across the first screen
-      // of scroll.
       gsap.to(width, {
         w: WIDTH_WIDE,
         ease: "none",

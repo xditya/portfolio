@@ -1,6 +1,3 @@
-// Social profiles in display order. Home, footer, contact, the palette and
-// the game's portals all read this list.
-
 export type SocialLabel = "GitHub" | "X / Twitter" | "LinkedIn" | "Telegram" | "YouTube";
 
 export type Social = {

@@ -32,8 +32,7 @@ type Errors = Partial<Record<Key, string>>;
 const EMPTY: Values = { name: "", email: "", phone: "", socialHandle: "", message: "" };
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// The same limits the API route's schema enforces, checked here first so
-// the message appears under the field instead of in the result modal.
+// Mirrors the API schema so errors show under the field, not in the modal.
 function validate(v: Values): Errors {
   const errors: Errors = {};
   if (!v.name.trim()) errors.name = "Please enter your name";
@@ -53,12 +52,7 @@ const normalizeUrl = (url: string) =>
 
 type Modal = { type: "success" | "error"; message: string };
 
-/* ── Field · label, control, ink line, error ──
-   The line draws from the side the pointer came in on (--o, set on entry
-   and cleared on leave so keyboard focus draws from the left). */
-
-// Clears the entry side; the pointer leaving does not blur the field, so
-// nothing retracts here, and the next keyboard focus starts from the left.
+// Cleared on leave so the next keyboard focus draws the line from the left.
 function clearFillOrigin(e: PointerEvent<HTMLElement>): void {
   e.currentTarget.style.removeProperty("--o");
 }
@@ -102,7 +96,6 @@ function Field({
   );
 }
 
-// The input and the ink line it draws on focus.
 function Control({ children }: { children: ReactNode }) {
   return (
     <div className={s.control}>
@@ -111,8 +104,6 @@ function Control({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-/* ── Result modal · success or error, copy unchanged ── */
 
 function ResultModal({
   modal,
@@ -127,15 +118,12 @@ function ResultModal({
   const reduce = useReducedMotion() === true;
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  // Focus moves to the one button while the modal is open and back to the
-  // submit button when it closes (the submit was disabled while sending,
-  // which already dropped its focus, so activeElement is no guide). Esc
-  // closes; Tab stays on the button.
+  // Focus returns to submit explicitly: disabling it while sending already
+  // dropped focus, so activeElement is no guide.
   useEffect(() => {
     if (!modal) return;
     closeRef.current?.focus();
-    // A submit disabled by a captcha failure cannot take focus; the message
-    // field stands in for it then.
+    // A submit disabled by a captcha failure cannot take focus; use the message field.
     const returnTo = () =>
       form.current?.querySelector<HTMLElement>('button[type="submit"]:enabled, #message');
     const onKey = (e: KeyboardEvent) => {
@@ -206,8 +194,6 @@ function ResultModal({
     </AnimatePresence>
   );
 }
-
-/* ── Form ── */
 
 export default function ContactForm() {
   const [values, setValues] = useState<Values>(EMPTY);
@@ -465,7 +451,6 @@ export default function ContactForm() {
           </p>
         )}
 
-        {/* hCaptcha (invisible) */}
         <HCaptcha
           ref={hcaptchaRef}
           sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}

@@ -11,16 +11,13 @@ gsap.registerPlugin(ScrollTrigger, CustomEase);
 const PHONE_QUERY = "(max-width: 760px)";
 const MOTION_QUERY = "(prefers-reduced-motion: no-preference)";
 
-// How far the noise pushes the picture around before it settles, in px,
-// and how long the settle takes. Phones get a plain crossfade instead:
-// an SVG filter over a large image is slow there.
+// In px. Phones crossfade instead: an SVG filter over a large image is slow there.
 const DISPLACE_FROM = 90;
 const SETTLE_SECONDS = 1.1;
 const CROSSFADE_SECONDS = 0.4;
 const START = "top 75%";
 
-// The site's --ease-out curve (globals.css), registered with GSAP the
-// first time a reveal runs. Lazy so the module also loads on the server.
+// The site's --ease-out curve. Lazy so the module also loads on the server.
 let inkEase: gsap.EaseFunction | undefined;
 function easeOut(): gsap.EaseFunction {
   inkEase ??= CustomEase.create("inkOut", "0.2, 0.8, 0.2, 1");
@@ -34,14 +31,7 @@ type Props = {
   seed?: number;
 };
 
-/**
- * Reveals its children the way ink settles in water. The server renders
- * them visible; with motion allowed the script hides them before the
- * first client paint and, when they scroll into view, animates an SVG
- * displacement map (fractal noise) from 90px to 0 while the opacity goes
- * 0 to 1. Phones crossfade instead. Under reduced motion, and without JS,
- * the children simply sit there.
- */
+/** The server renders children visible, so without JS or under reduced motion nothing is hidden. */
 export default function InkReveal({ children, className, seed = 2 }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -82,8 +72,7 @@ export default function InkReveal({ children, className, seed = 2 }: Props) {
         return;
       }
 
-      // The filter is only attached while the ink moves. Once settled it
-      // comes off again so scrolling past the image costs nothing extra.
+      // The filter comes off once settled so scrolling past costs nothing.
       gsap.set(content, { opacity: 0, filter: `url(#${filterId})` });
       gsap.set(map, { attr: { scale: DISPLACE_FROM } });
 

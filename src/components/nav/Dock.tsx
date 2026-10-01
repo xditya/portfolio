@@ -10,12 +10,8 @@ import MoreSheet from "./MoreSheet";
 import { dockItems, isActivePath, moreItems } from "./shared";
 import s from "./Dock.module.css";
 
-// Phone only (CSS hides it above 760px). Five equal cells: four pages and
-// More, which opens the sheet. A route change closes the sheet for good: the
-// last seen path is kept in state and reconciled during render (React's
-// "adjust state when a prop changes" pattern), so no effect runs and the
-// sheet cannot come back on its own when Back or Forward returns to the
-// route it was opened on.
+// A route change closes the sheet during render rather than in an effect, so
+// Back or Forward to the route it was opened on cannot reopen it.
 export default function Dock() {
   const pathname = usePathname();
   const reduce = useReducedMotion() === true;
@@ -36,16 +32,13 @@ export default function Dock() {
     trackEvent("mobile_menu_toggle", { state: next ? "open" : "close" });
   };
 
-  // Backdrop, Esc and Close go through here. A row or Search closes the
-  // sheet silently, like the route-change close above, so a navigation
-  // reports only its nav_click.
+  // A row or Search closes silently instead, so a navigation reports only its nav_click.
   const closeSheet = useCallback(() => {
     setOpen(false);
     trackEvent("mobile_menu_toggle", { state: "close" });
   }, []);
 
-  // If the window grows past the phone breakpoint while the sheet is open,
-  // drop it so the scroll lock does not linger behind a hidden sheet.
+  // Close past the phone breakpoint so the scroll lock does not linger behind a hidden sheet.
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 761px)");
     const onChange = (e: MediaQueryListEvent) => {

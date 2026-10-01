@@ -11,18 +11,16 @@ import s from "./ProjectPreview.module.css";
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
-// The card is 16:10. The stylesheet lifts it 112% of its height, so it
-// floats above the cursor with a gap of 12%.
+// 16:10 card; the stylesheet lifts it 112% of its height, leaving a 12% gap.
 const CARD_WIDTH = 320;
 const CARD_HEIGHT = CARD_WIDTH / 1.6;
 const CARD_GAP = CARD_HEIGHT * 0.12;
 const EDGE = 8;
 
-// Share of the remaining distance covered per frame. The lag reads as a
-// little momentum; under reduced motion the card sits on the cursor.
+// Share of the remaining distance covered per frame.
 const FOLLOW = 0.16;
 
-// How far the noise pushes the picture around before it settles, in px.
+// px
 const DISPLACE_FROM = 40;
 const SETTLE_SECONDS = 0.5;
 
@@ -30,12 +28,7 @@ const shots = projects.flatMap((p) =>
   p.image ? [{ id: p.name, src: p.image }] : [],
 );
 
-/**
- * The screenshot that follows the cursor over project rows. Render it once,
- * inside the RowGroup that holds the ProjectRows: it shows the picture of
- * the row the pointer is on and hides over rows without one. Fine pointers
- * only; on touch devices it is display: none and never listens.
- */
+/** Render once inside the RowGroup holding the ProjectRows. Fine pointers only. */
 export default function ProjectPreview() {
   const active = useActiveRow();
   const posRef = useRef<HTMLDivElement>(null);
@@ -50,7 +43,6 @@ export default function ProjectPreview() {
       ? active.id
       : null;
 
-  // Follow the cursor. The loop sleeps once the card has caught up.
   useEffect(() => {
     const pos = posRef.current;
     if (!pos || !window.matchMedia(FINE_POINTER).matches) return;
@@ -70,9 +62,7 @@ export default function ProjectPreview() {
     };
 
     const onMove = (e: MouseEvent) => {
-      // Keep the card inside the window: clamp it sideways, and hang it
-      // under the cursor (clear of the pointer glyph) when there is no
-      // room above.
+      // Clamp sideways; hang below the cursor glyph when there is no room above.
       const half = CARD_WIDTH / 2 + EDGE;
       const reach = CARD_HEIGHT + CARD_GAP;
       target.x = Math.min(Math.max(e.clientX, half), window.innerWidth - half);
@@ -90,8 +80,7 @@ export default function ProjectPreview() {
     };
   }, []);
 
-  // Each picture arrives through the ink filter. The filter is attached
-  // only while the noise settles, so a resting preview costs nothing.
+  // The filter is attached only while the noise settles, so a resting preview costs nothing.
   useEffect(() => {
     const frame = frameRef.current;
     const map = mapRef.current;

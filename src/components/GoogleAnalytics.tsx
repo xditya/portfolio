@@ -18,15 +18,11 @@ export default function GoogleAnalytics() {
       }
     };
 
-    // initial pageview
     handleRoute();
-
-    // listen to back/forward
     window.addEventListener("popstate", handleRoute);
 
-    // monkey-patch pushState to capture client navigations
+    // Patch pushState to catch client-side navigations.
     const origPush = history.pushState;
-    // @ts-expect-ignore
     history.pushState = function (...args: unknown[]) {
       const result = origPush.apply(this, args as never);
       handleRoute();

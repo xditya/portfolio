@@ -1,7 +1,4 @@
-/* Skills ticker · hairlines above and below, two identical chunks so the
-   loop is seamless at xPercent -50. Ticker.tsx moves the track; this file
-   only lays it out. Under reduced motion the second chunk is hidden and
-   the first wraps as a static row. */
+/* Two identical chunks so the loop is seamless at xPercent -50. */
 
 .ticker {
   position: relative;
@@ -41,8 +38,6 @@
   white-space: nowrap;
 }
 
-/* One hairline between items. No dots: the availability dot is the page's
-   only one. */
 .sep {
   flex-shrink: 0;
   width: 1px;
@@ -58,8 +53,6 @@
     padding-inline: 20px;
   }
 }
-
-/* ── Reduced motion · a static, wrapped row ── */
 
 @media (prefers-reduced-motion: reduce) {
   .track {

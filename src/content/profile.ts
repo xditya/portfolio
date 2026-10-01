@@ -1,6 +1,3 @@
-// Who the site is about. Pages, the palette and the game read these values;
-// nothing else should type the name, role, email or bio again.
-
 export const currentYear = new Date().getFullYear();
 
 const name = "Aditya";

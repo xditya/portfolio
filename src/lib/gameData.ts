@@ -1,6 +1,3 @@
-// Game-facing view of src/content. The exported names stay so that
-// PortfolioGame.tsx compiles unchanged; the data itself lives in src/content.
-
 import { profile } from "@/content/profile";
 import { projects, projectYears, type Project } from "@/content/projects";
 import { stats } from "@/content/stats";

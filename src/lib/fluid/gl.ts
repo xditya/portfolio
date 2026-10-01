@@ -1,6 +1,5 @@
-/* Small WebGL helpers for the ink simulation. Every call checks status and
-   returns null on failure instead of throwing, so the caller can log once
-   and fall back. */
+/* Helpers return null or an error string instead of throwing, so the caller
+   can log once and fall back. */
 
 export type GL = WebGLRenderingContext | WebGL2RenderingContext;
 

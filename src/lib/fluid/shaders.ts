@@ -1,6 +1,5 @@
-/* GLSL for the ink simulation.
-   Everything is written in GLSL ES 1.00 so the same source runs on WebGL1
-   and WebGL2. Compile time defines pick the texture encoding:
+/* GLSL ES 1.00 so the same source runs on WebGL1 and WebGL2. Defines pick
+   the texture encoding:
 
    PACKED        signed fields (velocity, pressure, divergence, curl) live in
                  RGBA8 textures as 16 bit fixed point pairs. Used when no
@@ -32,7 +31,6 @@ void main() {
 }
 `;
 
-/* Shared head of every fragment shader. */
 const head = /* glsl */ `
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -324,7 +322,6 @@ void main() {
 }
 `;
 
-/* Prepend the defines a variant needs. */
 export function withDefines(source: string, defines: string[]): string {
   if (defines.length === 0) return source;
   return defines.map((d) => `#define ${d} 1\n`).join("") + source;

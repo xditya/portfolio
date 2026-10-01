@@ -1,18 +1,8 @@
-/* Featured work · FeaturedStack.tsx.
-   Desktop: five full-viewport panels, each sticky at the top and pinned by
-   ScrollTrigger, so the next one slides over the last while .inner recedes
-   (scale and opacity, driven by the next panel's scroll).
-   Phones: a scroll-snap strip, screenshot on top, nothing hidden.
-   Reduced motion on desktop: a plain vertical list.
-   Tokens come from globals.css. */
-
 /* The section above ends in its own bottom padding, which is the gap. */
 .section {
   padding-top: 0;
 }
 
-/* "Featured" with the link to every project at the far end of the row,
-   above the stack and never pinned. */
 .head {
   display: flex;
   align-items: baseline;
@@ -28,8 +18,7 @@
   position: relative;
 }
 
-/* ── Panel · one viewport tall, opaque so it covers the one beneath ── */
-
+/* Opaque so it covers the panel beneath. */
 .panel {
   position: sticky;
   top: 0;
@@ -40,27 +29,23 @@
   background: var(--surface-0);
 }
 
-/* A hairline rides in on the top edge of each arriving panel. Not a
-   sibling selector: the pins wrap panels in spacer elements. */
+/* Not a sibling selector: the pins wrap panels in spacer elements. */
 .panel:not([data-first]) {
   border-top: 1px solid var(--line);
 }
 
-/* The first panel's work sits right under the heading row instead of in
-   the middle of a viewport of empty ground; once pinned, its top padding
-   still clears the nav. */
+/* Sits under the heading row rather than mid-viewport. */
 .panel[data-first] {
   align-items: start;
 }
 
-/* FeaturedStack.tsx sets this for the length of every ScrollTrigger
-   measurement: sticky would report a stuck panel at the viewport top
-   instead of its place in the flow. */
+/* Set during ScrollTrigger measurement: sticky would report a stuck panel
+   at the viewport top instead of its place in the flow. */
 .stack[data-measuring] .panel {
   position: relative;
 }
 
-/* The part that recedes. The top padding clears the fixed nav pill. */
+/* The top padding clears the fixed nav pill. */
 .inner {
   width: 100%;
   padding-top: 88px;
@@ -73,8 +58,6 @@
   align-items: center;
   gap: clamp(32px, 4.5vw, 80px);
 }
-
-/* ── Copy ── */
 
 .copy {
   display: flex;
@@ -158,7 +141,6 @@
   color: var(--accent-2);
 }
 
-/* External-link rule: the arrow nudges up and to the right. */
 .arrow {
   display: inline-block;
   transition: transform 350ms var(--ease-spring);
@@ -177,14 +159,11 @@
   transform: translate(0.12em, -0.12em);
 }
 
-/* ── Screenshot ── */
-
 .shot {
   min-width: 0;
 }
 
-/* 16:10. Capped through the width so a short viewport keeps the ratio
-   instead of the full column. */
+/* Capped through the width so a short viewport keeps the ratio. */
 .frame {
   position: relative;
   width: min(100%, 104vh);
@@ -201,15 +180,12 @@
   object-position: top center;
 }
 
-/* ── Phone · a scroll-snap strip, no pinning ── */
-
 @media (max-width: 760px) {
   .head {
     margin-bottom: 28px;
   }
 
-  /* Its own scroll container, so the page itself never scrolls sideways.
-     The scrollbar is hidden; the strip still scrolls. */
+  /* Its own scroll container, so the page never scrolls sideways. */
   .stack {
     display: flex;
     gap: 12px;
@@ -252,9 +228,7 @@
   .shot {
     order: -1;
   }
-  /* FeaturedStack.tsx sets --tilt-x and --tilt-y from the gyroscope, so
-     the card leans with the phone. The transition smooths the readings;
-     without JS or a sensor both stay 0 and nothing moves. */
+  /* --tilt-x and --tilt-y come from the gyroscope; the transition smooths the readings. */
   .frame {
     width: 100%;
     transform: perspective(900px) rotateX(var(--tilt-x, 0deg))
@@ -278,8 +252,6 @@
     margin-bottom: 20px;
   }
 }
-
-/* ── Reduced motion · desktop becomes a plain list, nothing moves ── */
 
 @media (prefers-reduced-motion: reduce) and (min-width: 761px) {
   .panel {

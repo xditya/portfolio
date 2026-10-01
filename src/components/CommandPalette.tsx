@@ -14,13 +14,7 @@ type Item = {
   run: () => void;
 };
 
-/**
- * ⌘K / Ctrl+K command palette.
- *
- * Opens with NO animation: the palette is a keyboard-initiated, high-frequency
- * surface, and animating those makes them feel slow (Emil Kowalski's rule;
- * Raycast does the same).
- */
+// No open animation: a keyboard-driven, high-frequency surface feels slow when animated.
 export default function CommandPalette() {
   const router = useRouter();
   const pathname = usePathname();
@@ -31,10 +25,7 @@ export default function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // A route change closes the palette. The last seen path is kept in state
-  // and reconciled during render (React's "adjust state when a prop changes"
-  // pattern), so no effect runs and the new route never paints with the
-  // palette still open.
+  // Closed during render, not in an effect, so the new route never paints with the palette open.
   const [seenPath, setSeenPath] = useState(pathname);
   if (seenPath !== pathname) {
     setSeenPath(pathname);
@@ -69,8 +60,6 @@ export default function CommandPalette() {
         keywords: "copy email clipboard contact mail",
         group: "Actions",
         run: () => {
-          // The toast confirms a write that happened, so it waits for the
-          // promise; a failed or unavailable clipboard shows nothing.
           const clipboard = navigator.clipboard;
           if (!clipboard) return;
           clipboard
@@ -161,7 +150,6 @@ export default function CommandPalette() {
     [],
   );
 
-  /* Global shortcuts */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -171,9 +159,8 @@ export default function CommandPalette() {
       } else if (e.key === "Escape" && open) {
         setOpen(false);
       } else if (e.key === "Tab" && open) {
-        // The input is the only tab stop (results move with the arrow
-        // keys). Handled on window so it still holds after a click on the
-        // panel has dropped focus to the body.
+        // The input is the only tab stop; handled on window so it holds after
+        // a click on the panel drops focus to the body.
         e.preventDefault();
         inputRef.current?.focus();
       }
@@ -182,17 +169,13 @@ export default function CommandPalette() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, openPalette]);
 
-  /* Open via navbar (custom event keeps Navbar decoupled) */
   useEffect(() => {
     const onOpen = () => openPalette("navbar");
     window.addEventListener("cmdk:open", onOpen);
     return () => window.removeEventListener("cmdk:open", onOpen);
   }, [openPalette]);
 
-  /* Focus the input on open and lock page scroll while open. Both html and
-     body are set: globals.css gives html overflow-x: clip, which stops a
-     body-only overflow from reaching the viewport. Both are restored to
-     what they were on close, and focus goes back to whatever had it. */
+  // Both are set: html's overflow-x: clip stops body overflow reaching the viewport.
   useEffect(() => {
     if (!open) return;
     const opener = document.activeElement as HTMLElement | null;
@@ -210,7 +193,6 @@ export default function CommandPalette() {
     };
   }, [open]);
 
-  /* Keep active row in view */
   useEffect(() => {
     const el = listRef.current?.querySelector<HTMLElement>(`[data-idx="${active}"]`);
     el?.scrollIntoView({ block: "nearest" });
@@ -222,7 +204,6 @@ export default function CommandPalette() {
       aria-hidden="true"
       style={{
         position: "fixed",
-        // Clears the phone dock; the variable is 0px on desktop and on /game.
         bottom: "calc(var(--dock-space) + 28px)",
         left: "50%",
         transform: "translateX(-50%)",
@@ -241,8 +222,7 @@ export default function CommandPalette() {
 
   const flat = grouped.flatMap((g) => g.items);
 
-  // One live region, mounted whether or not the palette is open, so screen
-  // readers hear the copy confirmation and an empty result.
+  // Always mounted so screen readers hear the copy confirmation even when closed.
   const live = (
     <div
       role="status"
@@ -274,9 +254,7 @@ export default function CommandPalette() {
       {live}
       <div
         className="cmdk-overlay"
-        // Lenis scrolls the page programmatically on wheel, which an overflow
-        // lock cannot stop; this keeps wheel events over the palette out of
-        // Lenis, so the page stays put and the result list scrolls natively.
+        // Lenis scrolls in script and ignores the overflow lock.
         data-lenis-prevent=""
         onPointerDown={(e) => {
           if (e.target === e.currentTarget) setOpen(false);
@@ -293,7 +271,6 @@ export default function CommandPalette() {
             placeholder="Search pages, projects, socials…"
             value={query}
             onChange={(e) => {
-              // A new query starts from the first result.
               setQuery(e.target.value);
               setActive(0);
             }}

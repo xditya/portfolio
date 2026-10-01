@@ -8,7 +8,6 @@ import styles from "./Footer.module.css";
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      {/* Sign-off */}
       <div className={`container-x ${styles.signoff}`}>
         <p className={styles.eyebrow}>
           Have an idea?{" "}
@@ -33,7 +32,6 @@ export default function Footer() {
         </Link>
       </div>
 
-      {/* Bottom row */}
       <div className={styles.bottom}>
         <div className={`container-x ${styles.bar}`}>
           <span className={styles.wordmark}>

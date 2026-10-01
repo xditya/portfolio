@@ -10,17 +10,13 @@ import s from "./not-found.module.css";
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
-// One drop, up and to the right of the type, that spreads slowly on its own.
 const DRIP = { x: 0.68, y: 0.3 };
 
 export default function NotFoundStage() {
   const stageRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
-  // The server renders "404" at rest, which is also what reduced motion
-  // gets. With motion allowed the digits scramble into place the way the
-  // home name does. A layout effect so the first client paint already shows
-  // the scramble's first frame rather than the resting digits.
+  // Layout effect so the first paint shows the scramble, not the resting digits.
   useLayoutEffect(() => {
     const stage = stageRef.current;
     const title = titleRef.current;
@@ -46,7 +42,7 @@ export default function NotFoundStage() {
     };
   }, []);
 
-  // A section, not a main: the layout already wraps every page in <main>.
+  // Not <main>: the layout already provides one.
   return (
     <section ref={stageRef} className={s.stage}>
       <InkLayer intensity={0.55} idle opening={DRIP} />

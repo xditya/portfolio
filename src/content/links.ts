@@ -1,5 +1,3 @@
-// Tools and services listed on /links, in the palette and as game portals.
-
 export type ToolLink = {
   name: string;
   description: string;

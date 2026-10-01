@@ -1,30 +1,19 @@
-/* Contact form · ContactForm.tsx. Five underline fields (.field-u from
-   globals.css) in the same order as the API, a label above each and its
-   error below. Focus draws a 2px ink line along the field's hairline from
-   the side the pointer came in on (--o, set on the field wrapper; keyboard
-   focus has none and draws from the left). The submit is an InkButton; the
-   result modal sits fixed over the page. Tokens come from globals.css. */
-
 .form {
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
 
-/* Two fields side by side while each can be 260px or wider, one under the
-   other below that. Phone and social handle always stack: the handle needs
-   the full row to leave room to type beside its icons. */
 .pair {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 28px clamp(24px, 3vw, 40px);
 }
 
+/* The social handle needs the full row to leave typing room beside its icons. */
 .pairStack {
   grid-template-columns: 1fr;
 }
-
-/* ── Field ── */
 
 .field {
   display: flex;
@@ -48,9 +37,7 @@
   position: relative;
 }
 
-/* The hairline is the field's own border; the ink line lies on it. The
-   class's focus colour change is left off inside this form so the line
-   is the only thing that moves on focus. */
+/* .field-u's focus border colour is held back so only the ink line moves. */
 .control .line {
   position: absolute;
   left: 0;
@@ -70,7 +57,6 @@
   border-bottom-color: var(--line-strong);
 }
 
-/* Invalid: the hairline and the line turn red; the message sits under. */
 .field[data-invalid] :global(.field-u) {
   border-bottom-color: var(--bad);
 }
@@ -87,16 +73,11 @@
 }
 
 .textarea {
-  /* Block, so the control ends at the textarea's border and the ink line
-     lies on it (inline-block leaves a descender gap below). */
+  /* inline-block would leave a descender gap under the ink line. */
   display: block;
   resize: vertical;
   min-height: 120px;
 }
-
-/* ── Social handle · the four prefill icons at the right end ──
-   Each button is 36px wide with 8px between, and its target grows to 44px
-   through the pseudo-element, so the targets touch and never overlap. */
 
 .withIcons {
   position: relative;
@@ -104,7 +85,6 @@
 
 .socialInput {
   padding-right: 176px;
-  /* A placeholder longer than the room beside the icons ends in an ellipsis */
   text-overflow: ellipsis;
 }
 
@@ -135,6 +115,7 @@
     color 200ms var(--ease-out),
     transform 160ms var(--ease-out);
 }
+/* 36px button + 4px each side = 44px targets that touch across the 8px gap. */
 .icon::before {
   content: "";
   position: absolute;
@@ -155,8 +136,6 @@
     color: var(--text);
   }
 }
-
-/* ── Submit row ── */
 
 .actions {
   display: flex;
@@ -182,8 +161,6 @@
 .footLink {
   color: var(--text-2);
 }
-
-/* ── Result modal ── */
 
 .overlay {
   position: fixed;
@@ -235,10 +212,7 @@
   justify-content: center;
 }
 
-/* ── Phones · one column ── */
-
 @media (max-width: 540px) {
-  /* The icons move under the input so the field keeps its full width. */
   .socialInput {
     padding-right: 2px;
   }
@@ -248,8 +222,6 @@
     transform: none;
   }
 }
-
-/* ── Reduced motion · the line and icons change state without moving ── */
 
 @media (prefers-reduced-motion: reduce) {
   .control .line,

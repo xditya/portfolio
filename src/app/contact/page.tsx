@@ -9,14 +9,12 @@ export const metadata: Metadata = {
   description: "Get in touch with Aditya. Usually replies within a day.",
 };
 
-// The form comes first in the markup, since it is the job of the page and
-// what a phone shows first; on wide windows the stylesheet places the
-// direct contact block in the column to its left.
+// Form first in the markup so phones show it first; CSS moves it right on wide screens.
 export default function ContactPage() {
   return (
     <div className={s.page}>
       <header className={s.pool}>
-        {/* The first drop lands low on the left, clear of the text's ground. */}
+        {/* First drop lands clear of the centred text. */}
         <InkLayer intensity={0.5} opening={{ x: 0.22, y: 0.68 }} />
         <div className={s.ground} aria-hidden="true" />
         <div className={`container-x ${s.heading}`}>

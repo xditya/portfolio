@@ -1,18 +1,8 @@
-/* Projects index · page.tsx.
-   Two columns: a narrow one for counts and year numerals, a wide one for
-   the tool and the rows. The title stands on the search field, on the same
-   left edge, and shares its baseline with the sentence at the right edge,
-   so the header is one line of type resting on the tool. The year numeral
-   is sticky while its group scrolls. Under 900px the columns stack; under
-   760px the chips become one strip that scrolls sideways. */
-
 .page {
   --year-col: clamp(120px, 14vw, 200px);
   --col-gap: clamp(24px, 3vw, 48px);
   padding-top: 88px;
 }
-
-/* ── Header ── */
 
 .tool {
   display: grid;
@@ -48,7 +38,6 @@
 .search {
   grid-area: search;
   align-self: baseline;
-  /* A placeholder longer than a narrow phone ends in an ellipsis */
   text-overflow: ellipsis;
 }
 /* The underline is the focus mark; a second pixel makes it hard to miss. */
@@ -56,8 +45,6 @@
   box-shadow: 0 1px 0 var(--accent);
 }
 
-/* Sits in the narrow column, on the search field's baseline: the same
-   column that carries each year's own count further down. */
 .count {
   grid-area: count;
   align-self: baseline;
@@ -74,8 +61,7 @@
   margin-top: 20px;
 }
 
-/* 36px tall with 8px between chips; the pseudo-element takes half the gap
-   on every side, so each target is 44px and none overlap. */
+/* 36px + 4px hit area on each side = 44px targets that don't overlap. */
 .filter {
   position: relative;
   flex: none;
@@ -95,8 +81,6 @@
   color: inherit;
 }
 
-/* ── Index ── */
-
 .index {
   padding-top: clamp(44px, 6vw, 88px);
 }
@@ -109,8 +93,7 @@
   margin-bottom: clamp(48px, 7vw, 88px);
 }
 
-/* Pinned under the fixed navigation (64px) until the group's last row
-   has passed. */
+/* Clears the 64px fixed nav. */
 .year {
   position: sticky;
   top: 96px;
@@ -141,8 +124,6 @@
 .emptyText {
   margin: 0 0 20px;
 }
-
-/* ── Narrow windows · one column, the year above its rows ── */
 
 @media (max-width: 899px) {
   .tool {
@@ -176,8 +157,6 @@
   }
 }
 
-/* ── Phones · the chips run in one strip that scrolls sideways ── */
-
 @media (max-width: 760px) {
   .page {
     padding-top: 84px;
@@ -193,8 +172,7 @@
     text-align: left;
   }
 
-  /* Bleeds to both screen edges so a chip cut by the edge says there is
-     more; the padding puts the first chip back on the gutter. */
+  /* Bleeds to the screen edges so a clipped chip hints at more. */
   .chips {
     flex-wrap: nowrap;
     margin: 12px calc(-1 * clamp(20px, 3.5vw, 48px)) 0;

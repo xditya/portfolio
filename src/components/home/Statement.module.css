@@ -1,6 +1,3 @@
-/* Statement · a wide measure of display type, the link to /about, then
-   the stats grid (Stats.module.css). Section spacing 64 to 160px. */
-
 .section {
   padding-block: clamp(64px, 10vw, 160px);
 }
@@ -11,9 +8,8 @@
   color: var(--text);
 }
 
-/* Full opacity here beats the global .w-rv value. Statement.tsx sets the
-   dim starting value inline once it runs, so server HTML and reduced
-   motion both read the paragraph as written. */
+/* Beats the global .w-rv opacity so server HTML and reduced motion read the
+   paragraph as written; Statement.tsx dims it inline. */
 .text .word {
   display: inline-block;
   opacity: 1;
@@ -44,7 +40,6 @@
   inset: -12px -6px;
 }
 
-/* External-link rule: the arrow nudges up and to the right. */
 .arrow {
   display: inline-block;
   transition: transform 350ms var(--ease-spring);

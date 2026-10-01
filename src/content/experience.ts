@@ -1,5 +1,4 @@
-// Work history, newest first. Shown on /about and as the game's towers.
-
+// Newest first.
 export type Experience = {
   title: string;
   company: string;

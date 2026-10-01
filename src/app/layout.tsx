@@ -9,8 +9,7 @@ import PageAssist from "@/components/PageAssist";
 import { profile } from "@/content";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 
-// Display: variable weight plus the width and optical-size axes, so the
-// hero can run condensed (wdth 78) and labels can use the small optical cut.
+// The opsz and wdth axes let the hero run condensed and labels use the small optical cut.
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   weight: "variable",
@@ -19,7 +18,6 @@ const bricolage = Bricolage_Grotesque({
   display: "swap",
 });
 
-// Body
 const geist = Geist({
   subsets: ["latin"],
   weight: "variable",
@@ -27,7 +25,6 @@ const geist = Geist({
   display: "swap",
 });
 
-// Data: years, stars, uptime, keyboard hints
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   weight: "variable",
@@ -63,8 +60,7 @@ export const metadata: Metadata = {
   },
 };
 
-// viewport-fit: cover is what makes env(safe-area-inset-bottom) non-zero on
-// iOS, so the phone dock can sit above the home indicator.
+// viewport-fit: cover makes env(safe-area-inset-bottom) non-zero on iOS.
 export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: "#070A12",

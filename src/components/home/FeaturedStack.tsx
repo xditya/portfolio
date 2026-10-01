@@ -16,14 +16,12 @@ const PHONE_QUERY = "(max-width: 760px)";
 const DESKTOP_QUERY = "(min-width: 761px)";
 const MOTION_QUERY = "(prefers-reduced-motion: no-preference)";
 
-// How far a pinned panel recedes while the next one slides over it.
 const RECEDE_SCALE = 0.92;
 const RECEDE_OPACITY = 0.55;
 
-// Phone tilt. A screenshot leans with the phone, up to TILT_MAX degrees at
-// TILT_RANGE degrees of tilt. The rest position follows the reading slowly
-// (TILT_SETTLE per event), so the card lies flat however the phone is
-// held once it stops moving, and there is nothing to calibrate.
+// Degrees: up to TILT_MAX of lean at TILT_RANGE of phone tilt. The rest
+// position drifts toward the reading (TILT_SETTLE per event), so the card
+// lies flat however the phone is held and nothing needs calibrating.
 const TILT_MAX = 9;
 const TILT_RANGE = 30;
 const TILT_SETTLE = 0.004;
@@ -32,7 +30,6 @@ type OrientationWithPermission = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<"granted" | "denied">;
 };
 
-/** Leans every screenshot frame in `stack` with the phone. Returns the teardown. */
 function attachTilt(stack: HTMLElement) {
   let restBeta: number | null = null;
   let restGamma: number | null = null;
@@ -74,12 +71,10 @@ function attachTilt(stack: HTMLElement) {
   const listen = () =>
     window.addEventListener("deviceorientation", onOrientation);
 
-  // iOS only hands out orientation after a permission request made inside a
-  // user gesture; the first touch on the strip is that gesture. Elsewhere the
-  // events flow without asking.
+  // iOS only grants orientation from a permission request inside a user
+  // gesture. Asked on every touch until granted, since Safari may not count
+  // a touch as a gesture.
   const Orientation = DeviceOrientationEvent as OrientationWithPermission;
-  // Asked on every touch until granted: a dismissed sheet or a touch that
-  // Safari did not count as a gesture gets another chance.
   const ask = () => {
     Orientation.requestPermission?.()
       .then((state) => {
@@ -104,9 +99,8 @@ function attachTilt(stack: HTMLElement) {
   };
 }
 
-// The phone strip is a carousel; the desktop stack is not. The roles
-// follow the breakpoint through a store, so nothing sets state in an
-// effect. The server renders the desktop markup.
+// Carousel roles follow the breakpoint through a store, so nothing sets
+// state in an effect.
 function subscribeToPhone(onChange: () => void) {
   const query = window.matchMedia(PHONE_QUERY);
   query.addEventListener("change", onChange);
@@ -115,8 +109,7 @@ function subscribeToPhone(onChange: () => void) {
 const isPhoneNow = () => window.matchMedia(PHONE_QUERY).matches;
 const isPhoneOnServer = () => false;
 
-// Five screenshots finishing one after another would refresh five times.
-// One refresh on the next frame covers them all.
+// Batches screenshot loads into one ScrollTrigger refresh per frame.
 let refreshQueued = false;
 function refreshOnLoad() {
   if (refreshQueued) return;
@@ -127,7 +120,6 @@ function refreshOnLoad() {
   });
 }
 
-/** "Featured" and the link to every project, on one row above the stack. */
 function Head({ id, count }: { id: string; count: number }) {
   return (
     <div className={`container-x ${s.head}`}>
@@ -154,18 +146,12 @@ function Head({ id, count }: { id: string; count: number }) {
   );
 }
 
-/**
- * The five featured projects. Desktop: full-viewport panels, each sticky
- * at the top and pinned by ScrollTrigger, so the next one slides over the
- * last while it scales back and dims. Phones: a scroll-snap strip with the
- * screenshot on top. Reduced motion on desktop: a plain vertical list.
- */
 export default function FeaturedStack({
   projects,
   count,
 }: {
   projects: FeaturedProject[];
-  /** How many projects the whole index holds. */
+  /** Total projects in the index. */
   count: number;
 }) {
   const stackRef = useRef<HTMLDivElement>(null);
@@ -194,16 +180,10 @@ export default function FeaturedStack({
       });
     }
 
-    // ScrollTrigger reverts its own pins before it measures, but it knows
-    // nothing about position: sticky. A panel that is stuck while a
-    // refresh runs (a screenshot finishing further down, a resize) would
-    // report the viewport top as its place in the flow, so the panels sit
-    // in the flow for the length of every measurement (see the module).
-    // A refresh also reverts and rewraps the pins, which takes the panel
-    // holding keyboard focus out of the document for a moment and drops
-    // focus to the body. The focused element is held across the refresh
-    // and given focus back. A refresh also cancels any focus scroll still
-    // running, so the focused control is brought back into view after it.
+    // ScrollTrigger knows nothing about position: sticky, so a stuck panel
+    // would measure at the viewport top; panels drop sticky while measuring.
+    // A refresh also rewraps the pins, dropping focus to the body and
+    // cancelling focus scrolls, so focus is held and restored across it.
     let held: HTMLElement | null = null;
     const measureStart = () => {
       stack.setAttribute("data-measuring", "");
@@ -240,9 +220,7 @@ export default function FeaturedStack({
       panels.forEach((panel, i) => {
         if (panel === last) return;
 
-        // Held at the top until the last panel arrives there. No spacing:
-        // the panels keep their own height in the flow, so the section
-        // stays exactly five viewports tall.
+        // No pin spacing: panels keep their own height in the flow.
         const pin = ScrollTrigger.create({
           trigger: panel,
           start: "top top",
@@ -253,7 +231,6 @@ export default function FeaturedStack({
         });
         pins.set(panel, pin);
 
-        // The next panel drives the recede as it crosses the viewport.
         const inner = panel.querySelector<HTMLElement>("[data-inner]") ?? panel;
         gsap.fromTo(
           inner,
@@ -273,16 +250,12 @@ export default function FeaturedStack({
       });
       measureEnd();
 
-      // Re-measure everything (the reveals inside the panels included) now
-      // that the guard is in place; the page may have loaded mid-stack.
+      // Re-measure now that the guard is in place; the page may have loaded mid-stack.
       ScrollTrigger.refresh();
 
-      // Once the page is past a pinned panel's start, the next panel slides
-      // over it, and the browser will not scroll to a control that is
-      // already inside the viewport. Walking back with Shift+Tab would
-      // leave focus under the panel above, so the page returns to the
-      // focused panel's start, where nothing covers it.
-      // A mouse click focuses too; only keyboard focus moves the page.
+      // The browser will not scroll to a control already in the viewport, so
+      // Shift+Tab could leave focus under the panel above. Keyboard focus
+      // scrolls back to the focused panel's start.
       const onFocusIn = (e: FocusEvent) => {
         const target = e.target as HTMLElement;
         if (!target.matches(":focus-visible")) return;
@@ -307,8 +280,7 @@ export default function FeaturedStack({
 
   return (
     <section className={s.section} aria-labelledby={headingId}>
-      {/* Outside the pinned panels, so it scrolls away with the page and the
-          first project never carries it under the panels that follow. */}
+      {/* Outside the pinned panels so it scrolls away with the page. */}
       <Head id={headingId} count={count} />
 
       <div
