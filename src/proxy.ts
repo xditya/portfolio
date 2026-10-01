@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.hcaptcha.com https://www.googletagmanager.com;
     style-src 'self' 'unsafe-inline';
-    img-src 'self' data: https://*.hcaptcha.com;
+    img-src 'self' data: https://*.hcaptcha.com https://*.google-analytics.com https://*.googletagmanager.com;
     frame-src 'self' https://*.hcaptcha.com;
-    connect-src 'self' https://*.hcaptcha.com https://www.google-analytics.com;
+    connect-src 'self' https://*.hcaptcha.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;
     font-src 'self';
     object-src 'none';
     base-uri 'self';
@@ -20,7 +19,6 @@ export function proxy(request: NextRequest) {
     .trim();
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", cspHeader);
 
   const response = NextResponse.next({

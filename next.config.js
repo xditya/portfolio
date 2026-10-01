@@ -18,6 +18,20 @@ const nextConfig = {
   // server drops the hot-reload socket for that origin and the page never
   // hydrates (no ink layer, no interactions). Dev only.
   allowedDevOrigins: ["*.ngrok-free.app"],
+  poweredByHeader: false,
+  // Gyroscope and accelerometer stay allowed: the phone tilt uses them.
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return Object.entries(redirectLinks).map(([key, value]) => ({
       source: `/${key}`,

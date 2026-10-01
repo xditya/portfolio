@@ -1,23 +1,16 @@
-# My Portfolio Site
+# xditya.me
 
-Welcome to the repository for my personal portfolio website!
+Source for my personal site: projects, an about page, a contact form, links, a status page and a small game. Dark theme, with a WebGL ink layer behind most pages.
 
-This site is built to showcase my projects, skills, and provide a way for visitors to learn more about me and get in touch.
+## Stack
 
-## Features
-
-- **Project Showcase:** Dedicated section to highlight key projects with details.
-- **About Me:** Information about my background, skills, and interests.
-- **Contact Form:** Easy way for visitors to send me a message.
-- **Responsive Design:** Optimized for various devices and screen sizes.
-
-## Technologies Used
-
-- [Next.js](https://nextjs.org/) (React Framework)
-- [React](https://reactjs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [GSAP](https://gsap.com/) (for animations)
+- [Next.js](https://nextjs.org/) 16 (App Router), [React](https://react.dev/) 19, [TypeScript](https://www.typescriptlang.org/)
+- CSS modules next to each component, plus shared styles in `src/app/globals.css`. Tailwind v4 is imported there, but only its base reset and the `sr-only` utility are used.
+- [GSAP](https://gsap.com/) with ScrollTrigger for scroll-driven motion, [Motion](https://motion.dev/) for component state, [Lenis](https://lenis.darkroom.engineering/) for smooth scrolling
+- A WebGL fluid ink layer written for this site (`src/lib/fluid`)
+- [three.js](https://threejs.org/) for the game at `/game`
+- [matter-js](https://brm.io/matter-js/) for the tech tray on `/about`
+- GitHub numbers (repos, stars, followers) fetched on the server and revalidated every hour
 
 ## Development
 
@@ -27,21 +20,32 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The dev server runs at http://localhost:3000. Fill in `.env.local` as needed: the contact form needs the hCaptcha and Telegram values, and analytics stays off while the measurement id is empty. Each variable is described in `.env.example`.
+The dev server runs at http://localhost:3000. `npm run build` is the production build and `npm run lint` runs ESLint.
 
-## Analytics Setup
+To try the site on a phone, put an ngrok tunnel in front of the dev server. `next.config.js` allows `*.ngrok-free.app` as a dev origin, so hot reload and hydration work through the tunnel.
 
-Google Analytics (GA4) is integrated through an environment variable. Set `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-xxxxxxxxxxx` in `.env.local` to turn it on.
+## Environment variables
+
+All of them are described in `.env.example`. None are needed to run the site locally.
+
+- `NEXT_PUBLIC_HCAPTCHA_SITE_KEY`, `HCAPTCHA_SECRET_KEY`: the captcha on the contact form
+- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`: where contact form messages are delivered
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID`: Google Analytics 4; analytics stays off while it is empty
+- `GITHUB_TOKEN`: optional, raises the GitHub API rate limit. Without it (or if the fetch fails) the site shows fallback numbers.
+
+## Content
+
+Everything the site says lives in `src/content` (profile, projects, experience, tech stack, socials, links, stats) and is imported from `@/content`. Edit it there; no page repeats a name, link or project.
+
+## Analytics
+
+Google Analytics (GA4) turns on when `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-xxxxxxxxxxx` is set in `.env.local`.
 
 Tracked interactions include page views, navbar clicks, primary home CTA clicks, social link clicks, and contact form submit outcomes.
 
 ## Contact
 
-If you have any questions or just want to connect, feel free to reach out:
-
 - [Portfolio Site](https://xditya.me)
 - [LinkedIn](https://linkedin.com/in/xditya/)
 - [GitHub](https://github.com/xditya)
 - [Telegram](https://t.me/xditya)
-
-Thank you for checking out my portfolio!
