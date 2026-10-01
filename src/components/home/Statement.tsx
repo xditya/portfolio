@@ -7,7 +7,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { event as trackEvent } from "@/lib/gtag";
 import { profile, siteStats, type GithubStats } from "@/content";
 import Stats from "./Stats";
-import { setFillOrigin } from "./Hero";
 import s from "./Statement.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -81,28 +80,5 @@ export default function Statement({ github }: { github: GithubStats }) {
 
       <Stats stats={siteStats(github)} />
     </section>
-  );
-}
-
-/** The centred "All N Projects" button under the featured work. */
-export function AllProjectsLink({ count }: { count: number }) {
-  return (
-    <div className={`container-x ${s.all}`}>
-      <Link
-        href="/projects"
-        className="btn-line"
-        onPointerEnter={setFillOrigin}
-        onPointerLeave={setFillOrigin}
-        onClick={() =>
-          trackEvent("cta_click", {
-            cta_label: "All Projects",
-            link_url: "/projects",
-            source: "home_featured",
-          })
-        }
-      >
-        {`All ${count} Projects`}
-      </Link>
-    </div>
   );
 }

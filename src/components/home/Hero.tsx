@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, type PointerEvent } from "react";
+import { useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,23 +8,10 @@ import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import InkLayer from "@/components/ink/InkLayer";
 import { event as trackEvent } from "@/lib/gtag";
 import { profile } from "@/content";
+import { setFillOrigin } from "@/lib/fillOrigin";
 import s from "./Hero.module.css";
 
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
-
-/**
- * Sets `--o`, the side a button's fill grows from, to the half the pointer
- * entered (or left) through. Wired to pointerenter and pointerleave so the
- * fill retracts toward the exit side too.
- */
-export function setFillOrigin(e: PointerEvent<HTMLElement>): void {
-  const el = e.currentTarget;
-  const rect = el.getBoundingClientRect();
-  el.style.setProperty(
-    "--o",
-    e.clientX - rect.left < rect.width / 2 ? "left" : "right",
-  );
-}
 
 // Width axis of the name: condensed at rest, wide once the hero has
 // scrolled out. Hero.module.css reads it as --w on the h1 (.hero .name), so

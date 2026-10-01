@@ -2,9 +2,11 @@
 
 import { useId, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { FeaturedProject } from "@/content";
+import { event as trackEvent } from "@/lib/gtag";
 import InkReveal from "./InkReveal";
 import s from "./FeaturedStack.module.css";
 
@@ -126,6 +128,36 @@ function refreshOnLoad() {
 }
 
 /**
+ * "Featured" and the link to every project, on one row. The id goes on
+ * one copy only, so the section's label always resolves to one heading.
+ */
+function Head({ id, count, className }: { id?: string; count: number; className: string }) {
+  return (
+    <div className={`container-x ${s.head} ${className}`}>
+      <h2 id={id} className={`display-md ${s.heading}`}>
+        Featured
+      </h2>
+      <Link
+        href="/projects"
+        className={`link-u ${s.link}`}
+        onClick={() =>
+          trackEvent("cta_click", {
+            cta_label: "All Projects",
+            link_url: "/projects",
+            source: "home_featured",
+          })
+        }
+      >
+        {`All ${count} projects`}{" "}
+        <span className={s.arrow} aria-hidden="true">
+          ↗
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+/**
  * The five featured projects. Desktop: full-viewport panels, each sticky
  * at the top and pinned by ScrollTrigger, so the next one slides over the
  * last while it scales back and dims. Phones: a scroll-snap strip with the
@@ -133,8 +165,11 @@ function refreshOnLoad() {
  */
 export default function FeaturedStack({
   projects,
+  count,
 }: {
   projects: FeaturedProject[];
+  /** How many projects the whole index holds. */
+  count: number;
 }) {
   const stackRef = useRef<HTMLDivElement>(null);
   const isPhone = useSyncExternalStore(
@@ -167,8 +202,33 @@ export default function FeaturedStack({
     // refresh runs (a screenshot finishing further down, a resize) would
     // report the viewport top as its place in the flow, so the panels sit
     // in the flow for the length of every measurement (see the module).
-    const measureStart = () => stack.setAttribute("data-measuring", "");
-    const measureEnd = () => stack.removeAttribute("data-measuring");
+    // A refresh also reverts and rewraps the pins, which takes the panel
+    // holding keyboard focus out of the document for a moment and drops
+    // focus to the body. The focused element is held across the refresh
+    // and given focus back. A refresh also cancels any focus scroll still
+    // running, so the focused control is brought back into view after it.
+    let held: HTMLElement | null = null;
+    const measureStart = () => {
+      stack.setAttribute("data-measuring", "");
+      const a = document.activeElement;
+      if (a instanceof HTMLElement && stack.contains(a)) held = a;
+    };
+    const measureEnd = () => {
+      stack.removeAttribute("data-measuring");
+      if (held && held.isConnected && document.activeElement !== held) {
+        held.focus({ preventScroll: true });
+      }
+      held = null;
+      const a = document.activeElement;
+      // Only for keyboard focus: a link left focused by a click must not
+      // pull the page back after a later refresh.
+      if (a instanceof HTMLElement && stack.contains(a) && a.matches(":focus-visible")) {
+        const r = a.getBoundingClientRect();
+        if (r.top < 88 || r.bottom > window.innerHeight - 16) {
+          a.scrollIntoView({ block: "nearest" });
+        }
+      }
+    };
 
     mm.add({ desktop: DESKTOP_QUERY, motion: MOTION_QUERY }, (context) => {
       const conditions: Record<string, boolean> = context.conditions ?? {};
@@ -178,6 +238,7 @@ export default function FeaturedStack({
       ScrollTrigger.addEventListener("refresh", measureEnd);
 
       const last = panels[panels.length - 1];
+      const pins = new Map<HTMLElement, ScrollTrigger>();
       measureStart();
       panels.forEach((panel, i) => {
         if (panel === last) return;
@@ -185,7 +246,7 @@ export default function FeaturedStack({
         // Held at the top until the last panel arrives there. No spacing:
         // the panels keep their own height in the flow, so the section
         // stays exactly five viewports tall.
-        ScrollTrigger.create({
+        const pin = ScrollTrigger.create({
           trigger: panel,
           start: "top top",
           endTrigger: last,
@@ -193,6 +254,7 @@ export default function FeaturedStack({
           pin: true,
           pinSpacing: false,
         });
+        pins.set(panel, pin);
 
         // The next panel drives the recede as it crosses the viewport.
         const inner = panel.querySelector<HTMLElement>("[data-inner]") ?? panel;
@@ -218,7 +280,25 @@ export default function FeaturedStack({
       // that the guard is in place; the page may have loaded mid-stack.
       ScrollTrigger.refresh();
 
+      // Once the page is past a pinned panel's start, the next panel slides
+      // over it, and the browser will not scroll to a control that is
+      // already inside the viewport. Walking back with Shift+Tab would
+      // leave focus under the panel above, so the page returns to the
+      // focused panel's start, where nothing covers it.
+      // A mouse click focuses too; only keyboard focus moves the page.
+      const onFocusIn = (e: FocusEvent) => {
+        const target = e.target as HTMLElement;
+        if (!target.matches(":focus-visible")) return;
+        const panel = target.closest<HTMLElement>("[data-panel]");
+        const pin = panel && pins.get(panel);
+        if (pin && window.scrollY > pin.start + 1) {
+          window.scrollTo({ top: pin.start, behavior: "instant" });
+        }
+      };
+      stack.addEventListener("focusin", onFocusIn);
+
       return () => {
+        stack.removeEventListener("focusin", onFocusIn);
         ScrollTrigger.removeEventListener("refreshInit", measureStart);
         ScrollTrigger.removeEventListener("refresh", measureEnd);
         measureEnd();
@@ -230,11 +310,9 @@ export default function FeaturedStack({
 
   return (
     <section className={s.section} aria-labelledby={headingId}>
-      <div className="container-x">
-        <h2 id={headingId} className={`display-md ${s.heading}`}>
-          Featured
-        </h2>
-      </div>
+      {/* Phones and reduced motion show this copy; the pinned desktop stack
+          carries its own inside the first panel. */}
+      <Head count={count} className={s.headOut} />
 
       <div
         ref={stackRef}
@@ -249,16 +327,27 @@ export default function FeaturedStack({
             <article
               key={p.name}
               className={s.panel}
-              aria-labelledby={nameId}
+              role={isPhone ? "group" : undefined}
+              aria-roledescription={isPhone ? "slide" : undefined}
+              aria-labelledby={isPhone ? `${nameId} ${nameId}-pos` : nameId}
               data-panel=""
+              data-first={i === 0 ? "" : undefined}
             >
               <div className={s.inner} data-inner="">
+                {i === 0 && (
+                  <Head id={headingId} count={count} className={s.headIn} />
+                )}
                 <div className={`container-x ${s.grid}`}>
                   <div className={s.copy}>
                     <p className={s.meta}>{`${p.year} · ${p.highlight}`}</p>
                     <h3 id={nameId} className={`display-md ${s.name}`}>
                       {p.shortName ?? p.name}
                     </h3>
+                    {isPhone && (
+                      <span id={`${nameId}-pos`} className="sr-only">
+                        {` ${i + 1} of ${projects.length}`}
+                      </span>
+                    )}
                     <p className={s.tagline}>{p.tagline}</p>
                     <p className={`body-lg ${s.summary}`}>
                       {p.summary ?? p.description}

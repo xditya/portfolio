@@ -76,4 +76,7 @@
   .dup {
     display: none;
   }
+  .cell:last-child .sep {
+    display: none;
+  }
 }

@@ -32,8 +32,16 @@
   font-weight: 500;
   line-height: 1.4;
   color: var(--accent-2);
+  position: relative;
   text-decoration: none;
   transition: color 200ms var(--ease-out);
+}
+
+/* A larger hit area for the small standalone link. */
+.more::before {
+  content: "";
+  position: absolute;
+  inset: -12px -6px;
 }
 
 /* External-link rule: the arrow nudges up and to the right. */
@@ -53,14 +61,6 @@
 
 .more:focus-visible .arrow {
   transform: translate(0.12em, -0.12em);
-}
-
-/* ── "All N Projects" under the featured stack ── */
-
-.all {
-  display: flex;
-  justify-content: center;
-  padding-top: clamp(32px, 5vw, 56px);
 }
 
 @media (prefers-reduced-motion: reduce) {

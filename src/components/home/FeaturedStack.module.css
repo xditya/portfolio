@@ -10,8 +10,25 @@
   padding-top: clamp(64px, 10vw, 160px);
 }
 
+/* "Featured" with the link to every project at the far end of the row.
+   Two copies exist: .headIn sits inside the first pinned panel, so the
+   heading arrives with the work instead of above a viewport of empty
+   ground; .headOut sits above the strip on phones and the plain list under
+   reduced motion. Only one shows at a time. */
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: clamp(32px, 5vw, 64px);
+}
+
+.headOut {
+  display: none;
+}
+
 .heading {
-  margin: 0 0 clamp(32px, 5vw, 64px);
+  margin: 0;
 }
 
 .stack {
@@ -30,8 +47,9 @@
   background: var(--surface-0);
 }
 
-/* A hairline rides in on the top edge of each arriving panel. */
-.panel + .panel {
+/* A hairline rides in on the top edge of each arriving panel. Not a
+   sibling selector: the pins wrap panels in spacer elements. */
+.panel:not([data-first]) {
   border-top: 1px solid var(--line);
 }
 
@@ -129,6 +147,13 @@
   color: var(--text-2);
 }
 
+/* A larger hit area for the small mono link (.link-u is positioned). */
+.link::before {
+  content: "";
+  position: absolute;
+  inset: -13px -6px;
+}
+
 .live {
   color: var(--accent-2);
 }
@@ -179,7 +204,11 @@
 /* ── Phone · a scroll-snap strip, no pinning ── */
 
 @media (max-width: 760px) {
-  .heading {
+  .headIn {
+    display: none;
+  }
+  .headOut {
+    display: flex;
     margin-bottom: 28px;
   }
 
@@ -209,7 +238,7 @@
     scroll-snap-align: start;
     background: transparent;
   }
-  .panel + .panel {
+  .panel:not([data-first]) {
     border-top: 0;
   }
 
@@ -257,6 +286,12 @@
 /* ── Reduced motion · desktop becomes a plain list, nothing moves ── */
 
 @media (prefers-reduced-motion: reduce) and (min-width: 761px) {
+  .headIn {
+    display: none;
+  }
+  .headOut {
+    display: flex;
+  }
   .panel {
     position: relative;
     min-height: 0;

@@ -132,11 +132,14 @@
   gap: 8px;
 }
 
+/* The auto margin keeps the actions at the right edge when the row wraps
+   them onto a line of their own. */
 .actions {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 14px;
+  margin-left: auto;
 }
 
 .place {
@@ -195,6 +198,7 @@
   }
   .actions {
     align-items: flex-start;
+    margin-left: 0;
   }
 }
 

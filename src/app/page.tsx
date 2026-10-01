@@ -2,7 +2,7 @@ import { featuredProjects, projects } from "@/content";
 import { getGithubStats } from "@/lib/github";
 import Hero from "@/components/home/Hero";
 import Ticker from "@/components/home/Ticker";
-import Statement, { AllProjectsLink } from "@/components/home/Statement";
+import Statement from "@/components/home/Statement";
 import FeaturedStack from "@/components/home/FeaturedStack";
 
 // The GitHub numbers are fetched when the page is built and refreshed
@@ -17,8 +17,7 @@ export default async function HomePage() {
       <Hero />
       <Ticker />
       <Statement github={github} />
-      <FeaturedStack projects={featuredProjects()} />
-      <AllProjectsLink count={projects.length} />
+      <FeaturedStack projects={featuredProjects()} count={projects.length} />
     </>
   );
 }
