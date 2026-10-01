@@ -1572,7 +1572,7 @@ export default function PortfolioGame() {
 
     const vel = new THREE.Vector3();
     const camTarget = new THREE.Vector3();
-    const clock = new THREE.Clock();
+    const clock = new THREE.Timer();
     let raf = 0;
     // Game time is summed from clamped deltas, so a hidden tab or a stalled
     // frame never jumps the world forward.
@@ -1580,6 +1580,7 @@ export default function PortfolioGame() {
 
     const loop = () => {
       raf = requestAnimationFrame(loop);
+      clock.update();
       const dt = Math.min(clock.getDelta(), 0.05);
       elapsed += dt;
       const t = elapsed;
@@ -1745,7 +1746,7 @@ export default function PortfolioGame() {
         cancelAnimationFrame(raf);
         raf = 0;
       } else if (!raf) {
-        clock.getDelta(); // drop the time spent hidden
+        clock.update(); // drop the time spent hidden
         loop();
       }
     };

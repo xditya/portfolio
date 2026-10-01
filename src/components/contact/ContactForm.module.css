@@ -11,13 +11,17 @@
   gap: 28px;
 }
 
-/* Two fields side by side while each can be 260px or wider (the social
-   handle keeps room to type beside its icons), one under the other below
-   that. */
+/* Two fields side by side while each can be 260px or wider, one under the
+   other below that. Phone and social handle always stack: the handle needs
+   the full row to leave room to type beside its icons. */
 .pair {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 28px clamp(24px, 3vw, 40px);
+}
+
+.pairStack {
+  grid-template-columns: 1fr;
 }
 
 /* ── Field ── */

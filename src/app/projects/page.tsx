@@ -57,6 +57,7 @@ export default function ProjectsPage() {
         <input
           ref={searchRef}
           type="search"
+          name="q"
           className={`field-u ${s.search}`}
           placeholder="Search projects (try “telegram” or “2022”)"
           aria-label="Search projects"

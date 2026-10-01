@@ -83,6 +83,9 @@ export function RowGroup({
   const onPointerOver = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return;
     const id = rowOf(e.target);
+    // Gaps between rows (a year header) keep the bar where it is, so it can
+    // travel across them instead of fading out and back in.
+    if (id === null) return;
     const at = e.timeStamp;
     setActive((prev) => next(prev, id, true, at));
   };

@@ -1,7 +1,7 @@
 /* About · page.tsx.
    One twelve-column grid runs down the page, with the same gap as the four
    stats, so edges repeat: the profile block and the experience descriptions
-   start on column nine, the second half of "What I Do / How I Work" starts
+   start on column nine, the second half of "What I do / How I work" starts
    where the third stat does. The title and the bio share their top and
    bottom edges with the profile block, and the pair rests on the hairlines
    of the stats. Under 1200px the avatar moves beside the name; under 900px
@@ -85,6 +85,10 @@
   text-wrap: balance;
 }
 
+.roleLine {
+  display: block;
+}
+
 .actions {
   display: flex;
   flex-direction: column;
@@ -141,7 +145,7 @@
   margin-top: 0;
 }
 
-/* ── What I Do / How I Work · one hairline between the halves ── */
+/* ── What I do / How I work · one hairline between the halves ── */
 
 .pair {
   display: grid;

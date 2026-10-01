@@ -14,7 +14,7 @@ import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { event as trackEvent } from "@/lib/gtag";
 import { EASE_OUT, INSTANT } from "@/components/nav/shared";
-import { setFillOrigin } from "@/components/home/Hero";
+import { setFillOrigin } from "@/lib/fillOrigin";
 import InkButton from "./InkButton";
 import { SOCIAL_PLATFORMS, SocialIcon } from "./socialPlatforms";
 import s from "./ContactForm.module.css";
@@ -219,9 +219,6 @@ export default function ContactForm() {
   const [modal, setModal] = useState<Modal | null>(null);
   const hcaptchaRef = useRef<HCaptcha>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const autoClose = useRef<number>(0);
-
-  useEffect(() => () => window.clearTimeout(autoClose.current), []);
 
   const errors = validate(values);
   const shown = (key: Key) => (touched[key] || submitted ? errors[key] : undefined);
@@ -230,10 +227,7 @@ export default function ContactForm() {
     setValues((v) => ({ ...v, [key]: e.target.value }));
   const blur = (key: Key) => () => setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
 
-  const closeModal = useCallback(() => {
-    window.clearTimeout(autoClose.current);
-    setModal(null);
-  }, []);
+  const closeModal = useCallback(() => setModal(null), []);
 
   const checkHighlight = (value: string) => {
     const n = normalizeUrl(value);
@@ -260,16 +254,15 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Every press of submit counts as an attempt, valid or not.
-    trackEvent("contact_form_submit_attempt", {
-      source: "contact_page",
-    });
     const firstInvalid = (Object.keys(errors) as Key[])[0];
     if (firstInvalid) {
       setSubmitted(true);
       formRef.current?.querySelector<HTMLElement>(`#${firstInvalid}`)?.focus();
       return;
     }
+    trackEvent("contact_form_submit_attempt", {
+      source: "contact_page",
+    });
     setIsSubmitting(true);
     try {
       if (hcaptchaRef.current) {
@@ -299,7 +292,6 @@ export default function ContactForm() {
           type: "success",
           message: "Your message has been sent. I'll get back to you soon.",
         });
-        autoClose.current = window.setTimeout(() => setModal(null), 4000);
       }
     } catch (err) {
       trackEvent("contact_form_submit", {
@@ -360,7 +352,7 @@ export default function ContactForm() {
           </Field>
         </div>
 
-        <div className={s.pair}>
+        <div className={`${s.pair} ${s.pairStack}`}>
           <Field id="phone" label="Phone" error={shown("phone")}>
             <Control>
               <input
@@ -376,7 +368,7 @@ export default function ContactForm() {
               />
             </Control>
           </Field>
-          <Field id="socialHandle" label="Social Handle" error={shown("socialHandle")}>
+          <Field id="socialHandle" label="Social handle" error={shown("socialHandle")}>
             <div className={s.withIcons}>
               <Control>
                 <input
@@ -431,7 +423,11 @@ export default function ContactForm() {
         </Field>
 
         <div className={s.actions}>
-          <InkButton type="submit" disabled={isSubmitting || hcaptchaError}>
+          <InkButton
+            type="submit"
+            disabled={isSubmitting || hcaptchaError}
+            aria-describedby={hcaptchaError ? "captcha-error" : undefined}
+          >
             {isSubmitting ? (
               <>
                 <span className={`spin ${s.spinner}`} aria-hidden="true" /> Sending...
@@ -462,6 +458,12 @@ export default function ContactForm() {
             </a>
           </p>
         </div>
+
+        {hcaptchaError && (
+          <p id="captcha-error" role="alert" className={`mono-sm ${s.footnote}`}>
+            The spam check could not load. Refresh the page, or email me directly.
+          </p>
+        )}
 
         {/* hCaptcha (invisible) */}
         <HCaptcha

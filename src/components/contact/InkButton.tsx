@@ -9,7 +9,7 @@ import {
 } from "react";
 import { animate, type AnimationPlaybackControls } from "motion/react";
 import { EASE_OUT } from "@/components/nav/shared";
-import { setFillOrigin } from "@/components/home/Hero";
+import { setFillOrigin } from "@/lib/fillOrigin";
 import s from "./InkButton.module.css";
 
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";

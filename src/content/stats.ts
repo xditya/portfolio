@@ -22,9 +22,9 @@ export const yearsCoding = currentYear - profile.codingSince;
 export function siteStats(github: GithubStats = fallbackStats): Stat[] {
   return [
     { label: "Repos", value: github.repos, suffix: "+" },
-    { label: "GitHub Stars", value: github.stars, suffix: "+" },
+    { label: "GitHub stars", value: github.stars, suffix: "+" },
     { label: "Followers", value: github.followers, suffix: "+" },
-    { label: "Years Coding", value: yearsCoding, suffix: "+" },
+    { label: "Years coding", value: yearsCoding, suffix: "+" },
   ];
 }
 

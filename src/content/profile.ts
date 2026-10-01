@@ -30,12 +30,12 @@ export const profile = {
   statement:
     "Full-stack developer interested in Python, TypeScript, and automation. I build Telegram bots, web apps, and open-source tools.",
   whatIDo: {
-    title: "What I Do",
+    title: "What I do",
     text: "Build Telegram bots, web applications, and automation tools using Python and TypeScript.",
     chips: ["Python", "TypeScript", "Telegram"],
   },
   howIWork: {
-    title: "How I Work",
+    title: "How I work",
     text: "Simple and automated. Solve the real problem, keep the code small, automate the boring parts.",
     chips: ["Efficiency", "Automation", "Open Source"],
   },

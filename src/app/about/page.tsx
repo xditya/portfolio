@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { experience, profile, siteStats, social } from "@/content";
 import { getGithubStats } from "@/lib/github";
 import Stats from "@/components/home/Stats";
@@ -9,6 +10,8 @@ import s from "./page.module.css";
 // The GitHub numbers are fetched when the page is built and refreshed
 // every hour after that, the same as on the home page.
 export const revalidate = 3600;
+
+export const metadata: Metadata = { title: "About" };
 
 // Email opens the mail app, so it stays in this tab.
 const profileLinks = [
@@ -34,9 +37,10 @@ export default async function AboutPage() {
             <div className={s.id}>
               <h2 className={s.name}>{profile.name}</h2>
               <p className={`mono-sm ${s.role}`}>
-                {/* A no-break space after each dot: a line can end before a
-                    separator, never on one. */}
-                {`${profile.role} \u00B7\u00A0${profile.location} \u00B7\u00A0${profile.age}y old`}
+                <span className={s.roleLine}>{profile.role}</span>
+                <span className={s.roleLine}>
+                  {`${profile.location} \u00B7\u00A0${profile.age}y old`}
+                </span>
               </p>
               <span className={`badge badge-accent ${s.open}`}>Open Source</span>
             </div>

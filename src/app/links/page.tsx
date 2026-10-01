@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { links } from "@/content";
 import { RowGroup } from "@/components/index/RowHighlight";
 import IndexRow, { RowList, RowTag } from "@/components/index/IndexRow";
 import s from "./page.module.css";
+
+export const metadata: Metadata = { title: "Links" };
 
 export default function LinksPage() {
   return (
