@@ -127,13 +127,10 @@ function refreshOnLoad() {
   });
 }
 
-/**
- * "Featured" and the link to every project, on one row. The id goes on
- * one copy only, so the section's label always resolves to one heading.
- */
-function Head({ id, count, className }: { id?: string; count: number; className: string }) {
+/** "Featured" and the link to every project, on one row above the stack. */
+function Head({ id, count }: { id: string; count: number }) {
   return (
-    <div className={`container-x ${s.head} ${className}`}>
+    <div className={`container-x ${s.head}`}>
       <h2 id={id} className={`display-md ${s.heading}`}>
         Featured
       </h2>
@@ -310,9 +307,9 @@ export default function FeaturedStack({
 
   return (
     <section className={s.section} aria-labelledby={headingId}>
-      {/* Phones and reduced motion show this copy; the pinned desktop stack
-          carries its own inside the first panel. */}
-      <Head count={count} className={s.headOut} />
+      {/* Outside the pinned panels, so it scrolls away with the page and the
+          first project never carries it under the panels that follow. */}
+      <Head id={headingId} count={count} />
 
       <div
         ref={stackRef}
@@ -334,9 +331,6 @@ export default function FeaturedStack({
               data-first={i === 0 ? "" : undefined}
             >
               <div className={s.inner} data-inner="">
-                {i === 0 && (
-                  <Head id={headingId} count={count} className={s.headIn} />
-                )}
                 <div className={`container-x ${s.grid}`}>
                   <div className={s.copy}>
                     <p className={s.meta}>{`${p.year} · ${p.highlight}`}</p>

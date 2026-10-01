@@ -6,25 +6,18 @@
    Reduced motion on desktop: a plain vertical list.
    Tokens come from globals.css. */
 
+/* The section above ends in its own bottom padding, which is the gap. */
 .section {
-  padding-top: clamp(64px, 10vw, 160px);
+  padding-top: 0;
 }
 
-/* "Featured" with the link to every project at the far end of the row.
-   Two copies exist: .headIn sits inside the first pinned panel, so the
-   heading arrives with the work instead of above a viewport of empty
-   ground; .headOut sits above the strip on phones and the plain list under
-   reduced motion. Only one shows at a time. */
+/* "Featured" with the link to every project at the far end of the row,
+   above the stack and never pinned. */
 .head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: clamp(32px, 5vw, 64px);
-}
-
-.headOut {
-  display: none;
 }
 
 .heading {
@@ -51,6 +44,13 @@
    sibling selector: the pins wrap panels in spacer elements. */
 .panel:not([data-first]) {
   border-top: 1px solid var(--line);
+}
+
+/* The first panel's work sits right under the heading row instead of in
+   the middle of a viewport of empty ground; once pinned, its top padding
+   still clears the nav. */
+.panel[data-first] {
+  align-items: start;
 }
 
 /* FeaturedStack.tsx sets this for the length of every ScrollTrigger
@@ -204,11 +204,7 @@
 /* ── Phone · a scroll-snap strip, no pinning ── */
 
 @media (max-width: 760px) {
-  .headIn {
-    display: none;
-  }
-  .headOut {
-    display: flex;
+  .head {
     margin-bottom: 28px;
   }
 
@@ -286,12 +282,6 @@
 /* ── Reduced motion · desktop becomes a plain list, nothing moves ── */
 
 @media (prefers-reduced-motion: reduce) and (min-width: 761px) {
-  .headIn {
-    display: none;
-  }
-  .headOut {
-    display: flex;
-  }
   .panel {
     position: relative;
     min-height: 0;
