@@ -25,6 +25,23 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    name: "Tomte",
+    tagline: "A Windows 11 app that lives in the top edge of your screen.",
+    summary:
+      "Hidden until you push the pointer up or press a hotkey. A shelf for files, clipboard history, a scratchpad, media controls and search, with optional AI on your own key. On the Microsoft Store.",
+    description:
+      "Tomte draws nothing until you need it. Push the pointer against the top edge, press a hotkey or drag a file up there, and a pill grows into panels: a shelf you drag files in and out of, shortcuts, media controls, a Markdown scratchpad, clipboard history that skips password-manager items, and search for apps, files and settings. AI is optional and runs on your own key or Ollama: ask from anywhere, circle something on screen to ask about it, or dictate with speech turned into text on your PC. It never takes focus away from what you are doing. Native Win32 and WinUI 3 on .NET 10, free on the Microsoft Store.",
+    tech: ["C#", ".NET", "WinUI 3", "Win32", "SQLite"],
+    featuredTech: ["C#", "WinUI 3", "Win32"],
+    year: 2026,
+    github: "https://github.com/xditya/tomte-windows",
+    url: "https://tomte.xditya.me",
+    image: "/images/tomte.png",
+    featured: true,
+    highlight: "Microsoft Store",
+    featuredOrder: 2,
+  },
+  {
     name: "pastr",
     tagline: "Paste text, get a link, decide when it disappears.",
     summary:
@@ -39,7 +56,7 @@ export const projects: Project[] = [
     image: "/images/pastr.png",
     featured: true,
     highlight: "Zero-knowledge",
-    featuredOrder: 5,
+    featuredOrder: 6,
   },
   {
     name: "engram",
@@ -72,7 +89,7 @@ export const projects: Project[] = [
     image: "/images/splitty.png",
     featured: true,
     highlight: "No backend",
-    featuredOrder: 4,
+    featuredOrder: 5,
   },
   {
     name: "Alamara",
@@ -180,7 +197,7 @@ export const projects: Project[] = [
     image: "/images/channelactions-site.png",
     featured: true,
     highlight: "1M+ users",
-    featuredOrder: 3,
+    featuredOrder: 4,
   },
   {
     name: "ChannelAutoPost",
@@ -223,7 +240,7 @@ export const projects: Project[] = [
     image: "/images/ultroid-blue.jpg",
     featured: true,
     highlight: "3K+ stars",
-    featuredOrder: 2,
+    featuredOrder: 3,
   },
   {
     name: "ForceSub",
